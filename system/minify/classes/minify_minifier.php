@@ -222,7 +222,7 @@ class MinifyMinifier {
             return '<link rel="stylesheet" href="' . $this->addminifiedVersion($href, $this->minify_css) . '"/>' . PHP_EOL;
     }
 
-    private function printScript($src, $def = '', $config) {
+    private function printScript($src, $def, $config) {
         
         //global $config;
         if ($config->get('cdn_status')) {
