@@ -23,7 +23,20 @@ if (!isset($_GET['route']) && !isset($_GET['_route_']) && isset($_SERVER['REQUES
 	$request_path = trim(rawurldecode((string)$request_path), '/');
 
 	if ($request_path && $request_path !== 'index.php') {
-		$_GET['_route_'] = $request_path;
+		// Herd uses Nginx and does not read the custom Apache rewrites in
+		// .htaccess, so mirror those top-level routes for local development.
+		$legacy_routes = [
+			'kontakt' => 'information/contact',
+			'brandovi' => 'product/manufacturer',
+			'bundle'   => 'extension/bundleproduct',
+			'akcije'   => 'product/special'
+		];
+
+		if (isset($legacy_routes[$request_path])) {
+			$_GET['route'] = $legacy_routes[$request_path];
+		} else {
+			$_GET['_route_'] = $request_path;
+		}
 	}
 }
 

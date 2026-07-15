@@ -1,7 +1,11 @@
 <div class="header-wrapper header1 fixed-header-possible">
 <span class="table header-main sticky-header-placeholder">&nbsp;</span>
 <div class="sticky-header outer-container header-style">
-<div class="container {{ main_header_width }}">
+{% if main_header_width == 'boxed' %}
+<div class="container boxed">
+{% else %}
+<div class="container">
+{% endif %}
 <div class="table header-main">
 
 <div class="table-cell w40 menu-cell hidden-xs hidden-sm">
