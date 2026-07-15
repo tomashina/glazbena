@@ -9,6 +9,8 @@ class ControllerStartupSeoUrl extends Controller {
 		// Decode URL
 		if (isset($this->request->get['_route_'])) {
 			$static_routes = array(
+				'kontakt' => 'information/contact',
+				'contact' => 'information/contact',
 				'raskid-ugovora' => 'extension/account/contract_withdrawal',
 				'special' => 'product/special',
 				'sitemap-index.xml' => 'extension/feed/boost_sitemap'
@@ -87,6 +89,7 @@ class ControllerStartupSeoUrl extends Controller {
 		parse_str($url_info['query'], $data);
 
 		$static_routes = array(
+			'information/contact' => 'kontakt',
 			'extension/account/contract_withdrawal' => 'raskid-ugovora',
 			'product/special' => 'special'
 		);
