@@ -33,9 +33,11 @@
             <div class="item single-product">
             <div class="image"{% if columns == 'list' %} style="width:{{ img_width }}px"{% endif %}>
                 <a href="{{ product.href }}">
-                <img  {% if product.thumb2 %}class="thumb1"  {% endif %}src="{{ product.thumb }}" loading="lazy" width="400" height="400" alt="{{ product.name }}" title="{{ product.name }}" />
                 {% if product.thumb2 %}
+                <img class="thumb1" src="{{ product.thumb }}" loading="lazy" width="400" height="400" alt="{{ product.name }}" title="{{ product.name }}" />
                 <img class="thumb2" src="{{ product.thumb2 }}" loading="lazy" width="400" height="400" alt="{{ product.name }}" title="{{ product.name }}" />
+                {% else %}
+                <img src="{{ product.thumb }}" loading="lazy" width="400" height="400" alt="{{ product.name }}" title="{{ product.name }}" />
                 {% endif %}
                 </a>
             {% if product.price and product.special and product.sale_badge %}
