@@ -298,6 +298,14 @@ class ControllerSettingStore extends Controller {
 			$data['config_meta_keyword'] = '';
 		}
 
+		$language_id = (int)$this->config->get('config_language_id');
+
+		foreach (array('config_meta_title', 'config_meta_description', 'config_meta_keyword') as $meta_key) {
+			if (!is_array($data[$meta_key])) {
+				$data[$meta_key] = array($language_id => (string)$data[$meta_key]);
+			}
+		}
+
 		if (isset($this->request->post['config_theme'])) {
 			$data['config_theme'] = $this->request->post['config_theme'];
 		} elseif (isset($store_info['config_theme'])) {

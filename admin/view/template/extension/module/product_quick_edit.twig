@@ -1,15 +1,14 @@
-{% macro alert_icon(type) %}{% spaceless %}
-		{% if type == 'error' %}
-			fa-times-circle
-		{% elseif type == 'warning' %}
-			fa-exclamation-triangle
-		{% elseif type == 'success' %}
-			fa-check-circle
-		{% elseif type == 'info' %}
-			fa-info-circle
-		{% else %}
-		{% endif %}
-{% endspaceless %}{% endmacro %}
+{% macro alert_icon(type) -%}
+	{%- if type == 'error' -%}
+		fa-times-circle
+	{%- elseif type == 'warning' -%}
+		fa-exclamation-triangle
+	{%- elseif type == 'success' -%}
+		fa-check-circle
+	{%- elseif type == 'info' -%}
+		fa-info-circle
+	{%- endif -%}
+{%- endmacro %}
 {{ header }}
 <div class="modal fade" id="legal_text" tabindex="-1" role="dialog" aria-labelledby="legal_text_label" aria-hidden="true">
 	<div class="modal-dialog">
@@ -1377,6 +1376,6 @@
 	</div>
 </div>
 <script type="text/javascript"><!--
-!function(e,o,s){var i,t={{ errors|json_encode() }};e.texts=o.extend({},e.texts,{error_ajax_request:"{{ error_ajax_request|addslashes() }}"}),e.load_service_list=function(e){var e=e!==s?1*e:0,t=o.Deferred();return i.service_list_loaded()&&!e||i.service_list_loading()?t.reject():(i.service_list_loading(!0),o.when(o.ajax({url:"{{ services }}",data:{force:e},dataType:"json"})).then(function(e){i.service_list_loaded(!0),i.service_list_loading(!1),i.clearServices(),e.services&&o.each(e.services,function(e,o){var s=o.code,t=o.name,r=o.description||"",a=o.currency,n=o.price,l=o.turnaround;i.addService(s,t,r,a,n,l)}),e.rate&&o("#hourly_rate").html(e.rate),t.resolve()},function(e,o,s){i.service_list_loaded(!0),i.service_list_loading(!1),t.reject(),window.console&&window.console.log&&window.console.log("Failed to load services list: "+s)})),t.promise()};var r=function(e,o,s,i,t,r){this.code=e,this.name=o,this.description=s,this.currency=i,this.price=t,this.turnaround=r},a=function(){var e=this;this.status=ko.observable("{{ module_product_quick_edit_status }}"),this.display_in_menu_as=ko.observable("{{ module_product_quick_edit_display_in_menu_as }}"),this.use_gross_price_for_actions=ko.observable("{{ module_product_quick_edit_use_gross_price_for_actions }}"),this.general_errors=ko.computed(function(){return!1}),e.service_list_loaded=ko.observable(!1),e.service_list_loading=ko.observable(!1),e.services=ko.observableArray([]),e.addService=function(o,s,i,t,a,n){e.services.push(new r(o,s,i,t,a,n))},e.clearServices=function(){e.services.removeAll()}};a.prototype=new e.observable_object_methods,o(function(){var s=window.location.hash,r=s.split("?")[0];i=e.view_model=new a,e.view_models=o.extend({},e.view_models,{ExtVM:e.view_model}),i.applyErrors(t),ko.applyBindings(i,o("#content")[0]),o("#legal_text .modal-body").load("view/template/extension/module/static/bull5i_pqe_plus_extension_terms.htm?v={{ installed_version }}"),o("body").on("shown.bs.tab","a[data-toggle='tab'][href='#ext-support'],a[data-toggle='tab'][href='#services']",function(){e.load_service_list()}),e.onComplete(o("#page-overlay"),o("#content")).done(function(){e.activateTab(r)})})}(window.bull5i=window.bull5i||{},jQuery);
+!function(e,o,s){var i,t={{ errors|json_encode() }};e.texts=o.extend({},e.texts,{error_ajax_request:"{{ error_ajax_request|e('js') }}"}),e.load_service_list=function(e){var e=e!==s?1*e:0,t=o.Deferred();return i.service_list_loaded()&&!e||i.service_list_loading()?t.reject():(i.service_list_loading(!0),o.when(o.ajax({url:"{{ services }}",data:{force:e},dataType:"json"})).then(function(e){i.service_list_loaded(!0),i.service_list_loading(!1),i.clearServices(),e.services&&o.each(e.services,function(e,o){var s=o.code,t=o.name,r=o.description||"",a=o.currency,n=o.price,l=o.turnaround;i.addService(s,t,r,a,n,l)}),e.rate&&o("#hourly_rate").html(e.rate),t.resolve()},function(e,o,s){i.service_list_loaded(!0),i.service_list_loading(!1),t.reject(),window.console&&window.console.log&&window.console.log("Failed to load services list: "+s)})),t.promise()};var r=function(e,o,s,i,t,r){this.code=e,this.name=o,this.description=s,this.currency=i,this.price=t,this.turnaround=r},a=function(){var e=this;this.status=ko.observable("{{ module_product_quick_edit_status }}"),this.display_in_menu_as=ko.observable("{{ module_product_quick_edit_display_in_menu_as }}"),this.use_gross_price_for_actions=ko.observable("{{ module_product_quick_edit_use_gross_price_for_actions }}"),this.general_errors=ko.computed(function(){return!1}),e.service_list_loaded=ko.observable(!1),e.service_list_loading=ko.observable(!1),e.services=ko.observableArray([]),e.addService=function(o,s,i,t,a,n){e.services.push(new r(o,s,i,t,a,n))},e.clearServices=function(){e.services.removeAll()}};a.prototype=new e.observable_object_methods,o(function(){var s=window.location.hash,r=s.split("?")[0];i=e.view_model=new a,e.view_models=o.extend({},e.view_models,{ExtVM:e.view_model}),i.applyErrors(t),ko.applyBindings(i,o("#content")[0]),o("#legal_text .modal-body").load("view/template/extension/module/static/bull5i_pqe_plus_extension_terms.htm?v={{ installed_version }}"),o("body").on("shown.bs.tab","a[data-toggle='tab'][href='#ext-support'],a[data-toggle='tab'][href='#services']",function(){e.load_service_list()}),e.onComplete(o("#page-overlay"),o("#content")).done(function(){e.activateTab(r)})})}(window.bull5i=window.bull5i||{},jQuery);
 //--></script>
 {{ footer }}

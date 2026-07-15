@@ -213,6 +213,19 @@ class ControllerCheckoutCart extends Controller {
 				);
 			}
 
+			$free_shipping_total = (float)$this->config->get('shipping_gls_free_total');
+			if ($free_shipping_total <= 0) {
+				$free_shipping_total = (float)$this->config->get('shipping_boxnow_free_total');
+			}
+
+			$cart_total = (float)$this->cart->getTotal();
+			if ($free_shipping_total > 0 && $cart_total < $free_shipping_total) {
+				$remaining = $this->currency->format($free_shipping_total - $cart_total, $this->session->data['currency']);
+				$data['freeshipppingnotification'] = sprintf($this->language->get('freeshipppingnotification'), $remaining);
+			} else {
+				$data['freeshipppingnotification'] = '';
+			}
+
 			$data['continue'] = $this->url->link('common/home');
 
 			$data['checkout'] = $this->url->link('checkout/checkout', '', true);

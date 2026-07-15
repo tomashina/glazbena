@@ -31,7 +31,7 @@ $_['text_payment_cancel']      = '%s svakih %d %s(a) do otkazivanja';
 $_['text_alert']                     = 'Besplatna dostava za naručenu količinu od najmanje <strong> %s </ strong>. <br /> Potrebno je samo naručiti <strong> %s </ strong> više i vaš paket stiže besplatno!';
 $_['text_notify']					 = 'Iznos narudžbe je <strong>%s</strong>.<br /> Za vas je dostava besplatna.';
 
-$_['freeshipppingnotification']              = 'Dodaj u košaricu za još %s € i izbjegni trošak dostave. Na sve narudžbe unutar HR iznad 50 € nemaš troškove dostave. Iskoristi priliku!';
+$_['freeshipppingnotification']              = 'Dodaj u košaricu za još %s i izbjegni trošak dostave. Na sve narudžbe unutar HR iznad 50 € nemaš troškove dostave. Iskoristi priliku!';
 
 // Column
 $_['column_image']                  = 'Slika';

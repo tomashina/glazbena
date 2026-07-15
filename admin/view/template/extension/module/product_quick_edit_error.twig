@@ -1,15 +1,14 @@
-{% macro alert_icon(type) %}{% spaceless %}
-		{% if type == 'error' %}
-			fa-times-circle
-		{% elseif type == 'warning' %}
-			fa-exclamation-triangle
-		{% elseif type == 'success' %}
-			fa-check-circle
-		{% elseif type == 'info' %}
-			fa-info-circle
-		{% else %}
-		{% endif %}
-{% endspaceless %}{% endmacro %}
+{% macro alert_icon(type) -%}
+	{%- if type == 'error' -%}
+		fa-times-circle
+	{%- elseif type == 'warning' -%}
+		fa-exclamation-triangle
+	{%- elseif type == 'success' -%}
+		fa-check-circle
+	{%- elseif type == 'info' -%}
+		fa-info-circle
+	{%- endif -%}
+{%- endmacro %}
 {{ header }}
 {{ column_left }}
 <div id="content">
