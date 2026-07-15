@@ -160,7 +160,11 @@ class Twig_Lexer implements Twig_LexerInterface
 
         // push the template text first
         $text = $textContent = substr($this->code, $this->cursor, $position[1] - $this->cursor);
-        if (isset($this->positions[2][$this->position][0])) {
+        // On PHP 7.4 the optional capture exists as an empty string even when
+        // the Twig whitespace-control marker (`-`) was not used. Checking only
+        // isset() therefore trims legitimate spaces before every Twig tag and
+        // joins HTML classes such as "btn" and "btn-contrast".
+        if (isset($this->positions[2][$this->position][0]) && $this->options['whitespace_trim'] === $this->positions[2][$this->position][0]) {
             $text = rtrim($text);
         }
         $this->pushToken(Twig_Token::TEXT_TYPE, $text);
