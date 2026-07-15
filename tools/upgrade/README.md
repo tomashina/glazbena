@@ -30,6 +30,7 @@ The script:
 - runs the official OpenCart database migrations;
 - installs the locked Composer dependencies;
 - applies the Glazbena compatibility patches and refreshes OCMOD;
+- adds idempotent indexes for category, product, action-price and SEO URL queries;
 - restores the previous maintenance state.
 
 `Opencart SEO Pack PRO` is removed completely because its legacy OCMOD and admin

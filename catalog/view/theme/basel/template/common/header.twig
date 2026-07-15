@@ -37,11 +37,13 @@
     <script src="catalog/view/javascript/bootstrap/js/bootstrap.min.js"></script>
     <script src="catalog/view/theme/basel/js/slick.min.js"></script>
     <script src="catalog/view/theme/basel/js/readmore.min.js"></script>
-    <script src="catalog/view/theme/basel/js/basel_common.js"></script>
+    <script src="catalog/view/theme/basel/js/basel_common.min.js?v=3.26"></script>
 
     
     <!-- Main stylesheet -->
-    <link href="catalog/view/theme/basel/stylesheet/stylesheet.css?v=3.2599" rel="stylesheet">
+    <link href="catalog/view/theme/basel/stylesheet/stylesheet.min.css?v=3.26" rel="stylesheet">
+    <link href="catalog/view/javascript/cookieconsent/cookieconsent.css?v=3.1" rel="stylesheet">
+    <link href="catalog/view/javascript/cookieconsent/glazbena-consent.css?v=1.1" rel="stylesheet">
 <!-- Mandatory Theme Settings CSS -->
 <style id="basel-mandatory-css">{{ basel_mandatory_css }}</style>
 <!-- Plugin Stylesheet(s) -->
@@ -63,10 +65,28 @@
 <link href="{{ link.href }}" rel="{{ link.rel }}" />
 {% endif %}
 {% endfor %}
-<!-- Analytic tools -->
-{% for analytic in analytics %}
-{{ analytic }}
-{% endfor %}
+<!-- Analytics are decoded only after explicit consent. -->
+<script>
+window.gkInjectEncodedMarkup=function(encoded){
+  if(!encoded){return;}var holder=document.createElement('div');holder.innerHTML=window.atob(encoded);
+  Array.prototype.slice.call(holder.childNodes).forEach(function(node){
+    if(node.nodeName==='SCRIPT'){
+      var script=document.createElement('script');
+      Array.prototype.slice.call(node.attributes||[]).forEach(function(attr){script.setAttribute(attr.name,attr.value);});
+      script.text=node.text||node.textContent||'';document.head.appendChild(script);
+    }else{document.head.appendChild(node.cloneNode(true));}
+  });
+};
+window.gkLoadAnalytics=function(){
+  if(window.gkAnalyticsLoaded){return;}window.gkAnalyticsLoaded=true;
+  var encoded='{{ analytics_encoded }}';if(!encoded){return;}
+  window.gkInjectEncodedMarkup(encoded);
+};
+window.gkLoadMetaPixel=function(){
+  if(window.gkMetaPixelLoaded){return;}window.gkMetaPixelLoaded=true;
+  window.gkInjectEncodedMarkup(window.gkMetaPixelEncoded||'');
+};
+</script>
 {% if basel_styles_status %}
 <!-- Custom Color Scheme -->
 <style id="basel-color-scheme">{{ basel_styles_cache }};</style>

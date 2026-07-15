@@ -185,6 +185,12 @@ class ControllerExtensionModulePathManager extends Controller {
 
 			$product_info = $this->model_catalog_product->getProduct($product_id);
 
+			// A disabled or removed product still renders the shared 404 template.
+			// Keep the home breadcrumb and do not dereference a missing product.
+			if (!$product_info) {
+				return $breadcrumbs;
+			}
+
 			if (isset($get['search']) || isset($get['tag'])) {
 				$url = '';
 

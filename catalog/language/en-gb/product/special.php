@@ -1,6 +1,7 @@
 <?php
 // Heading
 $_['heading_title']     = 'Special Offers';
+$_['meta_description']   = 'Special offers on musical instruments and equipment at Glazbena kutija.';
 
 // Text
 $_['text_empty']        = 'There are no special offer products to list.';

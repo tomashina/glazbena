@@ -44,8 +44,8 @@
 
          {% for category in product_categories|sort %}
                    <div class="item single-product">
-            <a href="https://www.glazbena-kutija.hr/special?category_id={{ category.id }}"><img src="{{ category.thumb }}" alt="{{ category.name }}" title="{{ category.name }}" /></a>
-            <a href="https://www.glazbena-kutija.hr/special?category_id={{ category.id }}">{{ category.name }}</a></div>
+            <a href="{{ category.href }}"><img src="{{ category.thumb }}" alt="{{ category.name }}" title="{{ category.name }}" /></a>
+            <a href="{{ category.href }}">{{ category.name }}</a></div>
           {% endfor %}
 
            

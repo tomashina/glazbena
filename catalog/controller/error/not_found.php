@@ -4,6 +4,7 @@ class ControllerErrorNotFound extends Controller {
 		$this->load->language('error/not_found');
 
 		$this->document->setTitle($this->language->get('heading_title'));
+		$this->document->setDescription($this->language->get('meta_description'));
 
 		$data['breadcrumbs'] = array();
 
@@ -34,6 +35,28 @@ class ControllerErrorNotFound extends Controller {
 		}
 
 		$data['continue'] = $this->url->link('common/home');
+		$data['search_action'] = 'index.php';
+		$data['special'] = $this->url->link('product/special');
+		$data['brands'] = $this->url->link('product/manufacturer');
+		$data['contact'] = $this->url->link('information/contact');
+		$data['requested_path'] = !empty($this->request->server['REQUEST_URI'])
+			? parse_url($this->request->server['REQUEST_URI'], PHP_URL_PATH)
+			: '/';
+
+		$this->load->model('catalog/category');
+		$data['popular_categories'] = array();
+
+		foreach (array_slice($this->model_catalog_category->getCategories(0), 0, 6) as $category) {
+			$data['popular_categories'][] = array(
+				'name' => $category['name'],
+				'href' => $this->url->link('product/category', 'path=' . (int)$category['category_id'])
+			);
+		}
+
+		$this->registry->set('seo_entity', array(
+			'type' => 'error',
+			'breadcrumbs' => $data['breadcrumbs']
+		));
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
@@ -43,6 +66,7 @@ class ControllerErrorNotFound extends Controller {
 		$data['header'] = $this->load->controller('common/header');
 
 		$this->response->addHeader($this->request->server['SERVER_PROTOCOL'] . ' 404 Not Found');
+		$this->response->addHeader('X-Robots-Tag: noindex, follow');
 
 		$this->response->setOutput($this->load->view('error/not_found', $data));
 	}

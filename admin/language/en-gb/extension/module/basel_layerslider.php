@@ -47,6 +47,8 @@ $_['text_slide_kenburn']     = '<span class="helper" data-toggle="tooltip" title
 $_['text_link_target']        	= '<span class="helper" data-toggle="tooltip" title="If the whole slide should be linked">Link URL Target</span>';
 $_['text_slide_preview']        = 'Slide Preview';
 $_['text_change_slide_bg']      = 'Add Slide Background Image';
+$_['text_mobile_slide_preview']  = 'Mobile Square Preview';
+$_['text_change_mobile_bg']      = 'Add Mobile Square Background';
 $_['text_bg_color']      		= 'Background Color';
 $_['text_add_text_layer']       = 'Add Text Layer';
 $_['text_add_button_layer']     = 'Add Button Layer';

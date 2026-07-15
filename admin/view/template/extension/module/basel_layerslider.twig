@@ -12,6 +12,7 @@
 }
 </style>
 {% endif %}
+<style>.mobile-slide-preview{width:320px;height:320px;max-width:100%;margin:0 0 15px;background:#eee center/cover no-repeat;border:1px solid #d8d8d8;box-shadow:0 2px 8px rgba(0,0,0,.08)}</style>
 {{ column_left }}
 <div id="content" class="{% if fullwidth %}fullwidth{% endif %}">
  <div class="page-header">
@@ -494,6 +495,9 @@
             </div> <!-- Slide preview inner ends -->
           </div> <!-- Slide preview ends -->
           </div> <!-- Slide preview wrapper ends -->
+
+          <h2>{{ text_mobile_slide_preview }}</h2>
+          <div class="mobile-slide-preview m{{ section_row }}" style="background-image:url('{% if section.mobile_image %}{{ base_url }}image/{{ section.mobile_image }}{% endif %}')"></div>
           
           <div class="slide-toolbar">
           <div class="row">
@@ -501,6 +505,8 @@
           <div>
        	  <a id="thumb-image{{ section_row }}" data-toggle="image" class="btn btn-default"><i class="fa fa-arrows-alt"></i> {{ text_change_slide_bg }}</a>
         <input type="hidden" name="sections[{{ section_row }}][thumb_image]" value="{{ section.thumb_image ? section.thumb_image }}" id="input-image{{ section_row }}" />
+        <a id="mobile-image{{ section_row }}" data-toggle="image" class="btn btn-info"><i class="fa fa-mobile"></i> {{ text_change_mobile_bg }}</a>
+        <input type="hidden" name="sections[{{ section_row }}][mobile_image]" value="{{ section.mobile_image ? section.mobile_image }}" id="input-mobile-image{{ section_row }}" />
           </div>
           </div>
           
@@ -979,12 +985,16 @@ function addSlide() {
 	html += '</div>';
 	html += '</div>';
 	html += '</div>';
+	html += '<h2>{{ text_mobile_slide_preview }}</h2>';
+	html += '<div class="mobile-slide-preview m' + section_row + '"></div>';
 	html += '<div class="slide-toolbar">';
 	html += '<div class="row">';
 	html += '<div class="col-sm-6">';
 	html += '<div>';
 	html += '<a id="thumb-image' + section_row + '" data-toggle="image" class="btn btn-default"><i class="fa fa-arrows-alt"></i> {{ text_change_slide_bg }}</a>';
 	html += '<input type="hidden" id="input-image' + section_row + '" name="sections[' + section_row + '][thumb_image]" />';
+	html += ' <a id="mobile-image' + section_row + '" data-toggle="image" class="btn btn-info"><i class="fa fa-mobile"></i> {{ text_change_mobile_bg }}</a>';
+	html += '<input type="hidden" id="input-mobile-image' + section_row + '" name="sections[' + section_row + '][mobile_image]" />';
 	html += '</div>';
 	html += '</div>';
 	html += '<div class="col-sm-6 text-right">';
@@ -1399,6 +1409,9 @@ function addSlideScripts(section_row){
 $('#input-image' + section_row).change( function(){
 $('.slide-preview.s' + section_row).css('background-image', 'url("{{ base_url }}/image/' + $(this).val() + '")');
 });
+$('#input-mobile-image' + section_row).change(function(){
+$('.mobile-slide-preview.m' + section_row).css('background-image', 'url("{{ base_url }}/image/' + $(this).val() + '")');
+});
 // Change layer background color
 $('#bg_color_' + section_row).colorpicker({
 sliders: {
@@ -1451,6 +1464,9 @@ $('#groups-{{ section_row }} .single-layer:first').addClass('active');
 // Change layer background image
 $("#input-image{{ section_row }}").change( function(){
 $('.slide-preview.s{{ section_row }}').css('background-image', 'url("{{ base_url }}/image/' + $(this).val() + '")');
+});
+$("#input-mobile-image{{ section_row }}").change(function(){
+$('.mobile-slide-preview.m{{ section_row }}').css('background-image', 'url("{{ base_url }}/image/' + $(this).val() + '")');
 });
 // Change layer background color
 $('#bg_color_{{ section_row }}').colorpicker({

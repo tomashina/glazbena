@@ -15,6 +15,8 @@ class ControllerStartupSession extends Controller {
         // ---------- LAZY SESSION + BOT GUARD ----------
         $method = $this->request->server['REQUEST_METHOD'] ?? 'GET';
         $route  = $this->request->get['route'] ?? '';
+		$request_path = parse_url($this->request->server['REQUEST_URI'] ?? '', PHP_URL_PATH);
+		$is_withdrawal_path = rtrim((string)$request_path, '/') === '/raskid-ugovora';
         $ua     = strtolower($this->request->server['HTTP_USER_AGENT'] ?? '');
 
         // 1) Ne pokreći sesiju za očite botove i HEAD/OPTIONS
@@ -38,12 +40,13 @@ class ControllerStartupSession extends Controller {
             $route === 'checkout/checkout' ||
             $route === 'checkout/cart'     ||
             strpos($route, 'account') === 0 ||
+            strpos($route, 'extension/account/contract_withdrawal') === 0 ||
             strpos($route, 'api/') === 0   ||
             strpos($route, 'product/compare') === 0 ||
             strpos($route, 'account/wishlist') === 0
         ));
 
-        if (!$has_session_cookie && $method === 'GET' && !$is_stateful_route) {
+        if (!$has_session_cookie && $method === 'GET' && !$is_stateful_route && !$is_withdrawal_path) {
             // Čisti anon GET bez cookieja -> NE pokreći sesiju
             return;
         }

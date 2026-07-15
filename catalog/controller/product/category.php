@@ -6,6 +6,8 @@ class ControllerProductCategory extends Controller {
 		$this->load->model('catalog/category');
 
 		$this->load->model('catalog/product');
+		$this->load->model('extension/basel/basel');
+		$this->load->language('basel/basel_theme');
 
 		$this->load->model('tool/image');
 
@@ -93,7 +95,13 @@ class ControllerProductCategory extends Controller {
 
 		if ($category_info) {
 			$this->document->setTitle($category_info['meta_title']);
-			$this->document->setDescription($category_info['meta_description']);
+			$meta_description = trim(strip_tags(html_entity_decode($category_info['meta_description'], ENT_QUOTES, 'UTF-8')));
+
+			if (utf8_strlen($meta_description) < 50) {
+				$meta_description = sprintf($this->language->get('text_meta_description'), $category_info['name']);
+			}
+
+			$this->document->setDescription($meta_description);
 			$this->document->setKeywords($category_info['meta_keyword']);
 
 			$data['heading_title'] = $category_info['name'];
@@ -166,6 +174,9 @@ class ControllerProductCategory extends Controller {
 			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 
 			$results = $this->model_catalog_product->getProducts($filter_data);
+			$product_ids = array_column($results, 'product_id');
+			$secondary_images = $this->config->get('basel_thumb_swap') ? $this->model_catalog_product->getPrimaryImagesByProductIds($product_ids) : array();
+			$special_end_dates = $this->model_extension_basel_basel->getSpecialEndDates($product_ids);
 
 			foreach ($results as $result) {
 				if ($result['image']) {
@@ -205,8 +216,27 @@ class ControllerProductCategory extends Controller {
 					 $specialeur  ='';
 				}
 	
+				if (isset($secondary_images[$result['product_id']])) {
+					$image2 = $this->model_tool_image->resize($secondary_images[$result['product_id']], $this->config->get('theme_default_image_product_width'), $this->config->get('theme_default_image_product_height'));
+				} else {
+					$image2 = false;
+				}
+
+				if ((float)$result['special'] && $this->config->get('salebadge_status')) {
+					if ($this->config->get('salebadge_status') == '2' && (float)$result['price'] > 0) {
+						$sale_badge = '-' . number_format((($result['price'] - $result['special']) / $result['price']) * 100, 0, ',', '.') . '%';
+					} else {
+						$sale_badge = $this->language->get('basel_text_sale');
+					}
+				} else {
+					$sale_badge = false;
+				}
+
+				$is_new = $this->config->get('newlabel_status') && strtotime($result['date_added']) > strtotime('-' . (int)$this->config->get('newlabel_status') . ' day');
+				$date_end = isset($special_end_dates[$result['product_id']]) ? $special_end_dates[$result['product_id']] : false;
+
 				if ($this->config->get('config_tax')) {
-					$tax = $this->currency->format($tax_price, $this->session->data['currency']);
+					$tax = $this->currency->format((float)$result['special'] ? $result['special'] : $result['price'], $this->session->data['currency']);
 				} else {
 					$tax = false;
 				}
@@ -216,31 +246,20 @@ class ControllerProductCategory extends Controller {
 				} else {
 					$rating = false;
 				}
-
-                $query_categories = $this->model_catalog_product->getCategories($result['product_id']);
-
-
-
-                foreach ($query_categories as  $cat) {
-
-                    if ($cat['product_id'] == $result['product_id'] && $cat['category_id']) {
-                        $ocb_category = $this->model_catalog_category->getCategory($cat['category_id']);
-
-                        $category_info['category_id'] = $ocb_category['category_id'];
-                        $data['category'] = $ocb_category['name'];
-
-                    }
-                }
-
 				$data['products'][] = array(
 					'product_id'  => $result['product_id'],
 					'jan'  => $result['jan'],
 					'thumb'       => $image,
+					'thumb2'      => $image2,
 					'name'        => $result['name'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
-                    'category'  => $ocb_category['name'],
+                    'category'  => $category_info['name'],
 					'special'     => $special,
+					'quantity'    => $result['quantity'],
+					'sale_badge'  => $sale_badge,
+					'sale_end_date' => $date_end,
+					'new_label'   => $is_new,
 					'tax'         => $tax,
 					'stock' => $result['stock_status'],
 			        'stock_id' => $result['stock_status_id'],

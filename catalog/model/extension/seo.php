@@ -250,7 +250,7 @@ class ModelExtensionSeo extends Model {
 
 	private function getRobots($route) {
 		$noindex_prefixes = array('account/', 'checkout/', 'affiliate/', 'api/', 'tool/', 'error/');
-		$noindex_routes = array('product/search', 'product/compare', 'product/product/review', 'information/information/agree');
+		$noindex_routes = array('product/search', 'product/compare', 'product/product/review', 'information/information/agree', 'extension/account/contract_withdrawal', 'extension/account/contract_withdrawal/success');
 		foreach ($noindex_prefixes as $prefix) {
 			if (strpos($route, $prefix) === 0) {
 				return 'noindex, follow';

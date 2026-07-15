@@ -22,3 +22,4 @@ $_['text_rating_desc']  = 'Rating (Highest)';
 $_['text_model_asc']    = 'Model (A - Z)';
 $_['text_model_desc']   = 'Model (Z - A)';
 $_['text_limit']        = 'Show:';
+$_['text_meta_description'] = 'Explore %s at Glazbena Kutija. Check current prices and availability and choose musical instruments and equipment with secure online shopping.';

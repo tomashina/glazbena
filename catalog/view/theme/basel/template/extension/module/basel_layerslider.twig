@@ -8,7 +8,10 @@
 {% if section.sort_order > 0 %}
 <div class="ms-slide {% if section.slide_kenburn is defined %} kenburn {{ section.slide_kenburn }}{% endif %}" data-delay="{{ section.duration }}" {% if section.bg_color|length %} style="background-color:{{ section.bg_color }}"{% endif %}>
 {% if section.is_bg %}
+<picture class="gk-slide-picture">
+{% if section.mobile_image %}<source media="(max-width: 767px)" srcset="{{ section.mobile_image }}">{% endif %}
 <img src="{{ section.thumb_image }}" data-src="{{ section.thumb_image }}" class="slide-bg" alt="">
+</picture>
 {% endif %}
 {% for key, group in section.groups %}
 {% if group.type == 'text' %}
@@ -53,13 +56,24 @@
     </div>
 <div class="clearfix"></div>
 </div><!-- .widget -->
+<style>
+@media(max-width:767px){
+#masterslider{{ module }} .gk-slide-picture img{width:100%;height:100%;object-fit:cover}
+#masterslider{{ module }} .ms-caption{max-width:86vw!important;white-space:normal!important;line-height:1.2!important;text-align:center}
+#masterslider{{ module }}{overflow:visible!important;margin-bottom:34px!important}
+#masterslider{{ module }} .ms-bullets.ms-dir-h{bottom:-25px!important;height:12px!important}
+#masterslider{{ module }} .ms-bullet{width:9px!important;height:9px!important;margin:0 5px!important;border:0!important;border-radius:50%!important;background:#d6d8db!important}
+#masterslider{{ module }} .ms-bullet-selected{background:#171717!important}
+}
+</style>
 <script>
 $(document).ready(function(){
 var slider = new MasterSlider();
+var gkMobileSlider = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
 slider.setup('masterslider{{ module }}' , {
 	width:{{ width }},
-	height:{{ height }},
-	minHeight:{{ minheight }},
+	height:gkMobileSlider ? {{ width }} : {{ height }},
+	minHeight:gkMobileSlider ? 0 : {{ minheight }},
 	layout:"fillwidth",
 	grabCursor:false,
 	centerControls:false,

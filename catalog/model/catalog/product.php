@@ -137,13 +137,26 @@ class ModelCatalogProduct extends Model {
 public function getProducts($data = array()) {
     $sql = "
         SELECT
-            p.product_id,
+            p.*,
+            pd.name,
+            pd.description,
+            pd.meta_title,
+            pd.meta_description,
+            pd.meta_keyword,
+            pd.tag,
+            m.name AS manufacturer,
+            ss.name AS stock_status,
             (
                 SELECT AVG(rating) AS total
                 FROM " . DB_PREFIX . "review r1
                 WHERE r1.product_id = p.product_id AND r1.status = '1'
                 GROUP BY r1.product_id
             ) AS rating,
+            (
+                SELECT COUNT(*)
+                FROM " . DB_PREFIX . "review r2
+                WHERE r2.product_id = p.product_id AND r2.status = '1'
+            ) AS reviews,
             (
                 SELECT price FROM " . DB_PREFIX . "product_discount pd2
                 WHERE pd2.product_id = p.product_id
@@ -162,7 +175,16 @@ public function getProducts($data = array()) {
                   AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
                 ORDER BY ps.priority ASC, ps.price ASC
                 LIMIT 1
-            ) AS special
+            ) AS special,
+            (
+                SELECT ps30.price
+                FROM " . DB_PREFIX . "product_special ps30
+                WHERE ps30.product_id = p.product_id
+                  AND ((ps30.date_start = '0000-00-00' OR ps30.date_start < DATE_SUB(CURDATE(), INTERVAL 30 DAY))
+                  AND (ps30.date_end = '0000-00-00' OR ps30.date_end > DATE_SUB(CURDATE(), INTERVAL 30 DAY)))
+                ORDER BY ps30.price ASC
+                LIMIT 1
+            ) AS price_last_30
     ";
 
     if (!empty($data['filter_category_id'])) {
@@ -184,6 +206,8 @@ public function getProducts($data = array()) {
     $sql .= "
         LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id)
         LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id)
+        LEFT JOIN " . DB_PREFIX . "manufacturer m ON (p.manufacturer_id = m.manufacturer_id)
+        LEFT JOIN " . DB_PREFIX . "stock_status ss ON (p.stock_status_id = ss.stock_status_id AND ss.language_id = '" . (int)$this->config->get('config_language_id') . "')
         WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'
           AND p.status = '1'
           AND p.date_available <= NOW()
@@ -316,7 +340,14 @@ public function getProducts($data = array()) {
     $query = $this->db->query($sql);
 
     foreach ($query->rows as $result) {
-        $product_data[$result['product_id']] = $this->getProduct($result['product_id']);
+        if ($result['discount'] !== null) {
+            $result['price'] = $result['discount'];
+        }
+
+        $result['price_last_30'] = $result['price_last_30'] !== null ? (float)$result['price_last_30'] : 0.0;
+        $result['rating'] = round((float)$result['rating'], 2);
+        $result['reviews'] = (int)$result['reviews'];
+        $product_data[$result['product_id']] = $result;
     }
 
     return $product_data;
@@ -325,17 +356,28 @@ public function getProducts($data = array()) {
 
  public function getProductSpecials($data = array()) {
     // Base SELECT
-    $sql  = "SELECT DISTINCT ps.product_id, ";
+    $sql  = "SELECT DISTINCT p.*, pd.name, pd.description, pd.meta_title, pd.meta_description, pd.meta_keyword, pd.tag, m.name AS manufacturer, ss.name AS stock_status, ";
     $sql .= "  (SELECT AVG(rating) ";
     $sql .= "   FROM " . DB_PREFIX . "review r1 ";
     $sql .= "   WHERE r1.product_id = ps.product_id AND r1.status = '1' ";
-    $sql .= "   GROUP BY r1.product_id) AS rating ";
+    $sql .= "   GROUP BY r1.product_id) AS rating, ";
+    $sql .= "  (SELECT COUNT(*) FROM " . DB_PREFIX . "review r2 WHERE r2.product_id = p.product_id AND r2.status = '1') AS reviews, ";
+    $sql .= "  (SELECT ps2.price FROM " . DB_PREFIX . "product_special ps2 WHERE ps2.product_id = p.product_id ";
+    $sql .= "   AND ps2.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' ";
+    $sql .= "   AND ((ps2.date_start = '0000-00-00' OR ps2.date_start < NOW()) AND (ps2.date_end = '0000-00-00' OR ps2.date_end > NOW())) ";
+    $sql .= "   ORDER BY ps2.priority ASC, ps2.price ASC LIMIT 1) AS special, ";
+    $sql .= "  (SELECT ps30.price FROM " . DB_PREFIX . "product_special ps30 WHERE ps30.product_id = p.product_id ";
+    $sql .= "   AND ((ps30.date_start = '0000-00-00' OR ps30.date_start < DATE_SUB(CURDATE(), INTERVAL 30 DAY)) ";
+    $sql .= "   AND (ps30.date_end = '0000-00-00' OR ps30.date_end > DATE_SUB(CURDATE(), INTERVAL 30 DAY))) ";
+    $sql .= "   ORDER BY ps30.price ASC LIMIT 1) AS price_last_30 ";
 
     // FROM + required joins (all joins come before WHERE)
     $sql .= "FROM " . DB_PREFIX . "product_special ps ";
     $sql .= "LEFT JOIN " . DB_PREFIX . "product p ON (ps.product_id = p.product_id) ";
     $sql .= "LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) ";
     $sql .= "LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) ";
+    $sql .= "LEFT JOIN " . DB_PREFIX . "manufacturer m ON (p.manufacturer_id = m.manufacturer_id) ";
+    $sql .= "LEFT JOIN " . DB_PREFIX . "stock_status ss ON (p.stock_status_id = ss.stock_status_id AND ss.language_id = '" . (int)$this->config->get('config_language_id') . "') ";
 
     // Optional category filtering join(s)
     if (!empty($data['filter_category_id'])) {
@@ -392,10 +434,35 @@ public function getProducts($data = array()) {
     $query = $this->db->query($sql);
 
     foreach ($query->rows as $result) {
-        $product_data[$result['product_id']] = $this->getProduct($result['product_id']);
+        $result['price_last_30'] = $result['price_last_30'] !== null ? (float)$result['price_last_30'] : 0.0;
+        $result['rating'] = round((float)$result['rating'], 2);
+        $result['reviews'] = (int)$result['reviews'];
+        $product_data[$result['product_id']] = $result;
     }
 
     return $product_data;
+}
+
+ public function getProductSpecialCategories($parent_id = 0) {
+    $sql = "SELECT DISTINCT c.category_id, cd.name, c.image
+        FROM " . DB_PREFIX . "product_special ps
+        INNER JOIN " . DB_PREFIX . "product p ON (ps.product_id = p.product_id)
+        INNER JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id)
+        INNER JOIN " . DB_PREFIX . "product_to_category p2c ON (p.product_id = p2c.product_id)
+        INNER JOIN " . DB_PREFIX . "category c ON (p2c.category_id = c.category_id)
+        INNER JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id)
+        WHERE p.status = '1'
+          AND p.date_available <= NOW()
+          AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
+          AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'
+          AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW())
+          AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))
+          AND c.status = '1'
+          AND c.parent_id = '" . (int)$parent_id . "'
+          AND cd.language_id = '" . (int)$this->config->get('config_language_id') . "'
+        ORDER BY c.sort_order ASC, LCASE(cd.name) ASC";
+
+    return $this->db->query($sql)->rows;
 }
 
 
@@ -629,6 +696,27 @@ public function getProducts($data = array()) {
             ORDER BY sort_order ASC
         ");
         return $query->rows;
+    }
+
+    public function getPrimaryImagesByProductIds(array $product_ids) {
+        $product_ids = array_values(array_unique(array_filter(array_map('intval', $product_ids))));
+
+        if (!$product_ids) {
+            return array();
+        }
+
+        $query = $this->db->query("SELECT product_id, image FROM " . DB_PREFIX . "product_image WHERE product_id IN (" . implode(',', $product_ids) . ") ORDER BY product_id ASC, sort_order ASC, product_image_id ASC");
+        $images = array();
+
+        foreach ($query->rows as $row) {
+            $product_id = (int)$row['product_id'];
+
+            if (!isset($images[$product_id]) && $row['image']) {
+                $images[$product_id] = $row['image'];
+            }
+        }
+
+        return $images;
     }
 
     public function getProductRelated($product_id) {

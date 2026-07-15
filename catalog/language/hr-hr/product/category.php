@@ -25,3 +25,4 @@ $_['text_model_desc']   = 'Model (Z -&gt; A)';
 $_['text_limit']        = 'Prikaži:';
 $_['text_more']        = 'Čitaj više';
 $_['text_less']        = 'Čitaj manje';
+$_['text_meta_description'] = 'Istražite ponudu iz kategorije %s u Glazbenoj kutiji. Provjerite cijene i dostupnost te odaberite glazbenu opremu uz sigurnu online kupnju.';

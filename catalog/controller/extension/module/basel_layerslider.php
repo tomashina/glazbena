@@ -4,7 +4,7 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
 		static $module = 0;
 
 		// Add required sources
-		$this->document->addScript('catalog/view/theme/basel/js/masterslider.js');
+		$this->document->addScript('catalog/view/theme/basel/js/masterslider.min.js?v=3.26');
 
 		if ($this->request->server['HTTPS']) {
 			$server = $this->config->get('config_ssl');
@@ -149,6 +149,7 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
 					'bg_color' => $section['bg_color'],
 					'is_bg' => $section['thumb_image'],
 					'thumb_image'   => $base_url . 'image/' . $section['thumb_image'],
+					'mobile_image'  => !empty($section['mobile_image']) ? $base_url . 'image/' . $section['mobile_image'] : '',
 					'sort_order'   => $section['sort_order'],
 					'groups'  => $groups
 				);

@@ -78,6 +78,22 @@ try {
 			'expected' => 1
 		)
 	));
+
+	// The legacy Meta Pixel OCMOD printed tracking code directly in <head>.
+	// Keep its e-commerce events, but expose the markup inertly until the
+	// visitor grants marketing consent through the custom cookie manager.
+	$patchModification('javv_meta_pixel_events', 'JAVV Meta Pixel Events', array(
+		array(
+			'search' => "\$data['javv_meta_pixel'] = \$this->load->controller('extension/module/javv_meta_pixel');",
+			'replace' => "\$data['javv_meta_pixel_encoded'] = base64_encode(\$this->load->controller('extension/module/javv_meta_pixel'));",
+			'expected' => 1
+		),
+		array(
+			'search' => "{% if javv_meta_pixel %}\n{{ javv_meta_pixel }}\n{% endif %}",
+			'replace' => "{% if javv_meta_pixel_encoded %}\n<script>window.gkMetaPixelEncoded='{{ javv_meta_pixel_encoded }}';</script>\n{% endif %}",
+			'expected' => 1
+		)
+	));
 } catch (Throwable $exception) {
 	fwrite(STDERR, $exception->getMessage() . "\n");
 	exit(1);

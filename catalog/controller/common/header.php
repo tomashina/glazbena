@@ -14,6 +14,9 @@ class ControllerCommonHeader extends Controller {
 			}
 		}
 
+		// Keep analytics inert until the visitor explicitly accepts analytics cookies.
+		$data['analytics_encoded'] = base64_encode(implode("\n", $data['analytics']));
+
 		if ($this->request->server['HTTPS']) {
 			$server = $this->config->get('config_ssl');
 		} else {

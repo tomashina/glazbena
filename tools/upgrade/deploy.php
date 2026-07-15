@@ -201,6 +201,7 @@ try {
 	$run(array(PHP_BINARY, $root . '/tools/upgrade/patch_modifications.php'));
 	$run(array(PHP_BINARY, $root . '/tools/upgrade/remove_seo_pack_pro.php'));
 	$run(array(PHP_BINARY, $root . '/tools/upgrade/repair_admin_permissions.php'));
+	$run(array(PHP_BINARY, $root . '/tools/upgrade/optimize_database.php'));
 
 	foreach ($statuses as $status) {
 		$enabled = (int)$status['status'];

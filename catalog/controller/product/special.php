@@ -1,7 +1,5 @@
 <?php
 
-use Agmedia\Models\Category\Category;
-
 class ControllerProductSpecial extends Controller {
     public function index() {
         $this->load->language('product/special');
@@ -38,6 +36,7 @@ class ControllerProductSpecial extends Controller {
         }
 
         $this->document->setTitle($this->language->get('heading_title'));
+        $this->document->setDescription($this->language->get('meta_description'));
 
         $data['breadcrumbs'] = array();
 
@@ -68,6 +67,11 @@ class ControllerProductSpecial extends Controller {
             'text' => $this->language->get('heading_title'),
             'href' => $this->url->link('product/special', $url)
         );
+
+        $this->registry->set('seo_entity', array(
+            'type' => 'collection',
+            'breadcrumbs' => $data['breadcrumbs']
+        ));
 
         $data['text_compare'] = sprintf($this->language->get('text_compare'), (isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0));
 
@@ -123,6 +127,7 @@ $results = $this->model_catalog_product->getProductSpecials($filter_data);
                     }
             } else {
                 $special = false;
+				$specialeur = '';
             }
 
             if ($this->config->get('config_tax')) {
@@ -156,54 +161,17 @@ $results = $this->model_catalog_product->getProductSpecials($filter_data);
             );
         }
     
-        /*******************************************************************************
-         *                                Copyright : AGmedia                           *
-         *                              email: filip@agmedia.hr                         *
-         *******************************************************************************/
-        $ag_results = $this->model_catalog_product->getProductSpecials();
-        $arr = [];
-        $arr2 = [];
-        foreach ($ag_results as $result) {
-            // get categories of each product, based on product id
-            $categories = $this->model_catalog_product->getCategoriesfilter($result['product_id']);
-        
-            if ( ! isset($this->request->get['mfp_path'])) {
-                foreach ($categories as $cat) {
-                    $_cat = Category::where('category_id', $cat['category_id'])->where('parent_id', 0)->first();
-                
-                    if ($_cat) {
-                        $arr[] = $_cat->category_id;
-                    }
-                }
-            } else {
-                foreach ($categories as $cat) {
-                    $_cats = Category::where('category_id', $cat['category_id'])->where('parent_id', $this->request->get['mfp_path'])->get();
-                
-                    foreach ($_cats as $__cat) {
-                        $arr[] = $__cat->category_id;
-                    }
-                }
-            }
-        
-            foreach ($arr as $item) {
-                $arr2[$item]['category_id'] = $item;
-            }
+        $special_parent_id = isset($this->request->get['mfp_path']) ? (int)$this->request->get['mfp_path'] : 0;
+		$data['product_categories'] = array();
+
+        foreach ($this->model_catalog_product->getProductSpecialCategories($special_parent_id) as $category) {
+            $data['product_categories'][] = array(
+                'id' => $category['category_id'],
+                'name' => $category['name'],
+                'thumb' => $this->model_tool_image->resize($category['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height')),
+                'href' => $this->url->link('product/special', 'category_id=' . (int)$category['category_id'])
+            );
         }
-        if ( ! empty($arr2)) {
-            // select each category name and create a link to it
-            foreach($arr2 as $category){
-                $category_info = $this->model_catalog_category->getCategory($category['category_id']);
-                $data['product_categories'][] = array(
-                    'id' => $category['category_id'],
-                    'name' => $category_info['name'],
-                    'thumb' => $this->model_tool_image->resize($category_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height')),
-                    'href' => 'special?mfp=path['.$category['category_id'].']'
-                );
-            }
-        }
-        /*******************************************************************************
-         *                              END Copyright : AGmedia                         *
-         *******************************************************************************/
 
         $url = '';
 

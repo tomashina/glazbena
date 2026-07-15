@@ -77,7 +77,7 @@ max-height:600px;
         {% if category.category_id %}
 
 				
-            <h1 class="cat_title">{{category.name}}</h1>
+            <div class="cat_title">{{ category.name }}</div>
         {% endif %}
     {% endfor %}
 {% endif %}
@@ -997,6 +997,7 @@ max-height:600px;
     </div> <!-- .container ends -->
 {% endif %}
 
+<link rel="stylesheet" href="dist/css/lightgallery-bundle.min.css?v=2.7" />
 <script src="dist/lightgallery.min.js"></script>
 
 <script src="dist/plugins/thumbnail/lg-thumbnail.umd.js"></script>

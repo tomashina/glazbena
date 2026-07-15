@@ -17,9 +17,9 @@
   {% for banner in banners %}
     <div class="item text-center">
     {% if banner.link %}
-        <a href="{{ banner.link }}"><img src="{{ banner.image }}" alt="{{ banner.title }}" class="display-inline-block" /></a>
+        <a href="{{ banner.link }}"><img src="{{ banner.image }}" alt="{{ banner.title }}" class="display-inline-block" loading="lazy" decoding="async" /></a>
     {% else %}
-        <img src="{{ banner.image }}" alt="{{ banner.title }}" class="display-inline-block" />
+        <img src="{{ banner.image }}" alt="{{ banner.title }}" class="display-inline-block" loading="lazy" decoding="async" />
     {% endif %}
     </div>
   {% endfor %}

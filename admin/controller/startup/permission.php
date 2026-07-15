@@ -21,6 +21,7 @@ class ControllerStartupPermission extends Controller {
 			// If a 3rd part is found we need to check if its under one of the extension folders.
 			$extension = array(
 				'extension/advertise',
+				'extension/base',
 				'extension/dashboard',
 				'extension/analytics',
 				'extension/captcha',
@@ -33,7 +34,8 @@ class ControllerStartupPermission extends Controller {
 				'extension/shipping',
 				'extension/theme',
 				'extension/total',
-				'extension/report'
+				'extension/report',
+				'extension/sale'
 			);
 
 			if (isset($part[2]) && in_array($route, $extension)) {

@@ -1227,6 +1227,7 @@ div.required .control-label:after {
 .yelllow{color:#d69d00!important;}
 
 .yelllow span{color:#fff!important;}
+@media(max-width:767px){h2.yelllow{max-width:340px;margin-left:auto!important;margin-right:auto!important;font-size:18px!important;line-height:1.25!important}h2.yelllow span:last-child{display:block}}
 
 .bckholder{
     background:url('../image/headbck2020.jpg');
@@ -5450,7 +5451,6 @@ a.button-circle {
     font-size: 18px;
 }
 
-}
 .badge i {
     font-weight:600;
     font-size:13px;

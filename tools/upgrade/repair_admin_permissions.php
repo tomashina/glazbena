@@ -26,7 +26,15 @@ foreach ($iterator as $file) {
 	}
 
 	$route = substr($file->getPathname(), strlen($root . '/admin/controller/'));
-	$routes[] = str_replace(DIRECTORY_SEPARATOR, '/', substr($route, 0, -4));
+	$route = str_replace(DIRECTORY_SEPARATOR, '/', substr($route, 0, -4));
+	$routes[] = $route;
+
+	// OpenCart's permission startup checks some custom extension namespaces at
+	// their two-part parent route before dispatching the concrete controller.
+	$parts = explode('/', $route);
+	if (count($parts) > 2) {
+		$routes[] = $parts[0] . '/' . $parts[1];
+	}
 }
 
 $routes = array_values(array_unique($routes));

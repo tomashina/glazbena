@@ -1,7 +1,5 @@
 
-<div class="container">
-{{ position_bottom }}
-</div>
+<div class="container">{{ position_bottom }}</div>
 <div id="footer">
 <div class="container">
 {% if footer_block_1 and footer_block_1 != '<p><br></p>' %}
@@ -11,22 +9,7 @@
 {% endif %}
 <div class="row links-holder">
 
-    <script>
-      var smdWrapper = document.createElement("script"), smdScript;
-      smdWrapper.async = true;
-      smdWrapper.type = "text/javascript";
-      smdWrapper.src = "https://cpx.smind.hr/Log/LogData?data=" + JSON.stringify({
-          Key: "Cro_2155",
-          Size: "80",
-          Type: "badge",
-          Version: 2,
-          BadgeClassName: "smdWrapperTag"
-      });
-      smdScript = document.getElementsByTagName("script")[0];
-      smdScript.parentNode.insertBefore(smdWrapper, smdScript);
-    </script>
-
-      <div class="smdWrapperTag"></div>
+      <div class="smdWrapperTag" data-consent-service="certified-shop"></div>
 
   <div class="footer-column col-xs-12 col-sm-4">
 <div class="footer-custom-wrapper">
@@ -70,6 +53,8 @@
       <div class="footer-column col-xs-12 col-sm-4 eq_height">
         <h5>{{ text_service }}</h5>
         <ul class="list-unstyled" style="margin-bottom:20px">
+          <li><a href="{{ contract_withdrawal }}">{{ text_contract_withdrawal }}</a></li>
+          <li><a href="#cookie-settings" data-cookie-consent-trigger>{{ text_cookie_settings }}</a></li>
           {% for information in informations [6:]%}
           <li><a href="{{ information.href }}">{{ information.title }}</a></li>
           {% endfor %}
@@ -89,15 +74,9 @@
 </div>
 </div>
 <link href="catalog/view/javascript/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
-<!--<link href="catalog/view/theme/basel/js/lightgallery/css/lightgallery.css?v=10" rel="stylesheet" />-->
-
-<link type="text/css" rel="stylesheet" href="dist/css/lightgallery-bundle.css" />
-
-
-<script src="catalog/view/theme/basel/js/jquery.matchHeight.min.js"></script>
-<script src="catalog/view/theme/basel/js/countdown.js"></script>
-<script src="catalog/view/theme/basel/js/live_search.js"></script>
-<script src="catalog/view/theme/basel/js/featherlight.js"></script>
+<script src="catalog/view/theme/basel/js/countdown.min.js?v=3.26"></script>
+<script src="catalog/view/theme/basel/js/live_search.min.js?v=3.26"></script>
+<script src="catalog/view/theme/basel/js/featherlight.min.js?v=3.26"></script>
 {% if view_popup %}
 <!-- Popup -->
 <script>
@@ -118,21 +97,6 @@ $('#column-left, #column-right').theiaStickySidebar({containerSelector:$(this).c
 }
 </script>
 {% endif %}
-{% if view_cookie_bar %}
-<!-- Cookie bar -->
-<div class="basel_cookie_bar">
-<div class="table">
-<div class="table-cell w100">{{ basel_cookie_info }}</div>
-<div class="table-cell button-cell">
-<a class="btn btn-tiny btn-light-outline" onclick="$(this).parent().parent().parent().fadeOut(400);">{{ basel_cookie_btn_close }}</a>
-{% if href_more_info is defined %}
-<a class="more-info anim-underline light" href="{{ href_more_info }}">{{ basel_cookie_btn_more_info }}</a>
-{% endif %}
-</div>
-</div>
-</div>
-{% endif %}
-
 </div><!-- .outer-container ends -->
 
 {% if basel_copyright %}
@@ -147,17 +111,17 @@ $('#column-left, #column-right').theiaStickySidebar({containerSelector:$(this).c
         <div class="col-md-6">
 
 
-            <a href="https://www.corvuspay.com/" target="_blank" title="CorvusPay - internet Payment Gateway" target="_blank"><img src="image/corvus-logo.png" style="margin-right:3px" alt="Corvus Payment"></a>
+            <a href="https://www.corvuspay.com/" target="_blank" rel="noopener" title="CorvusPay - internet Payment Gateway"><img src="image/corvus-logo.png" style="margin-right:3px" alt="Corvus Payment" loading="lazy" decoding="async"></a>
 
-              <a href="https://www.mastercard.hr/hr-hr/consumers/find-card-products/debit-cards/maestro-debit.html" target="_blank"><img style="height: 40px;margin-right:3px" src="image/catalog/credit-cards/Maestro_logo.svg.png"></a>
+              <a href="https://www.mastercard.hr/hr-hr/consumers/find-card-products/debit-cards/maestro-debit.html" target="_blank" rel="noopener"><img style="height: 40px;margin-right:3px" src="image/catalog/credit-cards/Maestro_logo.svg.png" alt="Maestro" loading="lazy" decoding="async"></a>
 
-            <a href="http://www.visa.com.hr/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/visa.png"></a>
+            <a href="https://www.visa.com.hr/" target="_blank" rel="noopener"><img style="margin-right:3px" src="image/catalog/credit-cards/visa.png" alt="Visa" loading="lazy" decoding="async"></a>
           
-            <a href="http://www.mastercard.com/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/Mastercard-logo.svg.png"></a>
-            <a href="https://www.dinersclub.com/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/logo-diners-club-png.png"></a>
+            <a href="https://www.mastercard.com/" target="_blank" rel="noopener"><img style="margin-right:3px" src="image/catalog/credit-cards/Mastercard-logo.svg.png" alt="Mastercard" loading="lazy" decoding="async"></a>
+            <a href="https://www.dinersclub.com/" target="_blank" rel="noopener"><img style="margin-right:3px" src="image/catalog/credit-cards/logo-diners-club-png.png" alt="Diners Club" loading="lazy" decoding="async"></a>
          <!--   <a href="https://www.pbzcard.hr/hr/sigurnost/sigurnost-kupnje/verified-by-visa/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/visa-secure.svg"></a>
             <a href="https://www.pbzcard.hr/hr/sigurnost/sigurnost-kupnje/mastercard-securecode/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/mastercard-secure.svg"></a> -->
-<a href="sigurnost-placanja" target="_blank"><img style="margin-right:3px" src="image/ssl.svg" alt="SSL certifikat - 100% sigurna kupnja" title="SSL certifikat - 100% sigurna kupnja"></a>
+<a href="sigurnost-placanja" target="_blank" rel="noopener"><img style="margin-right:3px" src="image/ssl.svg" alt="SSL certifikat - 100% sigurna kupnja" title="SSL certifikat - 100% sigurna kupnja" loading="lazy" decoding="async"></a>
   
         </div>
 
@@ -166,40 +130,14 @@ $('#column-left, #column-right').theiaStickySidebar({containerSelector:$(this).c
     </div>
 {% endif %}
 <a class="scroll-to-top primary-bg-color " onclick="$('html, body').animate({scrollTop:0});"><i class="icon-arrow-right"></i></a>
+<button type="button" class="gk-cookie-fab" data-cookie-consent-trigger aria-label="{{ text_cookie_settings }}" title="{{ text_cookie_settings }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z"/><path d="M8.5 8.5h.01M16 15.5h.01M12 12h.01M11 17h.01M7 14h.01"/></svg></button>
 <div id="featherlight-holder"></div>
 
 
 
 
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/66f6b827e5982d6c7bb5a510/1i8ps10ve';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
-
- <script>
-      var smdObject = {
-        Key: "Cro_2155",
-        Type: "floatingbar",
-          Version: 2,
-          BadgeClassName: "smdWrapperTag",
-          BadgeZoom: 1
-      };
-      var smdWrapper = document.createElement("script");
-      smdWrapper.id = "_cpxTag";
-      smdWrapper.type = "text/javascript";
-      smdWrapper.src = "https://cpx.smind.hr/Log/LogData?data=" + encodeURIComponent(JSON.stringify(smdObject));
-      var smdScript = document.getElementsByTagName("script")[0];
-      smdScript.parentNode.insertBefore(smdWrapper, smdScript);
-    </script>
+<script src="catalog/view/javascript/cookieconsent/cookieconsent.umd.js?v=3.1" defer></script>
+<script src="catalog/view/javascript/cookieconsent/glazbena-consent.js?v=1.1" defer></script>
 
 
 

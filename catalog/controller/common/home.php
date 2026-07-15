@@ -1,6 +1,8 @@
 <?php
 class ControllerCommonHome extends Controller {
 	public function index() {
+		$this->load->language('common/home');
+
 		$language_id = (int)$this->config->get('config_language_id');
 		$meta_title = $this->config->get('config_meta_title');
 		$meta_description = $this->config->get('config_meta_description');
@@ -19,7 +21,7 @@ class ControllerCommonHome extends Controller {
 		}
 
 		$this->document->setTitle($meta_title ?: $this->config->get('config_name'));
-		$this->document->setDescription($meta_description);
+		$this->document->setDescription($meta_description ?: $this->language->get('text_meta_description'));
 		$this->document->setKeywords($meta_keyword);
 
 		if (isset($this->request->get['route'])) {
@@ -27,6 +29,7 @@ class ControllerCommonHome extends Controller {
 		}
 
 		$this->registry->set('seo_entity', array('type' => 'home', 'breadcrumbs' => array()));
+		$data['heading_title'] = $this->language->get('heading_title');
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');

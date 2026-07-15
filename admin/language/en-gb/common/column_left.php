@@ -46,6 +46,7 @@ $_['text_product']              = 'Products';
 $_['text_reports']              = 'Reports';
 $_['text_review']               = 'Reviews';
 $_['text_return']               = 'Returns';
+$_['text_contract_withdrawal']   = 'Contract withdrawals';
 $_['text_return_action']        = 'Return Actions';
 $_['text_return_reason']        = 'Return Reasons';
 $_['text_return_status']        = 'Return Statuses';

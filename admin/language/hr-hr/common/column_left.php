@@ -63,6 +63,7 @@ $_['text_report_affiliate']          = 'Partneri (affiliates)';
 $_['text_report_affiliate_activity'] = 'Aktivnosti partnera (affiliates)';
 $_['text_review']                    = 'Ocjene';
 $_['text_return']                    = 'Povrati artikala';
+$_['text_contract_withdrawal']        = 'Raskidi ugovora';
 $_['text_return_action']             = 'Akcije povrata artikala';
 $_['text_return_reason']             = 'Razlozi povrata artikala';
 $_['text_return_status']             = 'Statusi povrata artikala';

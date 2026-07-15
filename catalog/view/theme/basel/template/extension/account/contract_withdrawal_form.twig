@@ -1,0 +1,99 @@
+{{ header }}
+<div class="container contract-withdrawal-page">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>{% endfor %}
+  </ul>
+  <div class="breadcrumb-holder">
+    <span id="title-holder">&nbsp;</span>
+    <div class="links-holder"><a class="basel-back-btn" onclick="history.go(-1); return false;"><i></i></a><span>&nbsp;</span></div>
+  </div>
+  <div class="row">
+    {{ column_left }}
+    {% if column_left and column_right %}{% set class = 'col-sm-6' %}{% elseif column_left or column_right %}{% set class = 'col-md-9 col-sm-8' %}{% else %}{% set class = 'col-sm-12' %}{% endif %}
+    <div id="content" class="{{ class }}">
+      {{ content_top }}
+      <h1 id="page-title">{{ heading_title }}</h1>
+      {% if errors.warning %}<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ errors.warning }}</div>{% endif %}
+
+      {% if preview %}
+        <div class="alert alert-info">{{ text_preview_help }}</div>
+        <h3 class="lined-title"><span><b>{{ text_preview }}</b></span></h3>
+        <div class="table-responsive margin-b30">
+          <table class="table table-bordered">
+            <tbody>
+              <tr><td><b>{{ entry_order_id }}</b></td><td>#{{ form.order_id }}</td></tr>
+              <tr><td><b>{{ entry_firstname }} / {{ entry_lastname }}</b></td><td>{{ form.firstname }} {{ form.lastname }}</td></tr>
+              <tr><td><b>{{ entry_email }}</b></td><td>{{ form.email }}</td></tr>
+              {% if form.refund_iban %}<tr><td><b>{{ entry_refund_iban }}</b></td><td>{{ form.refund_iban }}</td></tr>{% endif %}
+              <tr><td><b>{{ entry_scope }}</b></td><td>{% if form.withdrawal_scope == 'items' %}{{ text_selected_items }}{% else %}{{ text_full_order }}{% endif %}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 class="lined-title"><span><b>{{ text_statement }}</b></span></h3>
+        <pre class="contract-withdrawal-statement">{{ statement }}</pre>
+        <form action="{{ action }}" method="post">
+          <input type="hidden" name="form_token" value="{{ form_token }}" />
+          <input type="hidden" name="order_id" value="{{ form.order_id }}" />
+          <input type="hidden" name="firstname" value="{{ form.firstname }}" />
+          <input type="hidden" name="lastname" value="{{ form.lastname }}" />
+          <input type="hidden" name="email" value="{{ form.email }}" />
+          <input type="hidden" name="telephone" value="{{ form.telephone }}" />
+          <input type="hidden" name="address" value="{{ form.address }}" />
+          <input type="hidden" name="refund_iban" value="{{ form.refund_iban }}" />
+          <input type="hidden" name="withdrawal_scope" value="{{ form.withdrawal_scope }}" />
+          <input type="hidden" name="comment" value="{{ form.comment }}" />
+          {% for order_product_id in form.order_products %}<input type="hidden" name="order_products[]" value="{{ order_product_id }}" />{% endfor %}
+          <div class="checkbox required contract-withdrawal-confirm">
+            <label><input type="checkbox" name="confirm_legal" value="1" required /> {{ text_confirm_legal }}</label>
+          </div>
+          <div class="buttons clearfix margin-b50">
+            <div class="pull-left"><button type="button" onclick="window.history.back();" class="btn btn-default">{{ button_edit }}</button></div>
+            <div class="pull-right"><button type="submit" name="confirm" value="1" class="btn btn-contrast">{{ button_confirm }}</button></div>
+          </div>
+        </form>
+      {% else %}
+        <p class="lead">{{ text_intro }}</p>
+        <p class="text-muted">{{ text_required_note }}</p>
+        <form action="{{ action }}" method="post" class="form-vertical">
+          <input type="hidden" name="form_token" value="{{ form_token }}" />
+          <input type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true" class="contract-withdrawal-honeypot" />
+          <fieldset>
+            <legend>{{ text_order }}</legend>
+            <div class="form-group required">
+              <label for="input-order-id">{{ entry_order_id }}</label>
+              <input type="number" min="1" name="order_id" value="{{ form.order_id }}" id="input-order-id" class="form-control" required />
+              {% if errors.order_id %}<div class="text-danger">{{ errors.order_id }}</div>{% endif %}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>{{ text_customer }}</legend>
+            <div class="row">
+              <div class="form-group col-sm-6 required"><label for="input-firstname">{{ entry_firstname }}</label><input type="text" name="firstname" value="{{ form.firstname }}" id="input-firstname" maxlength="64" class="form-control" required />{% if errors.firstname %}<div class="text-danger">{{ errors.firstname }}</div>{% endif %}</div>
+              <div class="form-group col-sm-6 required"><label for="input-lastname">{{ entry_lastname }}</label><input type="text" name="lastname" value="{{ form.lastname }}" id="input-lastname" maxlength="64" class="form-control" required />{% if errors.lastname %}<div class="text-danger">{{ errors.lastname }}</div>{% endif %}</div>
+            </div>
+            <div class="row">
+              <div class="form-group col-sm-6 required"><label for="input-email">{{ entry_email }}</label><input type="email" name="email" value="{{ form.email }}" id="input-email" maxlength="96" class="form-control" required />{% if errors.email %}<div class="text-danger">{{ errors.email }}</div>{% endif %}</div>
+              <div class="form-group col-sm-6"><label for="input-telephone">{{ entry_telephone }}</label><input type="tel" name="telephone" value="{{ form.telephone }}" id="input-telephone" maxlength="32" class="form-control" />{% if errors.telephone %}<div class="text-danger">{{ errors.telephone }}</div>{% endif %}</div>
+            </div>
+            <div class="form-group"><label for="input-address">{{ entry_address }}</label><textarea name="address" rows="3" id="input-address" class="form-control">{{ form.address }}</textarea>{% if errors.address %}<div class="text-danger">{{ errors.address }}</div>{% endif %}</div>
+            <div class="form-group"><label for="input-refund-iban">{{ entry_refund_iban }}</label><input type="text" name="refund_iban" value="{{ form.refund_iban }}" id="input-refund-iban" maxlength="34" class="form-control" autocomplete="off" />{% if errors.refund_iban %}<div class="text-danger">{{ errors.refund_iban }}</div>{% endif %}</div>
+          </fieldset>
+          <fieldset>
+            <legend>{{ text_products }}</legend>
+            <div class="form-group"><label>{{ entry_scope }}</label><div class="radio"><label><input type="radio" name="withdrawal_scope" value="full" {% if form.withdrawal_scope != 'items' %}checked{% endif %} /> {{ text_full_order }}</label></div><div class="radio"><label><input type="radio" name="withdrawal_scope" value="items" {% if form.withdrawal_scope == 'items' %}checked{% endif %} {% if not order_products %}disabled{% endif %} /> {{ text_selected_items }}</label></div></div>
+            {% if order_products %}
+              <div class="table-responsive"><table class="table table-bordered table-striped"><thead><tr><th class="text-center" style="width:45px"></th><th>{{ text_products }}</th><th>Model</th><th class="text-right">Kol.</th></tr></thead><tbody>{% for product in order_products %}<tr><td class="text-center"><input type="checkbox" name="order_products[]" value="{{ product.order_product_id }}" {% if product.order_product_id in form.order_products %}checked{% endif %} /></td><td>{{ product.name }}</td><td>{{ product.model }}</td><td class="text-right">{{ product.quantity }}</td></tr>{% endfor %}</tbody></table></div>
+            {% else %}<p class="text-muted">{{ text_no_products }}</p>{% endif %}
+            {% if errors.scope %}<div class="text-danger">{{ errors.scope }}</div>{% endif %}
+            <div class="form-group"><label for="input-comment">{{ entry_comment }}</label><textarea name="comment" rows="5" id="input-comment" class="form-control">{{ form.comment }}</textarea></div>
+          </fieldset>
+          <div class="buttons clearfix margin-b50"><div class="pull-right"><button type="submit" class="btn btn-contrast">{{ button_preview }}</button></div></div>
+        </form>
+      {% endif %}
+    </div>
+    {{ column_right }}
+  </div>
+</div>
+<style>.contract-withdrawal-page fieldset{margin:0 0 30px}.contract-withdrawal-page legend{font-size:20px;font-weight:600;padding-bottom:8px}.contract-withdrawal-statement{white-space:pre-wrap;margin:0 0 25px;padding:18px;border:1px solid #ddd;background:#f7f7f7;font-family:inherit;line-height:1.6}.contract-withdrawal-confirm{margin:20px 0}.contract-withdrawal-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}</style>
+{{ content_bottom }}
+{{ footer }}

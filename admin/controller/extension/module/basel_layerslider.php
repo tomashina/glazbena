@@ -102,6 +102,8 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
 		$data['text_link_target'] = $this->language->get('text_link_target');
 		$data['text_slide_preview'] = $this->language->get('text_slide_preview');
 		$data['text_change_slide_bg'] = $this->language->get('text_change_slide_bg');
+		$data['text_mobile_slide_preview'] = $this->language->get('text_mobile_slide_preview');
+		$data['text_change_mobile_bg'] = $this->language->get('text_change_mobile_bg');
 		$data['text_add_text_layer'] = $this->language->get('text_add_text_layer');
 		$data['text_add_button_layer'] = $this->language->get('text_add_button_layer');
 		$data['text_add_image_layer'] = $this->language->get('text_add_image_layer');
@@ -543,6 +545,7 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
 				'slide_kenburn'   => $section['slide_kenburn'],
 				'bg_color'   => $section['bg_color'],
 				'thumb_image'   => $section['thumb_image'],
+				'mobile_image'  => isset($section['mobile_image']) ? $section['mobile_image'] : '',
 				'groups'  => $groups
 			);
 		}

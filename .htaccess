@@ -23,7 +23,7 @@ RewriteEngine On
 
 RewriteBase /
 
-ErrorDocument 404 /index.php
+ErrorDocument 404 /index.php?route=error/not_found
 
 RewriteCond %{HTTP_HOST} !\.(test|localhost)$ [NC]
 RewriteCond %{HTTPS} off
@@ -76,17 +76,15 @@ RewriteRule ^([^?]*) index.php?_route_=$1 [L,QSA]
 # 7. disable open_basedir limitations
 # php_admin_value open_basedir none
 
-# Enable Gzip Compression
-AddOutputFilterByType DEFLATE text/text
-AddOutputFilterByType DEFLATE text/plain
-AddOutputFilterByType DEFLATE text/html
-AddOutputFilterByType DEFLATE text/xml
-AddOutputFilterByType DEFLATE text/css
-AddOutputFilterByType DEFLATE application/xml
-AddOutputFilterByType DEFLATE application/xhtml+xml
-AddOutputFilterByType DEFLATE application/rss+xml
-AddOutputFilterByType DEFLATE application/javascript
-AddOutputFilterByType DEFLATE application/x-javascript
+# Prefer Brotli when the production server provides it.
+<IfModule mod_brotli.c>
+AddOutputFilterByType BROTLI_COMPRESS text/plain text/html text/xml text/css application/xml application/xhtml+xml application/rss+xml application/javascript application/json image/svg+xml
+</IfModule>
+
+# Gzip fallback for Apache servers without Brotli.
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css application/xml application/xhtml+xml application/rss+xml application/javascript application/json image/svg+xml
+</IfModule>
 
 # Leverage Browser Caching
 <IfModule mod_expires.c>
@@ -98,6 +96,10 @@ ExpiresByType image/png "access plus 1 year"
 ExpiresByType image/webp "access plus 1 year"
 ExpiresByType image/svg+xml "access plus 1 year"
 ExpiresByType font/woff2 "access plus 1 year"
+ExpiresByType font/woff "access plus 1 year"
+ExpiresByType application/font-woff "access plus 1 year"
+ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
+ExpiresByType application/x-font-ttf "access plus 1 year"
 ExpiresByType text/css "access plus 1 month"
 ExpiresByType application/pdf "access plus 1 year"
 ExpiresByType text/javascript "access plus 1 month"
