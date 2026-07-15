@@ -1,0 +1,8 @@
+<div class="list-group">
+<h4 class="title module-title">{{ heading_title }}</h4>
+  {% if bundletitles %}
+  {% for result in bundletitles %}
+  <a href="{{ result.href }}" class="list-group-item">{{ result.title }} ({{ result.prototal }})</a>
+   {% endfor %}
+  {% endif %}
+</div>

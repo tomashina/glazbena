@@ -1,0 +1,588 @@
+{% if hide_container is not empty %}
+	<div style="display: none;">
+{% endif %}
+
+<div class="box mfilter-box mfilter-box-{{_idx}}{{ theme }} mfilter-{{_position}}{{class_hide_container}}{{ _displayOptionsAs is not empty and _displayOptionsAs == 'modern_horizontal' ? ' mfilter-hide' : ''}} mfilter-direction-{{direction}}" id="mfilter-box-{{_idx}}">
+	{% if heading_title %}
+		<h3 class="box-heading">{{ heading_title }}</h3>
+	{% endif %}
+	<div class="box-content mfilter-content{{class_calculate_number_of_products}}">
+		{{buttons['top']}}
+		<ul>
+			{% for key_group,gfilter in filters %}
+			
+				{% set gfilters = [] %}
+				{% set gkey = '' %}
+				
+				{% if gfilter['type'] == 'attribute_group' %}
+					{% set gkey = gfilter['group_key'] %}
+					{% set gfilters = gfilter['attributes'] %}
+				{% else %}
+					{% set gfilters = [gfilter] %}
+				{% endif %}
+			
+			{% if gfilter['type'] == 'attribute_group' and gfilter['name'] is not null %}
+				<li class="mfilter-gheader" data-group-key="{{gkey}}">{{gfilter['name']}}</li>
+			{% endif %}
+			{% for filter in gfilters %}
+				{% set base_type = filter['base_type'] is empty ? filter['type'] : filter['base_type'] %}	
+				{% set base_id = filter['id'] is empty ? '' : filter['id'] %}	
+				{% set display_list_of_items = filter['display_list_of_items'] is empty ? mfp_options['display_list_of_items']['type'] : filter['display_list_of_items'] %}	
+					
+				{% if filter['type'] in filter_types %}
+					{% set display_list_of_items = '-1' %}
+				{% endif %}
+					
+					<li
+						data-type="{{ filter['type'] }}"
+						data-base-type="{{ base_type }}"
+						data-id="{{ base_id }}"
+						data-group-key="{{ gkey }}"
+						data-seo-name="{{ filter['seo_name'] }}"
+						data-inline-horizontal="{{ _horizontalInline ? '1' : '0'}}"
+						
+						{% if filter['auto_levels'] %}
+							data-auto-levels="{{ filter['auto_levels'] }}"
+						{% endif %}
+						
+						{% set display_live_filter = settings['display_live_filter']['enabled'] ? '1' : '-1' %}
+						{% if filter['display_live_filter'] is not empty %}
+							{% set display_live_filter = filter['display_live_filter'] %}
+						{% endif %}
+						data-display-live-filter="{{ display_live_filter == '1' and settings['display_live_filter']['items'] is not empty ? settings['display_live_filter']['items'] : 0 }}"
+		
+						{% if filter['type'] == 'levels' %}
+							data-labels="{{ filter['labels']|join('||')}}"
+						{% endif %}
+						
+						data-display-list-of-items="{{ display_list_of_items }}"
+						class="mfilter-filter-item mfilter-{{ filter['type'] }} mfilter-{{ base_type }}{{ base_type == 'attribute' ? ' mfilter-attributes' : ( base_type == 'option' ? ' mfilter-options' : ( base_type == 'filter' ? ' mfilter-filters' : '' ) ) }}"
+						>
+						{% if filter['collapsed'] != 'hide_header' and filter['name'] is not empty and filter['hide_header'] == 0 %}
+							<div class="mfilter-heading 
+								{% if filter['collapsed'] %}
+									{% if filter['collapsed'] == '1' or ( is_mobile and filter['collapsed'] == 'mobile' ) or ( not is_mobile and filter['collapsed'] == 'pc' ) %}
+										{% if params[filter['seo_name']] is empty %}
+											 mfilter-collapsed
+										{% endif %}
+									{% endif %}
+								{% endif %}
+							">
+								<div class="mfilter-heading-content">
+									<div class="mfilter-heading-text">
+										<span>
+											{% if filter['select_deselect_all'] and ( filter['type'] == 'checkbox' or filter['type'] == 'image' or filter['type'] == 'image_list_checkbox' ) %}
+												{% if filter['select_deselect_all'] == '1' or ( is_mobile and filter['select_deselect_all'] == 'mobile' ) or ( not is_mobile and filter['select_deselect_all'] == 'pc' ) %}
+													<input type="checkbox" class="mfp-no-event" data-toggle="tooltip" title="{{ text_select_deselect_all }}">
+												{% endif %}
+											{% endif %}
+											{{ filter['name'] }}
+										</span>
+										{% if filter['tooltip'] is not empty %}
+											<i class="fa fa-question pull-right" data-mf-toggle="tooltip" data-html="1" title="{{ filter['tooltip'] }}"></i>
+										{% endif %}
+									</div>
+									<i class="mfilter-head-icon"></i>
+								</div>
+							</div>
+						{% endif %}
+
+						<div class="mfilter-content-opts"  
+								{% if ( filter['collapsed'] == '1' or ( is_mobile and filter['collapsed'] == 'mobile' ) or ( not is_mobile and filter['collapsed'] == 'pc' ) ) and filter['collapsed'] != 'hide_header' and _position != 'content_top' %}
+									{% if params[filter['seo_name']] is empty %}
+										style="display:none"
+									{% endif %}
+								{% endif %}
+						>
+							<div class="mfilter-opts-container">
+								<div class="mfilter-content-wrapper{{ display_list_of_items == 'scroll' ? ' mfilter-iscroll scroll-content scroll-wrapper' : ''}}"{{ display_list_of_items == 'scroll' and filter['type'] != 'tree' ? ' data-max-height="' ~ mfp_options['display_list_of_items']['max_height'] ~ '" style="max-height:' ~ mfp_options['display_list_of_items']['max_height'] ~ 'px"' : '' }}>
+									<div class="mfilter-options">
+										{% if base_type == 'categories' %}
+											<div class="mfilter-category mfilter-category-{{ filter['type'] }}">
+												{% if filter['type'] == 'related' %}
+													
+													<ul data-labels="{{ (filter['labels']|join('#|#'))|replace({'"': '&quot;'})  }}">
+														{% set values = params[filter['seo_name']] is empty ? [] : params[filter['seo_name']] %}
+														
+														{% for level_id,level in filter['levels'] %}
+															{% set values = values[level_id] is empty ? '' : values[level_id] %}
+															<li>
+																<select data-type="category-{{ filter['type'] }}">
+																	<option value="">{{ level['name'] }}</option>
+																	{% for optKey,optVal in level['options'] %}
+																		<option value="{{ optKey }}"{{ value == optKey ? ' selected="selected"' : '' }}>{{ optVal }}</option>
+																	{% endfor %}
+																</select>
+															</li>
+														{% endfor %}
+													</ul>
+												{% elseif filter['type'] == 'tree' %}
+													<input type="hidden" name="path" value="" />
+													<ul class="mfilter-tb" data-top-url="{{ filter['top_url'] }}" data-top-path="{{ filter['top_path'] }}">
+														{% for category in filter['categories'] %}
+															{% if settings['hide_inactive_values'] is not empty and category['cnt'] is empty %}
+																
+															{% else %}
+															<li class="mfilter-tb-as-tr">
+																<div class="mfilter-tb-as-td">
+																	<a href="#" data-id="{{ category['id'] }}" data-parent-id="{{ category['pid'] }}">{{ category['name'] }}</a>
+																</div>
+																<div class="mfilter-tb-as-td mfilter-col-count"><span class="mfilter-counter">{{ category['cnt'] }}</span></div>
+															</li>
+															{% endif %}
+														{% endfor %}
+													</ul>
+												{% elseif filter['type'] == 'cat_checkbox' %}
+													<div class="mfilter-tb">
+														
+														{% set tmpCatShown = 0 %}
+														{% set tmpCatIdx = 0 %}
+														
+														{% for category in filter['categories'] %}
+															
+															{% if category['cnt'] %}
+																{% set tmpCatShown = tmpCatShown + 1 %}
+															{% endif %}
+															{% set tmpCatIdx = tmpCatIdx + 1 %}
+															
+															<div class="mfilter-option mfilter-tb-as-tr{{ category['cnt'] ? '' : ' mfilter-hide' }}{{ tmpCatShown == 1 and tmpCatIdx > tmpCatShown ? ' mfilter-first-child' : '' }}">
+																<div class="mfilter-tb-as-td mfilter-col-input">
+																	<input
+																		id="mfilter-cat_checkbox-{{ _idx }}-{{ category['id'] }}"
+																		type="checkbox"
+																		{{ params['path'] is not empty and category['id'] in params['path'] ? ' checked="checked"' : '' }}
+																		value="{{ category['id'] }}" />
+																</div>
+																<label class="mfilter-tb-as-td" for="mfilter-cat_checkbox-{{ _idx }}-{{ category['id'] }}">
+																	{{ category['name'] }}
+																</label>
+																<div class="mfilter-tb-as-td mfilter-col-count"><span class="mfilter-counter{{ params['path'] is not empty and category['id'] in params['path'] ? ' mfilter-close' : '' }}">{{ category['cnt'] }}</span></div>
+															</div>
+														{% endfor %}
+													</div>
+												{% endif %}
+												{% if filter['show_button'] is not empty %}
+													<div class="mfilter-button">
+														<a href="#" class="button">{{ text_button_apply }}</a>
+													</div>
+												{% endif %}
+											</div>
+										{% elseif filter['type'] == 'search' or filter['type'] == 'search_oc' %}
+											<div class="mfilter-option mfilter-search{{ filter['button'] ? ' mfilter-search-button' : '' }}">
+												<input
+													id="mfilter-opts-search"
+													type="text"
+													class="form-control"
+													data-refresh-delay="{{ filter['refresh_delay'] ? filter['refresh_delay'] : '-1' }}"
+													value="{{ params['search'][0] ? params['search'][0] : ( params['search_oc'][0] ? params['search_oc'][0] : '' ) }}"
+													/>
+												{% if filter['button'] %}
+													<i
+														id="mfilter-opts-search_button"
+														type="submit"
+														></i>
+												{% endif %}
+											</div>
+										{% elseif filter['type'] == 'price' %}
+											<div class="mfilter-option mfilter-price">
+												<div class="mfilter-price-inputs">
+													{{ getSymbolLeft }}
+													<input
+														id="mfilter-opts-price-min"
+														type="text"
+														class="form-control"
+														value="{{ params['price'][0] ? params['price'][0] : '' }}"
+														/>
+														{{ getSymbolRight }}
+														-
+													{{ getSymbolLeft }}
+													<input
+														id="mfilter-opts-price-max"
+														type="text"
+														class="form-control"
+														value="{{ params['price'][1] ? params['price'][1] : '' }}"
+														/>
+														{{ getSymbolRight }}
+												</div>
+												<div class="mfilter-price-slider">
+													<div id="mfilter-price-slider"></div>
+												</div>
+											</div>
+										{% elseif filter.type == 'slider' %}
+											<div class="mfilter-option mfilter-slider">
+												<div class="mfilter-slider-inputs">
+													<input
+														class="mfilter-opts-slider-min form-control"
+														type="text"
+														value=""
+														readonly="readonly"
+														/>
+														-
+													<input
+														class="mfilter-opts-slider-max form-control"
+														type="text"
+														value=""
+														readonly="readonly"
+														/>
+												</div>
+												<div class="mfilter-slider-container">
+													<div class="mfilter-slider-slider"></div>
+												</div>
+												<div class="mfilter-slider-data" style="display: none;">{{ filter['options'] }}</div>
+											</div>
+										{% elseif filter.type == 'numeric_slider' %}
+											<div class="mfilter-option mfilter-numeric-slider">
+												<div class="mfilter-slider-inputs">
+													<table>
+														<tr>
+															<td>
+																<input
+																	class="mfilter-opts-slider-min form-control"
+																	type="text"
+																	value="{{ params[filter.seo_name][0] ? params[filter.seo_name][0] : '' }}"
+																	data-value="{{ filter.min }}"
+																	/>
+															</td>
+															<td width="1" class="mf-p-left mf-p-right">-</td>
+															<td>
+																<input
+																	class="mfilter-opts-slider-max form-control"
+																	type="text"
+																	value="{{ params[filter.seo_name][1] ? params[filter.seo_name][1] : '' }}"
+																	data-value="{{ filter.max }}"
+																	/>
+															</td>
+															{% if filter.unit %}
+																<td width="1" class="mf-p-left">{{ filter.unit }}</td>
+															{% endif %}
+														</tr>
+													</table>
+												</div>
+												<div class="mfilter-slider-container">
+													<div class="mfilter-slider-slider"></div>
+												</div>
+											</div>
+										{% elseif filter['type'] == 'text' %}
+											<div class="mfilter-option mfilter-text">
+												<div class="mfilter-text-inputs">
+													<input
+														class="form-control"
+														id="mfilter-opts-text-{{ _idx }}-{{ base_id }}"
+														type="text"														
+														value="{{ params[filter['seo_name']][0] is not empty ? params[filter['seo_name']][0]|replace({'"': '&quot;'}) : '' }}"
+														name="{{ filter['seo_name'] }}"
+														/>
+												</div>
+											</div>
+										{% elseif filter['type'] == 'rating' %}
+											<div class="mfilter-tb">
+												{% set k = 5 %}
+												{% for i in range(k, 1) %}
+													<div class="mfilter-option mfilter-tb-as-tr">
+														<div class="mfilter-tb-as-td mfilter-col-input">
+															<input
+																id="mfilter-opts-rating-{{_idx }}-{{ i }}"
+																type="checkbox"
+																{{ params['rating'] is not empty and i in params['rating'] ? ' checked="checked"' : '' }}
+																value="{{ i }}" />
+														</div>
+														<label class="mfilter-tb-as-td" for="mfilter-opts-rating-{{ _idx }}-{{ i }}">
+															{{ i }} <img src="catalog/view/theme/default/stylesheet/mf/images/stars-{{ i }}.png" alt="" />
+														</label>
+														<div class="mfilter-tb-as-td mfilter-col-count"><span class="mfilter-counter">0</span></div>
+													</div>
+												{% endfor %}
+											</div>
+										{% elseif filter['type'] in ['stock_status', 'manufacturers', 'checkbox', 'radio', 'image_list_radio', 'image_list_checkbox'] %}
+											{% set _tmp_type = filter['type'] %}
+											{% if filter['type'] in ['stock_status', 'manufacturers'] %}
+												{% set _tmp_type = 'checkbox' %}
+											{% endif %}
+											<div class="mfilter-options-container">
+												<div class="mfilter-tb">
+												{% for option_id,option in filter['options'] %}
+													{{ _position == 'content_top' ? '<div class="mfilter-tb">' : '' }}
+													<div class="mfilter-option mfilter-tb-as-tr">
+														<div class="mfilter-tb-as-td mfilter-col-input">
+															<input 
+																id="mfilter-opts-attribs-{{ _idx }}-{{ base_id }}-{{ option['key'] }}" 
+																name="{{ filter['seo_name'] }}"
+																type="{{ _tmp_type == 'image_list_checkbox' ? 'checkbox' : ( _tmp_type == 'image_list_radio' ? 'radio' : _tmp_type ) }}"
+																{{ params[filter['seo_name']] is not empty and ( option['value'] in params[filter['seo_name']] or option['key'] in params[filter['seo_name']] ) ? ' checked="checked"' : '' }}
+																value="{{ option['value']|replace({'"': '&quot;'}) }}" />
+														</div>									
+														<label class="mfilter-tb-as-td" for="mfilter-opts-attribs-{{ _idx }}-{{ base_id }}-{{ option['key'] }}">
+															{% if _tmp_type in ['image_list_radio', 'image_list_checkbox'] %}
+																{% set w = settings['image_size_width'] is empty ? 20 : settings['image_size_width']|number_format %}
+																{% set h = settings['image_size_height'] is empty ? 20 : settings['image_size_height']|number_format %}
+																{{ option['label'] }}
+															{% else %}
+																{{ option['label'] }}
+															{% endif %}
+														</label>
+														<div class="mfilter-tb-as-td mfilter-col-count"><span class="mfilter-counter">0</span></div>
+													</div>
+													{{ _position == 'content_top' ? '</div>' : '' }}
+												{% endfor %}
+												</div>
+											</div>
+										{% elseif filter['type'] == 'vehicles' %}
+											<div class="mfilter-tb">
+												<div class="mfilter-option mfilter-select mfilter-vehicles">
+													{% set kk = 0 %}
+													{% for k,v in filter['options'] %}
+														<select class="form-control mf_selectpicker" data-type="vehicle-{{ k }}">
+															{% if filter['labels'][k] is not empty %}
+																<option value="">{{ filter['labels'][k] }}</option>
+															{% else %}
+																<option value="">{{ text_select }}</option>
+															{% endif %}
+															{% for option_id,option in v %}
+																<option 
+																	id="mfilter-opts-select-{{ _idx }}-{{ base_id }}-{{ option['key'] }}"
+																	value="{{ option['value']|replace({'"': '&quot;'}) }}"
+																	data-name="{{ option['name'] }}"
+																	data-total="{{ option['total'] ? option['total'] : '' }}"
+																	{{ params[filter['seo_name']] is not empty and params[filter['seo_name']][kk] and option['value'] == params[filter['seo_name']][kk] ? ' selected="selected"' : '' }}
+																	{% if option['image'] is not empty %}
+																		data-image="{{ option['image'] }}"
+																	{% endif %}
+																	>{{ option['name'] }}</option>
+															{% endfor %}
+														</select>
+														{% set kk = kk + 1 %}
+													{% endfor %}
+												</div>
+											</div>
+										{% elseif filter['type'] == 'levels' %}
+											<div class="mfilter-tb">
+												<div class="mfilter-option mfilter-select mfilter-levels">
+													{% set kk = 0 %}
+													{% for k,v in filter['options'] %}
+														<select class="form-control mf_selectpicker" data-type="level-{{ k }}">
+															{% if filter['labels'][k] is not empty %}
+																<option value="">{{ filter['labels'][k] }}</option>
+															{% else %}
+																<option value="">{{ text_select }}</option>
+															{% endif %}
+															{% for option_id,option in v %}
+																<option 
+																	id="mfilter-opts-select-{{ _idx }}-{{ base_id }}-{{ option['key'] }}"
+																	value="{{ option['value']|replace({'"': '&quot;'}) }}"
+																	data-name="{{ option['name'] }}"
+																	data-total="{{ option['total'] ? option['total'] : '' }}"
+																	{{ params[filter['seo_name']] is not empty and params[filter['seo_name']][kk] and option['value'] == params[filter['seo_name']][kk] ? ' selected="selected"' : '' }}
+																	{% if option['image'] is not empty %}
+																		data-image="{{ option['image'] }}"
+																	{% endif %}
+																	>{{ option['name'] }}</option>
+															{% endfor %}
+														</select>
+													{% set kk = kk + 1 %}
+													{% endfor %}
+												</div>
+											</div>
+										{% elseif filter['type'] == 'select' %}
+											<div class="mfilter-tb">
+												<div class="mfilter-option mfilter-select">
+													<select class="form-control">
+														<option value="">{{ text_select }}</option>
+														{% for option_id,option in filter['options'] %}
+															<option 
+																id="mfilter-opts-select-{{ _idx }}-{{ base_id }}-{{ option['key'] }}"
+																value="{{ option['value']|replace({'"': '&quot;'}) }}"
+																data-name="{{ option['name'] }}"
+																{{ params[filter['seo_name']] is not empty and option['value'] in params[filter['seo_name']] ? ' selected="selected"' : '' }}
+																>{{ option['name'] }}</option>
+														{% endfor %}
+													</select>
+												</div>
+											</div>
+										{% elseif filter['type'] in ['image', 'image_radio'] %}
+											<div class="mfilter-options-container">
+												<div class="mfilter-tb">
+													<ul>
+														{% for option_id,option in filter['options'] %}
+															<li class="mfilter-option mfilter-image">
+																<input
+																	id="mfilter-opts-attribs-{{ _idx }}-{{ base_id }}-{{ option['key'] }}" 
+																	name="{{ filter['seo_name'] }}"
+																	type="{{ filter['type'] == 'image' ? 'checkbox' : 'radio' }}" 
+																	style="display:none"
+																	{{ params[filter['seo_name']] is not empty and ( option['value'] in params[filter['seo_name']] or option['key'] in params[filter['seo_name']] ) ? ' checked="checked"' : '' }}
+																	value="{{ option['value']|replace({'"': '&quot;'}) }}" />
+																<label for="mfilter-opts-attribs-{{ _idx }}-{{ base_id }}-{{ option['key'] }}" title="{{ option['name'] }}">
+																	{{ option['label'] }}
+																</label>
+															</li>
+														{% endfor %}
+													</ul>
+												</div>
+											</div>
+										{% endif %}
+									</div>
+								</div>
+
+								<div class="mfilter-clearfix"></div>
+							</div>
+
+							<div class="mfilter-clearfix"></div>
+						</div>
+					</li>
+				{% endfor %}
+			{% endfor %}
+		</ul>
+		{{ buttons['bottom'] }}
+	</div>
+</div>
+{% if hide_container is not empty %}
+	</div>
+{% endif %}
+
+<script type="text/javascript">
+	MegaFilterLang.text_display = '{{ text_display }}';
+	MegaFilterLang.text_list	= '{{ text_list }}';
+	MegaFilterLang.text_grid	= '{{ text_grid }}';
+	MegaFilterLang.text_select	= '{{ text_select }}';
+	
+	if( typeof MegaFilterOverrideFn == 'undefined' ) {
+		var MegaFilterOverrideFn = {};
+	}
+	
+	if( typeof MegaFilterCommonData == 'undefined' ) {
+		var MegaFilterCommonData = {};
+	}
+	
+	MegaFilterCommonData.seo = {
+		'currentUrl' : '{{ current_url  }}',
+		'aliases' : {{ aliases }}
+	};
+	
+	MegaFilterCommonData.swipe = {
+		'threshold' : {{ settings['swipe_threshold']|number_format(0,'.','') }},
+		'cancel_threshold' : {{ settings['swipe_cancel_threshold']|number_format(0,'.','') }}
+	};
+	
+	if( typeof MegaFilterOverrideFn['{{ _idx }}'] == 'undefined' ) {
+		MegaFilterOverrideFn['{{ _idx }}'] = {};
+	}
+	
+	{% if settings['javascript'] is not empty %}
+		{{ settings['javascript'] }}
+	{% endif %}
+
+	jQuery().ready(function(){			
+		jQuery('#mfilter-box-{{ _idx }}').each(function(){
+			var _t = jQuery(this).addClass('init'),
+				_p = { };
+			
+			for( var i = 0; i < MegaFilterINSTANCES.length; i++ ) {
+				if( _t.attr('id') == MegaFilterINSTANCES[i]._box.attr('id') ) {
+					return;
+				}
+			}
+			
+			{% for k,v in requestGet %}
+				_p['{{ k }}'] = '{{ v }}';
+			{% endfor %}
+			
+			var mfpModule = new MegaFilter();
+			
+			if( typeof MegaFilterOverrideFn['{{ _idx }}'] != 'undefined' ) {
+				for( var i in MegaFilterOverrideFn['{{ _idx }}'] ) {
+					mfpModule[i] = MegaFilterOverrideFn['{{ _idx }}'][i];
+				}
+			}
+			
+			MegaFilterINSTANCES.push(mfpModule.init( _t, {
+				'idx'					: '{{ _idx }}',
+				'route'					: '{{ _route }}',
+				'routeProduct'			: '{{ _routeProduct }}',
+				'routeHome'				: '{{ _routeHome }}',
+				'routeCategory'			: '{{ _routeCategory }}',
+				'routeInformation'		: '{{ _routeInformation }}',
+				'contentSelector'		: '{{ settings['content_selector'] }}',
+				'contentSelectorH1'		: '{{ settings['content_selector_h1'] }}',
+				'contentSelectorPagination'	: '{{ settings['content_selector_pagination'] }}',
+				'contentSelectorProduct': '{{ settings['content_selector_product'] }}',
+				'infiniteScroll'		: {{ settings['infinite_scroll'] }},
+				'refreshResults'		: '{{ settings['refresh_results'] }}',
+				'refreshDelay'			: {{ settings['refresh_delay'] }},
+				'usingButtonWithCountInfo' : {{ settings['using_button_with_count_info'] }},
+				'autoScroll'			: {{ settings['auto_scroll_to_results'] }},
+				'ajaxGetInfoUrl'		: '{{ ajaxGetInfoUrl }}',
+				'ajaxResultsUrl'		: '{{ ajaxResultsUrl }}',
+				'ajaxGetCategoryUrl'	: '{{ ajaxGetCategoryUrl }}',
+				'priceMin'				: {{ price['min'] }}, 
+				'priceMax'				: {{ price['max'] }},
+				'mijoshop'				: {{ settings['mijo_shop'] }},
+				'joo_cart'				: {{ settings['joo_cart'] }},
+				'jcart'					: {{ jcart }},
+				'showNumberOfProducts'	: {{ settings['show_number_of_products'] }},
+				'calculateNumberOfProducts' : {{ settings['calculate_number_of_products'] }},
+				'calculateNumberOfProductsForSliders' : {{ settings['calculate_number_of_products_for_sliders'] }},
+				'addPixelsFromTop'		: {{ settings['add_pixels_from_top'] }},
+				'displayListOfItems'	: {
+					'type'				: '{{ mfp_options['display_list_of_items']['type'] }}',
+					'limit_of_items'	: {{ mfp_options['display_list_of_items']['limit_of_items'] }},
+					'maxHeight'			: {{ mfp_options['display_list_of_items']['max_height'] }},
+					'textMore'			: '{{ text_show_more }}',
+					'textLess'			: '{{ text_show_less }}',
+					'standardScroll'	: {{ mfp_options['display_list_of_items']['standard_scroll'] ? 'true' : 'false' }}
+				},
+				'smp'					: {
+					'isInstalled'			: {{ smp['isInstalled'] }},
+					'disableConvertUrls'	: {{ smp['disableConvertUrls'] }}
+				},
+				'params'					: _p,
+				'inStockDefaultSelected'	: {{ settings['in_stock_default_selected'] }},
+				'inStockDefaultSelectedGlobal' : {{ inStockDefaultSelectedGlobal }},
+				'inStockStatus'				: '{{ settings['in_stock_status'] }}',
+				'inStockStatusSelected'		: '{{ settings['in_stock_status_selected'] }}',
+				'showLoaderOverResults'		: {{ settings['show_loader_over_results'] }},
+				'showLoaderOverFilter'		: {{ settings['show_loader_over_filter'] }},
+				'hideInactiveValues'		: {{ settings['hide_inactive_values'] }},
+				'manualInit'				: '{{ settings['manual_init'] }}',
+				'homePageAJAX'				: {{ settings['home_page_ajax'] }},
+				'homePageContentSelector'	: '{{ settings['home_page_content_selector'] }}',
+				'ajaxPagination'			: {{ settings['ajax_pagination'] }},
+				'text'						: {
+					'loading'		: '{{ text_loading }}',
+					'go_to_top'		: '{{ text_go_to_top }}',
+					'init_filter'	: '{{ text_init_filter }}',
+					'initializing'	: '{{ text_initializing }}'
+				},
+				'color' : {
+					'loader_over_results' : '{{ settings['color_of_loader_over_results'] }}',
+					'loader_over_filter' : '{{ settings['color_of_loader_over_filter'] }}'
+				},
+				'direction'				: '{{ direction }}',
+				'seo' : {
+					'enabled'	: {{ seo['enabled'] }},
+					'aliasesEnabled' : {{ seo['aliases_enabled'] }},
+					'alias'		: '{{ seo_alias }}',
+					'parameter'	: '{{ seo['url_parameter'] }}',
+					'separator'	: '{{ seo['separator'] }}',
+					'valuesAreLinks' : {{ seo['values_are_links'] }},
+					'valuesLinksAreClickable' : {{ seo['values_links_are_clickable'] }},
+					'usePostAjaxRequests' : {{ seo['use_post_ajax_requests'] }},
+					'addSlashAtTheEnd' : {{ seo['add_slash_at_the_end'] }},
+					'metaRobots' : {{ seo['meta_robots'] }},
+					'metaRobotsValue' : '{{ seo['meta_robots_value'] }}',
+					'trans' : {{ seo['trans'] }}
+				},
+				'displayAlwaysAsWidget'		: {{ displayAlwaysAsWidget }},
+				'displaySelectedFilters'	: {{ displaySelectedFilters }},
+				'isMobile' : {{ is_mobile is empty ? 'false' : 'true' }},
+				'widgetWithSwipe' : {{ widgetWithSwipe is empty ? 'false' : 'true' }},
+				'widgetPosition' : '{{ widgetPosition is empty ? '' : widgetPosition }}',
+				'theme' : '{{ init_theme }}',
+				'pinBox' : {{ settings['pin_box'] }},
+				'pinContainerSelector' : '{{ settings['pin_container_selector'] }}',
+				'data' : {
+					'category_id' : {{ _data['filter_category_id'] is empty ? 'null' : "'"~_data['filter_category_id']~"'" }}
+				}
+			}));
+		});
+	});
+</script>

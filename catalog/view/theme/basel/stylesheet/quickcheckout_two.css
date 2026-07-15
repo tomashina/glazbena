@@ -1,0 +1,23 @@
+@media (min-width: 992px) {
+
+    .quickcheckoutleft {
+        width: 50%;
+        float: left;
+        padding-right: 50px;
+        border-right: 1px solid #0054a6;
+    }
+
+    .quickcheckoutright {
+        width: 50%;
+        float: right;
+        padding-left: 50px;
+
+    }
+}
+.quickcheckoutmid {
+	width: 100%;
+}
+.totals-slip {
+	margin-top:10px;
+    background-color: #fff;
+}

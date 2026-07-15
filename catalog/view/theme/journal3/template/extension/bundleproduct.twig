@@ -1,0 +1,143 @@
+{{ header }}
+<link href="catalog/view/theme/journal3/css/bundle.css" rel="stylesheet">
+<ul class="breadcrumb">
+  {% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+  {% endfor %}
+</ul>
+{% if j3.settings.get('pageTitlePosition') == 'top' %}
+  <h1 class="title page-title"><span>{{ heading_title }}</span></h1>
+{% endif %}
+{{ j3.loadController('journal3/layout', 'top') }}
+<div class="container bundle-bundleproduct">
+    <div class="row">{{ column_left }}
+    {% if column_left and column_right %}
+    {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'col-sm-9' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+   <div id="content" class="{{ class }} product-bundle">
+	{% if j3.settings.get('pageTitlePosition') == 'default' %}
+        <h1 class="title page-title">{{ heading_title }}</h1>
+    {% endif %}
+    {{ content_top }}
+      <div class="panel panel-default" id="main-panel">
+        <div class="panel-heading"><b>{{ btitles }} </b></div>
+        <div class="panel-body">
+          <div class="panel-body">
+            <p>{{ description }}</p>
+          </div>
+
+          {% for bundle in bundles %}
+           <form action="" method="post" enctype="multipart/form-data" class="tmdcartbundle{{ bundle.bundle_id }}">
+            <input type="hidden" name="bundle_id" value="{{ bundle.bundle_id }}"/>
+          <div class="panel panel-default">
+            <div class="panel-heading"><b>{{ bundle.title }}</b></div>
+            <div class="panel-body">
+            <div class="row">
+              {% for product in bundle.product_infos %}
+                <input type="hidden" name="bundleproduct[{{ product.product_id }}][product_id]" value="{{ product.product_id }}" />
+                <input type="hidden" name="bundleproduct[{{ product.product_id }}][quantity]" value="{{ product.minimum }}" />
+              <div class="product-layout col-md-2 col-sm-4 col-xs-12">
+                 
+                <div class="product-thumb">
+                  <div class="image">
+                    <a href="{{ product.href }}">
+                    <img src="{{ product.image }}" alt="{{ product.name }}" title="{{ product.name }}" class="bundle-thumb"/></a>
+                 </div>
+                <div class="caption">
+                   <div class="name"><a href="{{ product.href }}">{{ product.name }}</a></div>
+                    <p>
+                     
+                     <span class="label label-success">{{ product.minimum }}</span> 
+                     
+                    </p>
+                    <p>{{ product.price }}</p>
+                  </div>
+                </div>
+              </div>
+             {% endfor %}
+                 {% if bundle.newprice %}
+              <div class="product-layout total col-md-2 col-sm-4 col-xs-12"> 
+                <div class="plusign1">
+                 <h2 style="margin-top:10%;"> = </h2>
+                </div>
+                <div class="product-thumb">
+                  <div class="text-center">
+                    <p><span class="bundle_discount">{{ text_regularprice }} <span style="color:red; text-decoration: line-through;">{{ bundle.total }}</span></span></p>
+                    <h5><span class="bundle_discount">{{ text_price }} {{ bundle.newprice }}</span></h5>
+                    <p><span class="bundle_discount">{{ text_save }} {{ bundle.discount }}</span></p>
+                    
+                    <div style="margin-bottom:5px;">
+                      <button type="button" rel="{{ bundle.bundle_id }}" class="btn btn-primary addloading{{ bundle.bundle_id }}" id="bundle-cart"><i class="fa fa-shopping-cart"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+			   {% endif %}
+             </div>
+            </div>
+          </div>
+        </form>
+          {% endfor %}
+
+          <div class="row">
+            <div class="col-sm-6 text-left">{{ pagination }}</div>
+        <div class="col-sm-6 text-right">{{ results }}</div>
+          </div>
+        </div>
+      </div>
+
+      {{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+
+<script type="text/javascript"><!--
+$(document).on('click','#bundle-cart',function() {
+  bundle_id=$(this).attr('rel');
+  $.ajax({
+    url: 'index.php?route=extension/bundleproduct/addToCart',
+    type: 'post',
+    data :$('.tmdcartbundle'+bundle_id).serialize(),
+    dataType: 'json',
+    beforeSend: function() {
+      $('.addloading'+bundle_id).button('loading');
+    },
+    complete: function() {
+      $('.addloading'+bundle_id).button('reset');
+    },
+    success: function(json) {
+      $('.alert, .text-danger').remove();
+      $('.form-group').removeClass('has-error');
+
+      if (json['redirect']) {
+        location = json['redirect'];
+      }
+
+      if (json['success']) {
+        if (json['notification']) {
+          parent.show_notification(json['notification']);
+        } else {
+          parent.$('#content').parent().before('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+        }
+
+        parent.$('#cart-total').html(json['total']);
+        parent.$('#cart-items').html(json['items_count']);
+
+        if (Journal['scrollToTop']) {
+          parent.$('html, body').animate({ scrollTop: 0 }, 'slow');
+        }
+
+        parent.$('.cart-content ul').load('index.php?route=common/cart/info ul li');
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+        alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+    }
+  });
+});
+//--></script>
+
+{{ footer }}

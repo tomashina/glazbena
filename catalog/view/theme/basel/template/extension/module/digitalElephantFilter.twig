@@ -1,0 +1,371 @@
+{% if is_filter_show %}
+
+
+<div class="filter-container">
+
+<div class="closemenu mobm" >
+                <div class="icon-element mnu">
+
+                    <a class="shortcut-wrapper filter-closer hidden-md hidden-lg">
+                        <i class="icon-line-cross icon"></i>
+                    </a>
+
+                      </div>
+        </div>
+
+
+        
+    <div id="digitalElephantFilter_box">
+        
+        <div class="box-content digitalElephantFilter">
+            <form id="digitalElephantFilter_form" action="{{ JS_config['action']['getProduct'] }}" method="get">
+                {% if filter_data['price']['show'] %}
+                    <div class="filter_element_wrap">
+                        <div
+                            class="filter_element_title"
+                            data-section-name="price"
+                            data-section-id="price"
+                            >
+                            {{ text_price_range }}
+                        </div>
+                        {% set display = 'none' %}
+                        {% if filter_data['price']['open'] %}
+                            {% set display = 'block' %}
+                         {% endif %}
+                        <div class="filter_element_content price_slider collapsible" style="display: {{ display }}">
+                            
+							<input type="hidden" id="digitalElephantFilter_changing_price_min"
+                                               value="{{ filter_data['price']['min'] }}" name="price[min]"
+                                               class="price">
+                            <input type="hidden" id="digitalElephantFilter_changing_price_max"
+                                               value="{{ filter_data['price']['max'] }}" name="price[max]"
+                                               class="price">
+
+							
+                            <div id="slider-range"></div>
+							<div class="price-range-holder">
+							{{ text_price_range }}
+							<b>
+							{{ symbol_left }}<span id="price-min-holder">{{ filter_data['price']['min'] }}</span>{{ symbol_right }}
+							-
+							{{ symbol_left }}<span id="price-max-holder">{{ filter_data['price']['max'] }}</span>{{ symbol_right }}
+							</b>
+							</div>
+                        </div>
+                    </div>
+                {% endif %}
+
+
+                {% for package in filter_data['packages'] %}
+
+                    {% for section_group in package %}
+
+                        {% if section_group['sections'] %}
+
+                            {% if is_show_group_attributes and section_group['group_name'] %}
+                                <div class="filter_element_title">{{ section_group['group_name'] }}</div>
+                            {% endif %}
+
+                            {% for section in section_group['sections'] %}
+
+                                {% if section['type'] and section['values'] %}
+
+
+
+                                
+                                {% if newURL!='71' and newURL!='72' and newURL!='73' and newURL!='74' and newURL!='75' and newURL!='76' and newURL!='77' and newURL!='78' or section['id'] == 'categories' or section['id'] == 'manufacturer' %}
+
+                                    <div class="filter_element_wrap">
+
+                                        <div
+                                            class="filter_element_title {% if is_show_group_attributes and section_group['group_name'] %}is-attribute-child{% endif %}"
+                                            data-section-name="{{ section['name'] }}"
+                                            data-section-id="{{ section['id'] }}"
+
+                                            data-section-uri="{{ newURL }}"
+                                            >{{ section['name'] }}</div>
+
+                                        {% set display = 'none' %}
+                                        {% if section['open'] %}
+                                            {% set display = 'block' %}
+                                        {% endif %}
+
+                                        <div class="filter_element_content" style="display: {{ display }}">
+
+                                            {% set inputs_data = section['values'] %}
+                                            {% include "basel/template/extension/module/digitalElephantFilter/%s.twig"|format(section['type']) %}
+                                        </div>
+                                    </div>
+
+                                 {% endif %}
+
+                                {% endif %}
+
+                            {% endfor %}
+                        {% endif %}
+
+                    {% endfor %}
+
+                {% endfor %}
+                <div>
+                    <table width="100%" class="digitalElephantFilter_btn">
+                        <tr>
+                            {% if is_button_apply and is_button_clear %}
+                                <td width="50%" style="padding-right:2px;"><input type="reset" id="digitalElephantFilter_button_clear"
+                                                       class="btn btn-outline"
+                                                       value="{{ text_clear }}"/></td>
+                                <td width="50%" style="padding-left:2px;"><input type="button" id="digitalElephantFilter_button_apply"
+                                                       class="btn btn-contrast"
+                                                       value="{{ text_ok }}"/></td>
+                            {% elseif is_button_apply %}
+                                <td width="100%"><input type="button" id="digitalElephantFilter_button_apply"
+                                                        class="btn btn-contrast"
+                                                        value="{{ text_ok }}"/></td>
+                            {% elseif is_button_clear %}
+                                <td width="100%"><input type="reset" id="digitalElephantFilter_button_clear"
+                                                        class="btn btn-outline"
+                                                        value="{{ text_clear }}"/></td>
+                            {% endif %}
+                        </tr>
+                    </table>
+                </div>
+                            
+                <input type="hidden" name="ajax_digitalElephantFilter" value="1"/>
+            </form>
+
+            <script>
+                var DEFConfig = {
+                    peakPrice: {
+                        min: '{{ JS_config['peakPrice']['min'] }}',
+                        max: '{{ JS_config['peakPrice']['max'] }}'
+                    },
+                    currentPrice: {
+                        min: '{{ JS_config['currentPrice']['min'] }}',
+                        max: '{{ JS_config['currentPrice']['max'] }}'
+                    },
+                    selector: {
+                        containerProducts: '{{ JS_config['selector']['containerProducts'] }}',
+                        pagination: '{{ JS_config['selector']['pagination'] }}',
+                        quantityProducts: '{{ JS_config['selector']['quantityProducts'] }}',
+                        limit: '{{ JS_config['selector']['limit'] }}',
+                        sort: '{{ JS_config['selector']['sort'] }}'
+                    },
+                    action: {
+                        category: '{{ JS_config['action']['category'] }}',
+                        categoryProduct: '{{ JS_config['action']['categoryProduct'] }}',
+                        ajaxRenderPagination: '{{ JS_config['action']['ajaxRenderPagination'] }}',
+                        ajaxRenderQuantityProducts: '{{ JS_config['action']['ajaxRenderQuantityProducts'] }}',
+                        getProduct: '{{ JS_config['action']['getProduct'] }}',
+                        ajaxCheckToRenderShowMore: '{{ JS_config['action']['ajaxCheckToRenderShowMore'] }}',
+                        ajaxRenderPanel: '{{ JS_config['action']['ajaxRenderPanel'] }}',
+                        ajaxSetStateSection: '{{ JS_config['action']['ajaxSetStateSection'] }}'
+                    },
+                    text: {
+                        productNotFound: '{{ JS_config['text']['productNotFound'] }}',
+                        buttonShowMore: '{{ JS_config['text']['buttonShowMore'] }}'
+                    },
+                    categoryPath: '{{ JS_config['categoryPath'] }}',
+                    state: {
+                        isButtonShowMore: '{{ JS_config['state']['isButtonShowMore'] }}',
+                        isPagination: '{{ JS_config['state']['isPagination'] }}',
+                        isQuantityProducts: '{{ JS_config['state']['isQuantityProducts'] }}'
+                    },
+                    isButtonApply: '{{ JS_config['isButtonApply'] }}',
+                    preloaderClass: '{{ JS_config['preloaderClass'] }}'
+                };
+            </script>
+
+            {% if is_ajax_render %}
+                <script>
+                    $(function(){
+                        //instantiation
+                        var DEFController = new DigitalElephantFilterController();
+                        initSliderPrice(DEFController);
+                        //instantiation END
+                    });
+                </script>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<style>
+  .filter_element_title.is-open + .filter_element_content {
+    display: block !important;
+  }
+</style>
+
+<script type="text/javascript">
+// Basel
+$(document).ready(function() {
+  $('.filter-trigger-btn').addClass('active').html('<i class="icon-line-menu icon"></i> <b>{{ heading_title }}</b>');
+  // Basel
+  $(".filter-trigger-btn").click(function(){
+    $('html').addClass('no-scroll side-filter-open');
+    $('.body-cover').addClass('active'); 
+  });
+
+  $(".filter-closer").click(function(){
+    $('html').removeClass('no-scroll side-filter-open');
+    $('.body-cover').removeClass('active');
+  });
+
+  $("#digitalElephantFilter_button_clear").click(function(){
+    $('html').removeClass('no-scroll side-filter-open');
+    $('.body-cover').removeClass('active');
+  });
+
+  // ---------- NEW: helperi za state ----------
+  function defSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function defGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function defDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+  // ---------- NEW: reopen helpers ----------
+  var DEF_REOPEN_TTL_MS = 5000; // koliko dugo nakon "change" smijemo ponovno otvarati
+  var ajaxQuietTimer = null;
+
+  function markNeedReopen(sid){
+    defSet('def_keep_open_section', sid || '');
+    defSet('def_last_action', 'change');
+    defSet('def_reopen_deadline', String(Date.now() + DEF_REOPEN_TTL_MS));
+  }
+
+  function shouldReopen(){
+    var last = defGet('def_last_action');
+    var dl = parseInt(defGet('def_reopen_deadline') || '0', 10);
+    return last === 'change' && Date.now() <= dl;
+  }
+
+  function forceCloseOverlay(){
+    $('html').removeClass('no-scroll side-filter-open');
+    $('.body-cover').removeClass('active');
+  }
+
+  function reopenSection(){
+    var sid = defGet('def_keep_open_section');
+    if (!sid) return;
+    var $title = $('.filter_element_title[data-section-id="' + sid + '"]');
+    if ($title.length) {
+      $title.addClass('is-open');
+      $title.next('.filter_element_content').css('display', 'block');
+    }
+  }
+
+  function finishReopenCycleSoon(){
+    clearTimeout(ajaxQuietTimer);
+    ajaxQuietTimer = setTimeout(function(){
+      // ako smo još u TTL-u, pusti da ostane otvoreno; inače očisti state
+      if (!shouldReopen()){
+        defDel('def_last_action');
+        defDel('def_reopen_deadline');
+      }
+    }, 600); // kratko pričekaj da DOM i CSS “sjednu”
+  }
+
+  // Ostavlja dropdown otvoren nakon promjene filtera
+  // 1) Na promjenu filtera zapamti sekciju i odmah je ostavi otvorenom,
+  //    ali NEMOJ paliti overlay niti side panel.
+  $(document).off('change', '#digitalElephantFilter_box :checkbox, #digitalElephantFilter_box input[type=radio]');
+  $(document).on('change', '#digitalElephantFilter_box :checkbox, #digitalElephantFilter_box input[type=radio]', function () {
+    var $wrap = $(this).closest('.filter_element_wrap');
+    var sid = $wrap.find('.filter_element_title').data('section-id') || '';
+
+    // prisilno otvori content sada
+    $wrap.find('.filter_element_content').css('display', 'block');
+    $wrap.find('.filter_element_title').addClass('is-open');
+
+    // zapamti koju sekciju treba ostaviti otvorenom nakon AJAX-a (+ TTL)
+    markNeedReopen(sid); // NEW
+
+    // sigurnosno: ugasi overlay ako se kojim slučajem upalio
+    forceCloseOverlay();
+  });
+
+  // ---------- NEW: ručno otvaranje/zatvaranje jedne sekcije ----------
+  // Ako korisnik klikne na naslov sekcije i time je ZATVARA, zapamti da NE otvaramo ponovo nakon AJAX-a
+  $(document).off('click', '.filter_element_title');
+  $(document).on('click', '.filter_element_title', function () {
+    var $title = $(this);
+    var $content = $title.next('.filter_element_content');
+    var willClose = $content.is(':visible'); // ako je vidljivo i klikneš, zatvara se
+
+    if (willClose) {
+      defSet('def_last_action', 'close');
+      defDel('def_keep_open_section');
+      defDel('def_reopen_deadline');
+      $title.removeClass('is-open');
+    } else {
+      // ručno otvaranje – dopusti vizualno i zapamti kao manual-open (ne forsiramo reopen poslije)
+      defSet('def_last_action', 'manual-open');
+      $title.addClass('is-open');
+    }
+  });
+
+  // 2) Nakon što plugin završi AJAX re-render, samo ponovno otvori TU sekciju.
+  //    NE dodajemo overlay, NE dodajemo side-filter-open.
+  $(document).ajaxComplete(function (e, xhr, settings) {
+    try {
+      var isDEF =
+        settings.url.indexOf(DEFConfig.action.getProduct) !== -1 ||
+        settings.url.indexOf(DEFConfig.action.ajaxRenderPanel) !== -1 ||
+        settings.url.indexOf(DEFConfig.action.ajaxCheckToRenderShowMore) !== -1 ||
+        settings.url.indexOf(DEFConfig.action.ajaxRenderQuantityProducts) !== -1 ||
+        settings.url.indexOf(DEFConfig.action.ajaxRenderPagination) !== -1;
+
+      if (!isDEF) return;
+
+      // nikad ne palimo overlay
+      forceCloseOverlay();
+
+      // NEW: tijekom TTL-a, na SVAKI DEF ajaxComplete ponovno otvori sekciju
+      if (shouldReopen()){
+        // pričekaj da se DOM nacrta
+        requestAnimationFrame(function () {
+          reopenSection();
+        });
+      }
+
+      finishReopenCycleSoon(); // NEW
+    } catch (err) {}
+  });
+
+  // ---------- NEW: kad svi AJAX-i stanu, još jednom otvori pa počisti state ----------
+  $(document).ajaxStop(function(){
+    if (shouldReopen()){
+      requestAnimationFrame(function(){
+        reopenSection();
+        finishReopenCycleSoon();
+      });
+    } else {
+      finishReopenCycleSoon();
+    }
+  });
+
+  // ---------- NEW: kao sigurnosna mreža, promatraj promjene u #digitalElephantFilter_box ----------
+  try {
+    var box = document.getElementById('digitalElephantFilter_box');
+    if (box && window.MutationObserver){
+      var mo = new MutationObserver(function(){
+        if (shouldReopen()){
+          reopenSection();
+        }
+      });
+      mo.observe(box, {childList:true, subtree:true});
+    }
+  } catch(e){}
+
+  // 3) Ako korisnik ručno zatvori panel/overlay, očisti memoriju
+  $(document).on('click', '.filter-closer, .body-cover', function(){
+    localStorage.removeItem('def_keep_open_section');
+    $('html').removeClass('no-scroll side-filter-open');
+    $('.body-cover').removeClass('active');
+
+    defSet('def_last_action', 'close-all');
+    defDel('def_reopen_deadline'); // NEW
+  });
+
+  // (ostalo ostaje kako je bilo)
+});
+</script>
+
+
+{% endif %}

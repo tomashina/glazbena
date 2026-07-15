@@ -1,0 +1,102 @@
+.topdescrption{
+	font-size:14px;
+	margin-bottom:10px;
+	font-weight: 400;
+    line-height: 24px;
+}
+.padd0{padding: 0px;}
+.formbulider .form-horizontal .control-label{
+    text-align: left;
+}
+.bottomdescrption{
+	clear:both;
+	border-top:1px solid #ccc;
+	padding:10px;
+}
+.bottomdescrption p{
+	font-size:14px;
+	font-weight: 400;
+    line-height: 24px;
+	margin:0px;
+}
+
+#formbuilder .btn-primary{
+	margin-bottom:0px;
+}
+#formbuilder label{
+	text-align:left;
+    color: #000;
+    margin-bottom:5px;
+}
+.modal-header h4{
+	text-align:center;
+	font-size: 18px;
+    font-weight: 700;
+}
+.topdescrption p,.bottomdescrption p{
+
+}
+.modal-header .btn-default{
+	position: absolute;
+    top: -12px;
+    background: #000;
+    border-radius: 50%;
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+}
+
+.modal-body {
+    position: relative;
+    padding: 15px 25px;
+}
+.modal-body .image{
+	text-align:center;
+}
+.modal-body .image img{
+	margin:0 auto;
+}
+.formbulider{
+	border:1px solid #ccc;
+	border-radius:4px;
+}
+.formbulider h2{
+	background:#eee;
+	color:#444;
+	margin:0 0 10px;
+	font-size:18px;
+	padding:15px;
+	font-weight:600;
+}
+.formbulider form{
+	padding:0 15px;
+}
+#formbuilder .text-danger {color:#ff0000; font-size:13px;}
+.oc2 #formbuilder .text-danger {color:#fff;}
+.loader{
+    position: absolute;
+    bottom:100px;
+    left: auto;
+    z-index: 11;
+    opacity: 0.5;
+}
+#column-left .loader{
+	left: 70px;
+
+}
+.oc2 .formbulider .form-horizontal .form-group label,.oc2 .formbulider .form-horizontal .form-group label + div{
+    width: 100%;
+}
+.oc2 #help-modal .form-horizontal .form-group label + div{
+    width: 66%;
+    float: left;
+}
+.product-info .right .wishlist-compare{clear: both;}
+.hide{display: none;}
+#help-modal .warning{width: 93%;margin-bottom: 10px;}
+#formbuilder .buttons{display: block;width:100%;}
+.oc2 #help-modal .buttons{display: block;width:92%;}
+#formbuilder .buttons .btn-block + .btn-block {margin-top: 0px;margin-left: 10px;}
+.tmdhelptopic{margin-bottom: 10px;}
+#column-left .formbulider .captcha label{display: none;}
+#column-left .formbulider .captcha .g-recaptcha{transform: scale(0.75);margin-left: -30px;}

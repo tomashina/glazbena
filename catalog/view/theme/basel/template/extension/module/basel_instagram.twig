@@ -1,0 +1,42 @@
+{% if full_width %}</div>{% endif %}
+<div class="widget"{% if use_margin %} style="margin-bottom:{{ margin }}"{% endif %}>
+<div class="instagram_wrapper">
+{% if block_title %}
+<div class="instagram_title{% if title_inline %} floating_title text-center{% endif %}">
+<div class="table w100 h100"><div class="table-cell">
+<div class="widget-title">
+    {% if title_preline %}<p class="pre-line">{{ title_preline }}</p>{% endif %}
+    {% if title %} 
+    <p class="main-title"><span>{{ title }}</span></p>
+    <p class="widget-title-separator"><i class="icon-line-cross"></i></p>
+    {% endif %}
+    {% if title_subline %}
+    <p class="sub-line"><span>{{ title_subline }}</span></p>
+    {% endif %}
+</div>
+</div></div>
+</div>
+{% endif %}
+<div class="images_wrap">
+<div id="instafeed{{ module }}" class="grid-holder lg-grid{{ columns }} md-grid{{ columns_md }} sm-grid{{ columns_sm }}" style="margin:-{{ padding/2 }}px;"></div>
+</div>
+</div> <!-- .instagram_wrapper -->      
+</div>
+{% if full_width %}<div class="container">{% endif %}
+
+<script>
+var feed = new Instafeed({
+		get: 'user',
+		userId: {{ username }},
+		accessToken: '{{ access_token }}',
+		target: 'instafeed{{ module }}',
+		limit: '{{ limit }}',
+		template: '<a href="{\{\link\}\}" target="_blank" class="item insta-item" style="padding:{{ padding/2 }}px;"><div style="position:absolute;top:{{ padding/2 }}px;right:{{ padding/2 }}px;bottom:{{ padding/2 }}px;left:{{ padding/2 }}px;background-image:url(\'{\{\image\}\}\');background-position:center center;background-size:cover;"></div><img src="catalog/view/theme/basel/image/insta-filler.png" /><span class="hover_fill" style="top:{{ padding/2 }}px;right:{{ padding/2 }}px;bottom:{{ padding/2 }}px;left:{{ padding/2 }}px;"></span></a>',
+		{% if resolution %}
+		resolution: 'standard_resolution'
+		{% else %}
+		resolution: 'low_resolution'
+		{% endif %}
+});
+feed.run();
+</script>

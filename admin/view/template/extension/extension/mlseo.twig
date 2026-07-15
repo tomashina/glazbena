@@ -1,0 +1,95 @@
+﻿{{ header }} {{ column_left }} 
+<div id="content"><link type="text/css" href="view/stylesheet/stylesheet2.css" rel="stylesheet" media="screen" />
+<div class="breadcrumb">
+  {% for breadcrumb in breadcrumbs %} 
+  {{ breadcrumb.separator }} <a href="{{ breadcrumb.href }}">{{ breadcrumb.text }} </a>
+  {% endfor %}  
+</div>
+{% if error_warning %} 
+<div class="warning">{{ error_warning }} </div>
+{% endif %} 
+{% if success %} 
+  <div class="success">{{ success }} </div>
+  {% endif %} 
+<div class="box">
+  <div class="heading">
+    <h1><img src="view/image/module.png" alt="" /> {{ heading_title }} </h1>
+    <div class="buttons"><a onclick="$('#form').submit();" class="button">{{ button_save }} </a><a onclick="location = '{{ cancel }}';" class="button">{{ button_cancel }} </a></div>
+  </div>
+  <div class="content">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form">
+      
+      <table id="module" class="list">
+        <thead>
+          <tr>
+            <td class="left">Feature</td>
+            <td class="left">Enable</td>            			
+          </tr>
+        </thead>
+        
+        <tbody>
+          <tr>
+            <td class="left">Add Virtual Subfolders for additional languages in SEO URLs (eg. http://yoursite.com/<b>fr/</b>/yourproduct.html</td>
+           	<td class="left">
+				{% if mlseo.subfolder %} 
+                <input type="checkbox" name="mlseo[subfolder]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="mlseo[subfolder]" value="1" />{% endif %}
+                 </td>            
+          </tr>
+		  <tr>
+            <td class="left">Use rel="alternate" hreflang="x" - read more about it <a href="https://support.google.com/webmasters/answer/189077?hl=en">here</a></td>
+           	<td class="left">
+				{% if mlseo.hreflang %} 
+                <input type="checkbox" name="mlseo[hreflang]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="mlseo[hreflang]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 
+		  <tr>
+            <td class="left">Use rel="alternate" hreflang="x" for product pages</td>
+           	<td class="left">
+				{% if mlseo.hreflangproduct %} 
+                <input type="checkbox" name="mlseo[hreflangproduct]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="mlseo[hreflangproduct]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 
+		  <tr>
+            <td class="left">Use rel="alternate" hreflang="x" for category pages</td>
+           	<td class="left">
+				{% if mlseo.hreflangcategory %} 
+                <input type="checkbox" name="mlseo[hreflangcategory]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="mlseo[hreflangcategory]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 
+		  <tr>
+            <td class="left">Use rel="alternate" hreflang="x" for brand pages</td>
+           	<td class="left">
+				{% if mlseo.hreflangbrand %} 
+                <input type="checkbox" name="mlseo[hreflangbrand]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="mlseo[hreflangbrand]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 
+		  <tr>
+            <td class="left">Use rel="alternate" hreflang="x" for info pages</td>
+           	<td class="left">
+				{% if mlseo.hreflanginfo %} 
+                <input type="checkbox" name="mlseo[hreflanginfo]" value="1" checked="checked" />
+                {% else %}   
+                <input type="checkbox" name="mlseo[hreflanginfo]" value="1" /> {% endif %}
+                 </td>            
+          </tr>	 
+		  
+        </tbody>
+       
+             
+      </table>
+	 
+    </form>
+  </div>
+</div>
+
+{{ footer }} 

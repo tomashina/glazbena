@@ -1,0 +1,9 @@
+body{
+	 direction: rtl !important ;
+}
+#container {
+	text-align: right !important;
+}
+.formbulider .form-horizontal .control-label {
+    text-align: right;
+}

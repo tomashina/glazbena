@@ -1,0 +1,37 @@
+﻿{{ header }} {{ column_left }} 
+<div id="content"><link type="text/css" href="view/stylesheet/stylesheet2.css" rel="stylesheet" media="screen" />
+
+<div class="breadcrumb">
+  {% for breadcrumb in breadcrumbs %} 
+  {{ breadcrumb.separator }} <a href="{{ breadcrumb.href }}">{{ breadcrumb.text }} </a>
+    {% endfor %}
+</div>
+{% if error_warning %} 
+<div class="warning">{{ error_warning }} </div>
+{% endif %} 
+{% if success %} 
+  <div class="success">{{ success }} </div>
+  {% endif %} 
+<div class="box">
+  <div class="heading">
+    <h1><img src="view/image/module.png" alt="" /> {{ heading_title }} </h1>
+    <div class="buttons"><a onclick="$('#form').submit();" class="button">{{ button_save }} </a><a onclick="location = '{{ cancel }}';" class="button">{{ button_cancel }} </a></div>
+  </div>
+  <div class="content">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form">
+	<h2>License code</h2>
+      Please enter your Opencart SEO Pack PRO license code: 
+      <input type="text" name="l" value="{{ l }}" size="50"/> 
+	<span class="help">License code is the OrderID of the order you purchased Opencart SEO Pack PRO. It can be found in your account on opencart.com -> My Account -> Order History (first column).</span><br><br>
+	<h2>About Opencart SEO Pack PRO</h2>
+	v.9.89<br><br>
+	<a href="http://www.opencart.com/index.php?route=extension/extension/info&extension_id=6182&version=1&from={{ server }}">Get the latest version</a> / 
+	<a href="http://www.opencart.com/index.php?route=extension/extension/info&extension_id=6182&purchase=1&from={{ server }}">Purchase Opencart SEO Pack PRO</a>
+	
+	
+    </form>
+  </div>
+</div>
+
+
+{{ footer }} 

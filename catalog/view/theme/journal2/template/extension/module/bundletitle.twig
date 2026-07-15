@@ -1,0 +1,17 @@
+<div class="box oc-module">
+<h4class="list-group-item bgc1">{{ heading_title }}</h4>
+<div class="list-group box-content">
+<ul class="box-category">
+  {% if bundletitles %}
+  {% for result in bundletitles %}
+    <li><a href="{{ result.href }}" class="list-group-item">{{ result.title }} ({{ result.prototal }})</a></li>
+   {% endfor %}
+  {% endif %}
+</ul>
+</div>
+</div>
+<style>
+.padd0{padding: 0px;}
+.bgc1{background: #48c0f0;color: #fff;padding: 12px;}
+.bgc1{background: #1c95e6;color: #fff;padding: 12px;}
+</style>

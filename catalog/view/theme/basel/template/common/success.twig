@@ -1,0 +1,49 @@
+{{ header }}
+<div class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+    <!-- breadcrumb -->
+    <div class="breadcrumb-holder">
+
+            <span id="title-holder">&nbsp;</span>
+            <div class="links-holder">
+                <a class="basel-back-btn" onClick="history.go(-1); return false;"><i></i></a><span>&nbsp;</span>
+            </div>
+
+    </div>
+  <div class="row">{{ column_left }}
+    {% if column_left and column_right %}
+    {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'col-md-9 col-sm-8' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+    <div id="content" class="{{ class }}">{{ content_top }}
+      <h1 id="page-title">{{ heading_title }}</h1>
+      <div class="inline-link">{{ text_message }} {{ text_success }}</div>
+     </div>
+    {{ column_right }}</div>
+</div>
+{{ content_bottom }}
+
+  <script>
+      var smdObject = {
+        Key: "Cro_2155",        
+        Type: "order",
+        OrderId: "",
+        Products: []
+      };
+      var smdWrapper = document.createElement("script");
+      smdWrapper.id = "_cpxTag";
+      smdWrapper.type = "text/javascript";
+      smdWrapper.src = "https://cpx.smind.hr/Log/LogData?data=" + encodeURIComponent(JSON.stringify(smdObject));
+      var smdScript = document.getElementsByTagName("script")[0];
+      smdScript.parentNode.insertBefore(smdWrapper, smdScript);
+    </script>
+
+    
+{{ footer }}

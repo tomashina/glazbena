@@ -1,0 +1,30 @@
+
+<div class="widget viewcat">
+    <div class="main-menu vertical vertical-menu-bg">
+    <h4 class="menu-heading"><b>{{ heading_title }}</b></h4>
+        <ul class="categories vertical-menu-bg">
+                        
+
+
+  {% if bundles %}
+  {% for category in categories %}
+  {% if category.bundle_category_id == bundle_category_id %} 
+ <li> <a href="{{ category.href }}" class=" active">{{ category.name }}</a> </li>
+  {% if category.children %}
+  {% for child in category.children %}
+  {% if child.bundle_category_id == child_id %}
+ v <a href="{{ child.href }}" class=" active">&nbsp;&nbsp;&nbsp;- {{ child.name }}</a> </li>
+  {% else %} 
+  <li> <a href="{{ child.href }}" class="">&nbsp;&nbsp;&nbsp;- {{ child.name }}</a></li>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% else %} <li> <a href="{{ category.href }}" class="">{{ category.name }}</a></li>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+
+</ul>
+</div>
+</div>
+

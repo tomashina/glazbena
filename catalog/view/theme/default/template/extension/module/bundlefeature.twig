@@ -1,0 +1,117 @@
+<h3>{{ heading_title }}</h3>
+{% for result in bundlefeatures %} 
+<form action="" method="post" enctype="multipart/form-data" class="tmdcartbundle{{ result['bundle_id'] }}">
+  <input type="hidden" name="bundle_id" value="{{ result['bundle_id'] }}"/>
+  <div class="panel panel-default">
+    <div class="panel-heading"><b>{{ result['title'] }}</b>
+		<!--13 aug 2020-->
+				<div class="pull-right countdown">
+					<a href="javascript:void(0);" style="padding:1px;" class="btn-lg btn-block timer{{ result.bundle_id }}" id="timer"><i class="fa fa-clock-o"></i> <b class="countdown{{ result.bundle_id }}"></b></a>
+				</div>
+			<!--13 aug 2020-->
+	</div>
+    <div class="panel-body">
+    <div class="row">
+      {% for product in result['product_infos'] %} 
+       <input type="hidden" name="bundleproduct[{{ product['product_id'] }}][product_id]" value="{{ product['product_id'] }}" />
+              <input type="hidden" name="bundleproduct[{{ product['product_id'] }}][quantity]" value="{{ product['minimum'] }}" />
+      <div class="product-layout col-md-2 col-sm-4 col-xs-12">
+        <div class="product-thumb">
+          <div class="image">
+            <a href="{{ product['href'] }}">
+            <img src="{{ product['image'] }}" alt="{{ product['name'] }}" title="{{ product['name'] }}" class="bundle-thumb"/></a>
+            <h4><a href="{{ product['href'] }}">{{ product['name'] }}</a></h4>
+           
+            <p>
+              
+              <span class="label label-success">{{ product['minimum'] }}</span>
+              
+            </p>
+            <p>{{ product['price'] }}</p>
+           
+          </div>
+        </div>
+      </div>
+      {% endfor %} 
+        {% if result.newprice %}
+      <div class="product-layout total col-md-2 col-sm-4 col-xs-12"> 
+        <div class="product-thumb">
+          <div class="text-center">
+            <p><span class="bundle_discount">{{ text_regularprice }} <span class="text-danger" style="text-decoration: line-through;">{{ result['total'] }}</span></span></p>
+            <h5><span class="bundle_discount"><strong>{{ text_price }} {{ result['newprice'] }}</strong></span></h5>
+            <p><span class="bundle_discount">{{ text_save }} {{ result['discount'] }}</span></p>
+            
+            <div style="margin-bottom:5px;">
+              <button type="button" rel="{{ result['bundle_id'] }}" class="btn btn-primary bundle-cart addloading{{ result['bundle_id'] }}" ><i class="fa fa-shopping-cart"></i> <span class="hidden-xs hidden-sm hidden-md">{{ button_addtocart }}</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+	  {% endif %}
+     </div>
+    </div>
+  </div>
+</form>
+ <script>
+		  var bundle_id      = '{{ result.bundle_id }}';
+		  $('.timer'+bundle_id).each(function() {
+			var exdate  = '{{ result.date_to }}';
+			var bundle_id = '{{ result.bundle_id }}';
+			var ex_date  = exdate * 1000;
+			var now      = {{ time }} * 1000;
+			var x = setInterval(function() {
+
+			  now = now + 1000;
+
+			  var distance = ex_date - now;
+			  if(distance!=0) {
+				var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+				var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+				var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+				var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+				$('.countdown' + bundle_id).html(days + '<span>Days</span> '+ hours + '<span>H:</span> '+ minutes + '<span>M:</span> '+ seconds + '<span>S</span>');
+			  }
+
+
+			}, 1000);
+		  });
+		</script>
+{% endfor %}        
+<script type="text/javascript">
+$(document).on('click','.bundle-cart',function() {
+  bundle_id=$(this).attr('rel');
+  $.ajax({
+    url: 'index.php?route=extension/module/relatedbundle/addToCart',
+    type: 'post',
+    data :$('.tmdcartbundle'+bundle_id).serialize(),
+    dataType: 'json',
+    beforeSend: function() {
+      $('.addloading'+bundle_id).button('loading');
+    },
+    complete: function() {
+      $('.addloading'+bundle_id).button('reset');
+    },
+    success: function(json) {
+      $('.alert, .text-danger').remove();
+      $('.form-group').removeClass('has-error');
+
+      if (json['redirect']) {
+        location = json['redirect'];
+      }
+
+      if (json['success']) {
+        $('#content').parent().before('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+        $('#cart > button').html('<span id="cart-total"><i class="fa fa-shopping-cart"></i> ' + json['total'] + '</span>');
+
+        $('html, body').animate({ scrollTop: 0 }, 'slow');
+
+        $('#cart > ul').load('index.php?route=common/cart/info ul li');
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+        alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+    }
+  });
+});
+</script>

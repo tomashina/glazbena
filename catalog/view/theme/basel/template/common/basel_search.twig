@@ -1,0 +1,9 @@
+<div class="search-field">
+<input type="text" name="search" value="{{ search }}" placeholder="{{ basel_text_search }}" class="form-control main-search-input" autocomplete="off"/>
+<span class="btn btn-contrast do-search main">{{ basel_text_search }}</span>
+</div>
+<script>
+$(document).ready(function() {
+$('.search-holder.mobs input[name=\'search\']').attr("placeholder", "{{ basel_text_search }}").attr("value", "{{ search }}");
+});
+</script>

@@ -1,0 +1,73 @@
+{{ header }} {{ column_left }} 
+{% spaceless %}
+<div id="content">
+<link type="text/css" href="view/stylesheet/stylesheet2.css" rel="stylesheet" media="screen" />
+  <div class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %} 
+    {{ breadcrumb.separator }} <a href="{{ breadcrumb.href }}">{{ breadcrumb.text }} </a>
+     {% endfor %} 
+  </div>
+  {% if error_warning %} 
+  <div class="warning">{{ error_warning }} </div>
+  {% endif %} 
+  {% if success %} 
+  <div class="success">{{ success }} </div>
+  {% endif %} 
+  <div class="box">
+    <div class="heading">
+      <h1><img src="view/image/review.png" alt="" /> {{ heading_title }} </h1>
+	<div class="buttons"><a onclick="$('#form').submit();" class="button">Save Parameters</a></div>
+	</div>
+    <div class="content">
+	<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form">
+		   <table class="list">
+            <thead>
+              <tr>
+                <td class="left" width="200">Extension</td>
+				<td class="left">About</td>
+				<td class="left" width="50">Parameters</td>
+				<td class="right" width="100">Action</td>
+              </tr>
+            </thead>
+            
+			<tbody>
+              <tr>
+                <td class="left"><b>SEO Images Generator</b></td>
+                <td class="left"><span class="help">SEO Images Generator automatically generates product's image names from relevant words in product(%p) names.<br><br>
+				<b>Parameters</b><br>
+				You can add keywords from product's model(%m), sku(%s), upc(%u) or brand(%b).<br>
+				Available Parameters: %p, %c, %m, %s and %u. Use them withat spaces or any other characters.<br>
+				<b>Example: %p%c%m%u</b> - will generate seo image names from product name, category name, model and product's upc.<br>				
+				<i>Before generating seo image names, if you have modified parameters, don't forget to save them using Save Parameters button.</i>	 </span>
+				<br>
+					<span style="color:red">A database and image folder <b>backup is recommended</b> before generating image seo names!</span><br>
+					<span style="color:red">If product images aren't displayed in modules or categories, Opencart may cache old file names. Try to clear Opencart's cache (delete the content of system/cache folder).</span><br></td>
+                <td class="left"><input type="text" name="seoimages_parameters[keywords]" value="{{ seoimages_parameters.keywords }}" size="10"/></td>
+                <td class="right">
+					<a onclick="location = 'controller/extension/extension/rename_files.php?gkey={{ seopack_parameters.gkey}}'" class="button">Generate</a>					 
+				</td>
+              </tr>
+            </tbody>
+			
+            
+          </table>
+	</form>
+	</div>
+   </div>
+</div>
+<script type="text/javascript">
+				function clearseo(data, link){						
+					if (!confirm('Are you sure you want to delete ALL ' + data + '?\n\nA database backup is recommended! \n\nThis action will delete ALL ' + data + '!!!')) 
+						{
+							return false;
+						}
+						else 
+						{
+							location = link;
+						}
+						
+					}
+				</script>
+
+{% endspaceless %}
+{{ footer}} 

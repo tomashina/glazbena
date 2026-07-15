@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="30px" height="30px" viewBox="34.376 34.376 30 30" enable-background="new 34.376 34.376 30 30" xml:space="preserve">
+<g>
+	<g>
+		<defs>
+			<path id="SVGID_1_" d="M34.984,49.376c0,7.949,6.443,14.393,14.393,14.393s14.393-6.443,14.393-14.393
+				s-6.443-14.393-14.393-14.393S34.984,41.427,34.984,49.376"/>
+		</defs>
+		<clipPath id="SVGID_2_">
+			<use xlink:href="#SVGID_1_"  overflow="visible"/>
+		</clipPath>
+		
+			<radialGradient id="SVGID_3_" cx="34.7783" cy="-32.2383" r="0.3039" gradientTransform="matrix(161.9794 -192.7558 192.7558 161.9794 611.0425 12002.1465)" gradientUnits="userSpaceOnUse">
+			<stop  offset="0" style="stop-color:#F4EB4A"/>
+			<stop  offset="0.1056" style="stop-color:#F3E84B"/>
+			<stop  offset="0.1728" style="stop-color:#F2E04D"/>
+			<stop  offset="0.2293" style="stop-color:#EED150"/>
+			<stop  offset="0.2798" style="stop-color:#EABC55"/>
+			<stop  offset="0.3264" style="stop-color:#E4A15C"/>
+			<stop  offset="0.3701" style="stop-color:#DD8064"/>
+			<stop  offset="0.4107" style="stop-color:#D5596D"/>
+			<stop  offset="0.4486" style="stop-color:#CC2E78"/>
+			<stop  offset="0.4513" style="stop-color:#CB2E79"/>
+			<stop  offset="0.7216" style="stop-color:#6C2EBD"/>
+			<stop  offset="0.9102" style="stop-color:#312EE8"/>
+			<stop  offset="1" style="stop-color:#1A2EF9"/>
+		</radialGradient>
+		<polygon clip-path="url(#SVGID_2_)" fill="url(#SVGID_3_)" points="20.806,51.855 46.898,20.806 77.947,46.898 51.855,77.946 		
+			"/>
+	</g>
+</g>
+<g>
+	<g>
+		<defs>
+			<rect id="SVGID_4_" x="34.376" y="34.376" width="30" height="30"/>
+		</defs>
+		<clipPath id="SVGID_5_">
+			<use xlink:href="#SVGID_4_"  overflow="visible"/>
+		</clipPath>
+		
+			<circle clip-path="url(#SVGID_5_)" fill="none" stroke="#FFFDFD" stroke-width="1.2151" stroke-miterlimit="10" cx="49.376" cy="49.376" r="14.393"/>
+	</g>
+	<g>
+		<defs>
+			<rect id="SVGID_6_" x="34.376" y="34.376" width="30" height="30"/>
+		</defs>
+		<clipPath id="SVGID_7_">
+			<use xlink:href="#SVGID_6_"  overflow="visible"/>
+		</clipPath>
+		<polygon clip-path="url(#SVGID_7_)" fill="#FFFFFF" points="55.865,44.157 55.865,44.157 55.865,44.157 		"/>
+	</g>
+	<g>
+		<defs>
+			<rect id="SVGID_8_" x="34.376" y="34.376" width="30" height="30"/>
+		</defs>
+		<clipPath id="SVGID_9_">
+			<use xlink:href="#SVGID_8_"  overflow="visible"/>
+		</clipPath>
+		<path clip-path="url(#SVGID_9_)" fill="#FFFFFF" d="M55.865,44.157C55.868,44.233,55.865,44.165,55.865,44.157"/>
+	</g>
+	<g>
+		<defs>
+			<rect id="SVGID_10_" x="34.376" y="34.376" width="30" height="30"/>
+		</defs>
+		<clipPath id="SVGID_11_">
+			<use xlink:href="#SVGID_10_"  overflow="visible"/>
+		</clipPath>
+		<path clip-path="url(#SVGID_11_)" fill="#FFFFFF" d="M51.792,54.781h-4.34c-1.926,0-3.492-1.566-3.492-3.492v-3.824
+			c0-1.926,1.566-3.492,3.492-3.492h4.34c1.926,0,3.492,1.566,3.492,3.492v3.824C55.285,53.214,53.718,54.781,51.792,54.781
+			 M47.453,44.749c-1.498,0-2.716,1.218-2.716,2.716v3.824c0,1.498,1.218,2.716,2.716,2.716h4.34c1.497,0,2.716-1.219,2.716-2.716
+			v-3.824c0-1.498-1.219-2.716-2.716-2.716H47.453L47.453,44.749z"/>
+	</g>
+	<g>
+		<defs>
+			<rect id="SVGID_12_" x="34.376" y="34.376" width="30" height="30"/>
+		</defs>
+		<clipPath id="SVGID_13_">
+			<use xlink:href="#SVGID_12_"  overflow="visible"/>
+		</clipPath>
+		<path clip-path="url(#SVGID_13_)" fill="#FFFFFF" d="M49.623,52.485c-1.714,0-3.108-1.394-3.108-3.108
+			c0-1.714,1.395-3.108,3.108-3.108c1.715,0,3.109,1.395,3.109,3.108C52.732,51.091,51.336,52.485,49.623,52.485 M49.623,47.043
+			c-1.286,0-2.333,1.047-2.333,2.333s1.047,2.333,2.333,2.333s2.333-1.047,2.333-2.333S50.909,47.043,49.623,47.043"/>
+	</g>
+	<g>
+		<defs>
+			<rect id="SVGID_14_" x="34.376" y="34.376" width="30" height="30"/>
+		</defs>
+		<clipPath id="SVGID_15_">
+			<use xlink:href="#SVGID_14_"  overflow="visible"/>
+		</clipPath>
+		<path clip-path="url(#SVGID_15_)" fill="#FFFFFF" d="M53.329,46.364c0,0.355-0.288,0.645-0.645,0.645s-0.646-0.289-0.646-0.645
+			c0-0.356,0.289-0.646,0.646-0.646S53.329,46.007,53.329,46.364"/>
+	</g>
+</g>
+</svg>

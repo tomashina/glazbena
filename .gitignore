@@ -1,0 +1,38 @@
+# macOS / IDE
+.DS_Store
+.idea/
+.ftpquota
+
+# Local/server-specific PHP configuration
+.user.ini
+php.ini
+
+# Runtime data and generated OpenCart files
+error_log
+admin/error_log
+*.log
+system/storage/cache/*
+system/storage/logs/*
+system/storage/modification/*
+system/storage/session/*
+system/storage/upload/*
+system/storage/download/*
+
+# Generated thumbnails and large product-media library (stored separately)
+image/cache/
+image/catalog/
+image/tmp/
+
+# Database dumps and private import feeds
+*.sql
+SHOP_sync.xml
+
+# Temporary/backup files
+*~
+*.bak
+*.swp
+*.tmp
+*.zip
+*-old
+*----
+

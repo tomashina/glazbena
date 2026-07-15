@@ -1,0 +1,86 @@
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">{{ entry_manageproducts }}</h3>
+      <div class="pull-right">
+        <button type="submit" form="form-managepro" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}"><button type="button" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></button></a>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="tmdsuccess"></div>
+      <form action="{{ proaction }}" method="post" enctype="multipart/form-data" id="form-managepro" class="form-horizontal">
+        
+        <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-product"><span data-toggle="tooltip" title="{{ help_product }}">{{ entry_product }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="product" value="" placeholder="{{ entry_product }}" id="input-product" class="form-control" />
+              <div id="bundle-product" class="well" style="height: 200px; overflow: auto;">
+                {% set rows = 0 %}
+                {% for bundle_product in bundle_products %}
+                <div class="form-group rmvfield{{ rows }}">
+                  <label class="col-sm-3 control-label" for="input-qty{{ bundle_product.product_id }}">{{ bundle_product.name }}</label>
+                  <div class="col-sm-6">
+                    <div class="input-group">
+                      <input type="hidden" name="bundle_product[{{ bundle_product.product_id }}][product_id]" value="{{ bundle_product.product_id }}" placeholder="{{ bundle_product.name }}" id="input-quantity{{ bundle_product.product_id }}" class="form-control">
+                      <input type="text" name="bundle_product[{{ bundle_product.product_id }}][quantity]" value="{{ bundle_product.quantity }}" placeholder="{{ bundle_product.name }}" id="input-quantity{{ bundle_product.product_id }}" class="form-control">
+                      <span class="input-group-btn">
+                        <button class="btn btn-danger" onclick="$('.rmvfield{{ rows }}').remove();" type="button"><i class="fa fa-trash"></i></button>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {% set rows = rows + 1 %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+var rows = 0;
+$('input[name=\'product\']').autocomplete({
+  'source': function(request, response) {
+    $.ajax({
+      url: 'index.php?route=extension/bundleproduct/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+      dataType: 'json',
+      success: function(json) {
+        response($.map(json, function(item) {
+          return {
+            label: item['name'],
+            value: item['product_id'],
+            price: item['price']
+          }
+        }));
+      }
+    });
+  },
+  'select': function(item) {
+    html  = '';
+    html += ' <input type="hidden" name="bundle_product[' + item['value'] + '][name]" value="' + item['label'] + '" />';
+    html += ' <input type="hidden" name="bundle_product[' + item['value'] + '][product_id]" value="' + item['value'] + '" />';
+
+    html += ' <div class="form-group rmvfield'+rows+'"">';
+    html += '   <label class="col-sm-3 control-label" for="input-required' + item['value'] + '">'+item['label']+'</label>';
+    html += '   <div class="col-sm-6"><div class="input-group">';
+    html +='    <input type="text" name="bundle_product[' + item['value'] + '][quantity]" placeholder="'+item['label']+'" id="input-required' + item['value'] + '" class="form-control">';
+    html += ' <span class="input-group-btn">';
+    html += ' <button class="btn btn-danger removess" onclick="$(\'.rmvfield' + rows + '\').remove();" type="button"><i class="fa fa-trash"></i></button>';
+    html += ' </span>';
+    html += ' </div></div>';
+    html += ' </div>';
+    $('#bundle-product').append(html);
+    rows++;
+  }
+});
+
+$('#bundle-product').delegate('.fa-minus-circle', 'click', function() {
+  $(this).parent().remove();
+});
+
+</script>
+

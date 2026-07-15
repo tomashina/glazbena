@@ -1,0 +1,57 @@
+﻿{{ header }} {{ column_left }} 
+<div id="content"><link type="text/css" href="view/stylesheet/stylesheet2.css" rel="stylesheet" media="screen" />
+<div class="breadcrumb">
+  {% for breadcrumb in breadcrumbs %} 
+  {{ breadcrumb.separator }} <a href="{{ breadcrumb.href }}">{{ breadcrumb.text }} </a>
+   {% endfor %} 
+</div>
+{% if error_warning %} 
+<div class="warning">{{ error_warning }} </div>
+{% endif %} 
+{% if success %} 
+  <div class="success">{{ success }} </div>
+  {% endif %} 
+<div class="box">
+  <div class="heading">
+    <h1><img src="view/image/module.png" alt="" /> {{ heading_title }} </h1>
+    <div class="buttons"><a onclick="$('#form').submit();" class="button">{{ button_save }} </a><a onclick="location = '{{ cancel }}';" class="button">{{ button_cancel }} </a></div>
+  </div>
+  <div class="content">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form">
+      
+      <table id="module" class="list">
+        <thead>
+          <tr>
+            <td class="left">Feature</td>
+            <td class="left">Enable</td>            			
+          </tr>
+        </thead>
+        
+        <tbody>
+          <tr>
+            <td class="left">Use SEO Pagination (eg. yoursite.com/category/<b>page/3</b>)</td>
+           	<td class="left">
+				{% if seopagination.pagination %} 
+                <input type="checkbox" name="seopagination[pagination]" value="1" checked="checked" />
+                {% else %}   
+                <input type="checkbox" name="seopagination[pagination]" value="1" />{% endif %} 
+                 </td>            
+          </tr>
+		  <tr>
+            <td class="left">Use rel="prev" or rel="next"<br><br><span class="help">Much like rel=”canonical” acts a strong hint for duplicate content, you can now use the HTML link elements rel=”next” and rel=”prev” to indicate the relationship between component URLs in a paginated series. Throughout the web, a paginated series of content may take many shapes—it can be an article divided into several component pages, or a product category with items spread across several pages, or a forum thread divided into a sequence of URLs. <a href="http://googlewebmastercentral.blogspot.ro/2011/09/pagination-with-relnext-and-relprev.html">Read more</a></span></a></td>
+           	<td class="left">
+				{% if seopagination.prevnext %} 
+                <input type="checkbox" name="seopagination[prevnext]" value="1" checked="checked" />
+                {% else %}   
+                <input type="checkbox" name="seopagination[prevnext]" value="1" /> {% endif %}
+                 </td>            
+          </tr>	 		  
+        </tbody>
+       
+             
+      </table>	  
+    </form>
+  </div>
+</div>
+
+{{ footer }} 

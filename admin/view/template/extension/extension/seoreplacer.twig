@@ -1,0 +1,139 @@
+﻿{{ header }} {{ column_left }} 
+<div id="content"><link type="text/css" href="view/stylesheet/stylesheet2.css" rel="stylesheet" media="screen" />
+<div class="breadcrumb">
+  {% for breadcrumb in breadcrumbs %} 
+  {{ breadcrumb.separator }} <a href="{{ breadcrumb.href }}">{{ breadcrumb.text }} </a>
+   {% endfor %} 
+</div>
+{% if error_warning %} 
+<div class="warning">{{ error_warning }} </div>
+{% endif %} 
+{% if success %} 
+  <div class="success">{{ success }} </div>
+  {% endif %} 
+<div class="box">
+  <div class="heading">
+    <h1><img src="view/image/module.png" alt="" /> {{ heading_title }} </h1>
+    <div class="buttons"><a onclick="$('#form').submit();" class="button">Save & Replace</a><a onclick="location = '{{ cancel }}';" class="button">{{ button_cancel }} </a></div>
+  </div>
+  <div class="content">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form">
+      
+	  <table id="module" class="list">
+        <thead>
+          <tr>
+            <td class="left">Replace <input type="text" name="seoreplacer[replace]" value="{{ seoreplacer.replace?seoreplacer.replace: ''}}" size="30"/> with <input type="text" name="seoreplacer[replacewith]" value="{{ seoreplacer.replacewith?seoreplacer.replacewith: '' }}" size="30"/> for 
+				  <select name="seoreplacer[language_id]">
+                  {% for language in languages %} 
+                  {% if seoreplacer.language_id  and  language.language_id  ==  seoreplacer.language_id %} 
+                  <option value="{{ language.language_id }}" selected="selected">{{ language.name }} </option>
+                   {% else %}   
+                  <option value="{{ language.language_id }}">{{ language.name }} </option>{% endif %}
+                   {% endfor %} 
+                   
+                </select> language</td>            			
+          </tr>
+        </thead>
+		</table>
+      <table id="module" class="list">
+        <thead>
+          <tr>
+            <td class="left">Select SEO data</td>
+            <td class="left">Enable</td>            			
+          </tr>
+        </thead>
+        
+        <tbody>
+          <tr>
+            <td class="left">Replace in meta keywords for products/categories/info/brands</td>
+           	<td class="left">
+				{% if seoreplacer.metakeywords %} 
+                <input type="checkbox" name="seoreplacer[metakeywords]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="seoreplacer[metakeywords]" value="1" />{% endif %}
+                 </td>            
+          </tr>
+		  <tr>
+            <td class="left">Replace in meta description for products/categories/info/brands</td>
+           	<td class="left">
+				{% if seoreplacer.metadescription %} 
+                <input type="checkbox" name="seoreplacer[metadescription]" value="1" checked="checked" />
+                {% else %}   
+                <input type="checkbox" name="seoreplacer[metadescription]" value="1" /> {% endif %}
+                 </td>            
+          </tr>	 	
+		  <tr>
+            <td class="left">Replace in custom alts attributes for products</td>
+           	<td class="left">
+				{% if seoreplacer.customalts %} 
+                <input type="checkbox" name="seoreplacer[customalts]" value="1" checked="checked" />
+                {% else %}   
+                <input type="checkbox" name="seoreplacer[customalts]" value="1" /> {% endif %}
+                 </td>            
+          </tr>	 		  
+		  <tr>
+            <td class="left">Replace in custom h1 tags for products</td>
+           	<td class="left">
+				{% if seoreplacer.customh1tags %} 
+                <input type="checkbox" name="seoreplacer[customh1tags]" value="1" checked="checked" />
+                {% else %}   
+                <input type="checkbox" name="seoreplacer[customh1tags]" value="1" />{% endif %} 
+                 </td>            
+          </tr>	 		  
+		  <tr>
+            <td class="left">Replace in custom h2 tags for products</td>
+           	<td class="left">
+				{% if seoreplacer.customh2tags %} 
+                <input type="checkbox" name="seoreplacer[customh2tags]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="seoreplacer[customh2tags]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 		  
+		  <tr>
+            <td class="left">Replace in custom image titles attributes for products</td>
+           	<td class="left">
+				{% if seoreplacer.customimagetitles %} 
+                <input type="checkbox" name="seoreplacer[customimagetitles]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="seoreplacer[customimagetitles]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 		  
+		  <tr>
+            <td class="left">Replace in custom meta titles for products/categories/info/brands</td>
+           	<td class="left">
+				{% if seoreplacer.customtitles %} 
+                <input type="checkbox" name="seoreplacer[customtitles]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="seoreplacer[customtitles]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 		  
+		  <tr>
+            <td class="left">Replace in product tags for products</td>
+           	<td class="left">
+				{% if seoreplacer.producttags %} 
+                <input type="checkbox" name="seoreplacer[producttags]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="seoreplacer[producttags]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 		  
+		  <tr>
+            <td class="left">Replace in SEO URLs (SEO Keywords) for products/categories/info/brands</td>
+           	<td class="left">
+				{% if seoreplacer.seourls %} 
+                <input type="checkbox" name="seoreplacer[seourls]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="seoreplacer[seourls]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 		  
+		  
+		  
+        </tbody>
+       
+             
+      </table>	  
+    </form>
+	<span style="color:red" class="help">* SEO Replacer Tool will alter your existing SEO data. Database backup is highly recommended before each usage.</span>
+  </div>
+</div>
+
+{{ footer }} 

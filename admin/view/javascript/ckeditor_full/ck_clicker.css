@@ -1,0 +1,15 @@
+/*@import 'contents.css';*/
+
+a.cke_button.cke_button__maximize {
+	position: absolute;
+	top: 0px;
+	right: 15px;
+}
+
+/* colored background for image and video buttons */
+a.cke_button.cke_button__image, a.cke_button.cke_button__video, a.cke_button.cke_button__html5video, a.cke_button.cke_button__html5audio, a.cke_button.cke_button__youtube {
+	background: rgba(234,143,14,0.2);
+}
+a.cke_button__bs_grid {
+	background: rgba(111,84,153,0.4);
+}

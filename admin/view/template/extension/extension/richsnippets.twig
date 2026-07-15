@@ -1,0 +1,144 @@
+﻿{{ header }} {{ column_left }} 
+<div id="content"><link type="text/css" href="view/stylesheet/stylesheet2.css" rel="stylesheet" media="screen" />
+<div class="breadcrumb">
+  {% for breadcrumb in breadcrumbs %} 
+  {{ breadcrumb.separator }} <a href="{{ breadcrumb.href }}">{{ breadcrumb.text }} </a>
+   {% endfor %} 
+</div>
+{% if error_warning %} 
+<div class="warning">{{ error_warning }} </div>
+{% endif %} 
+{% if success %} 
+  <div class="success">{{ success }} </div>
+  {% endif %} 
+<div class="box">
+  <div class="heading">
+    <h1><img src="view/image/module.png" alt="" /> {{ heading_title }} </h1>
+    <div class="buttons"><a onclick="$('#form').submit();" class="button">{{ button_save }} </a><a onclick="location = '{{ cancel }}';" class="button">{{ button_cancel }} </a></div>
+  </div>
+  <div class="content">
+    <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form">
+      
+      <table id="module" class="list">
+        <thead>
+          <tr>
+            <td class="left">Rich Snippets</td>
+            <td class="left">Enable</td>            			
+          </tr>
+        </thead>
+        
+        <tbody>
+          <tr>
+            <td class="left">Use Breadcrumbs RDF</td>
+           	<td class="left">
+				{% if richsnippets.breadcrumbs %} 
+                <input type="checkbox" name="richsnippets[breadcrumbs]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="richsnippets[breadcrumbs]" value="1" />{% endif %}
+                 </td>            
+          </tr>
+		  <tr>
+            <td class="left">Use Product Schema</a></td>
+           	<td class="left">
+				{% if richsnippets.product %} 
+                <input type="checkbox" name="richsnippets[product]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="richsnippets[product]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 
+		  <tr>
+            <td class="left">Use Offer Schema</a></td>
+           	<td class="left">
+				{% if richsnippets.offer %} 
+                <input type="checkbox" name="richsnippets[offer]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="richsnippets[offer]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 
+		  <tr>
+            <td class="left">Use Rating Schema</a></td>
+           	<td class="left">
+				{% if richsnippets.rating %} 
+                <input type="checkbox" name="richsnippets[rating]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="richsnippets[rating]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 
+		  <tr>
+            <td class="left">Use Structured Data for Store Info (JSON-LD)</a></td>
+           	<td class="left">
+				{% if richsnippets.store %} 
+                <input type="checkbox" name="richsnippets[store]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="richsnippets[store]" value="1" />{% endif %}
+                 </td>            
+          </tr>	 
+		  
+        </tbody>
+       
+             
+      </table>	  
+	  <table id="module" class="list">
+        <thead>
+          <tr>
+            <td class="left">Social SEO</td>
+            <td class="left">Enable</td>            			
+          </tr>
+        </thead>
+        
+        <tbody>
+          <tr>
+            <td class="left">Use Twitter Card for Website with username: <input type="text" name="richsnippets[twitteruser]" value="{{ richsnippets.twitteruser ? richsnippets.twitteruser :  ''}}" id="input-twitteruser; " /> (optional)</td>
+           	<td class="left">
+				{% if richsnippets.twittersite %} 
+                <input type="checkbox" name="richsnippets[twittersite]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="richsnippets[twittersite]" value="1" />{% endif %}
+                 </td>            
+          </tr>
+		  <tr>
+            <td class="left">Use Twitter Card for Products</td>
+           	<td class="left">
+				{% if richsnippets.twitterproduct %} 
+                <input type="checkbox" name="richsnippets[twitterproduct]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="richsnippets[twitterproduct]" value="1" />{% endif %}
+                 </td>            
+          </tr>
+		  <tr>
+            <td class="left">Use Facebook Opengraph for Website</td>
+           	<td class="left">
+				{% if richsnippets.ogsite %} 
+                <input type="checkbox" name="richsnippets[ogsite]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="richsnippets[ogsite]" value="1" />{% endif %}
+                 </td>            
+          </tr>
+		  <tr>
+            <td class="left">Use Facebook Opengraph for Products</td>
+           	<td class="left">
+				{% if richsnippets.ogproduct %} 
+                <input type="checkbox" name="richsnippets[ogproduct]" value="1" checked="checked" />
+                {% else %}   
+                <input type="checkbox" name="richsnippets[ogproduct]" value="1" /> {% endif %}
+                 </td>            
+          </tr>
+		  <tr>
+            <td class="left">Use Google Publisher with Google+ ID: <input type="text" name="richsnippets[googleid]" value="{{ richsnippets.googleid ? richsnippets.googleid :  '' }}" id="input-googleid; " /></td>
+           	<td class="left">
+				{% if richsnippets.googlepublisher %} 
+                <input type="checkbox" name="richsnippets[googlepublisher]" value="1" checked="checked" />
+                 {% else %}   
+                <input type="checkbox" name="richsnippets[googlepublisher]" value="1" />{% endif %}
+                 </td>            
+          </tr>
+		  
+        </tbody>
+       
+             
+      </table>	  
+    </form>
+  </div>
+</div>
+
+{{ footer }} 

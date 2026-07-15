@@ -1,0 +1,33 @@
+  {% if probundles %}
+
+
+      <div class="widget widget-related" style="margin-bottom:50px" id="main-panel">
+
+                    <div class="widget-title">
+                        <p class="main-title"><span>{{ related_heading }}</span></p>
+                        <p class="widget-title-separator"><i class="icon-line-cross"></i></p>
+                    </div>
+
+                    
+
+
+
+
+
+        <div id="relatedpages"></div> 
+        <script type="text/javascript"><!--
+          $('#relatedpages').delegate('.pagination a', 'click', function(e) {
+          e.preventDefault();
+
+          $('#relatedpages').fadeOut('slow');
+
+          $('#relatedpages').load(this.href);
+
+          $('#relatedpages').fadeIn('slow');
+          });
+
+          $('#relatedpages').load('{{ tmdrelatedproduct }}');
+        --></script>  
+    </div>
+
+{% endif %}

@@ -1,0 +1,206 @@
+
+<div class="container">
+{{ position_bottom }}
+</div>
+<div id="footer">
+<div class="container">
+{% if footer_block_1 and footer_block_1 != '<p><br></p>' %}
+<div class="footer-top-block ">
+{{ footer_block_1 }}
+</div>
+{% endif %}
+<div class="row links-holder">
+
+    <script>
+      var smdWrapper = document.createElement("script"), smdScript;
+      smdWrapper.async = true;
+      smdWrapper.type = "text/javascript";
+      smdWrapper.src = "https://cpx.smind.hr/Log/LogData?data=" + JSON.stringify({
+          Key: "Cro_2155",
+          Size: "80",
+          Type: "badge",
+          Version: 2,
+          BadgeClassName: "smdWrapperTag"
+      });
+      smdScript = document.getElementsByTagName("script")[0];
+      smdScript.parentNode.insertBefore(smdWrapper, smdScript);
+    </script>
+
+      <div class="smdWrapperTag"></div>
+
+  <div class="footer-column col-xs-12 col-sm-4">
+<div class="footer-custom-wrapper">
+{% if footer_block_title is defined %}
+<h5>{{ footer_block_title }}</h5>
+{% endif %}
+{% if footer_block_2 and footer_block_2 != '<p><br></p>' %}
+<div class="custom_block">{{ footer_block_2 }}</div>
+{% endif %}
+{% if footer_infoline_1 is defined %}
+<p class="infoline">{{ footer_infoline_1 }}</p>
+{% endif %}
+{% if footer_infoline_2 is defined %}
+<p class="infoline">{{ footer_infoline_2 }}</p>
+{% endif %}
+{% if footer_infoline_3 is defined %}
+<p class="infoline">{{ footer_infoline_3 }}</p>
+{% endif %}
+{% if payment_img %}
+<img class="payment_img" src="{{ payment_img }}" alt="" />
+{% endif %}
+</div>
+</div>
+      {% if informations %}
+      <div class="footer-column col-xs-12 col-sm-4 eq_height">
+        <h5>{{ text_information }}</h5>
+        <ul class="list-unstyled">
+              <li><a href="{{ contact }}">{{ text_contact }}</a></li>
+          {% for information in informations[:6] %}
+          <li><a href="{{ information.href }}">{{ information.title }}</a></li>
+          {% endfor %}
+   <li><a href="https://www.glazbena-kutija.hr/cesta-pitanja">{{ text_faq }}</a></li>
+
+
+
+
+        </ul>
+      </div>
+      {% endif %}
+      {% if informations %}
+      <div class="footer-column col-xs-12 col-sm-4 eq_height">
+        <h5>{{ text_service }}</h5>
+        <ul class="list-unstyled" style="margin-bottom:20px">
+          {% for information in informations [6:]%}
+          <li><a href="{{ information.href }}">{{ information.title }}</a></li>
+          {% endfor %}
+
+
+
+        </ul>
+      <a href="https://webretaileraward.com/hr/tekmovalci_2021/" target="_blank">  <img style="border:1px solid #fff;max-width:263px" src="image/WRA2021.svg" alt="Web Retailer Award"/></a>
+        <a href="https://www.e-commercejam.com/wra-competition/competitors/" target="_blank" >  <img style="border:1px solid #fff;margin-top:5px" src="image/hall-of-fame-2024.png" alt="Web Retailer Award"/></a>
+      </div>
+      {% endif %}
+
+</div><!-- .row ends -->
+
+<div class="clearfix"></div>
+
+</div>
+</div>
+<link href="catalog/view/javascript/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+<!--<link href="catalog/view/theme/basel/js/lightgallery/css/lightgallery.css?v=10" rel="stylesheet" />-->
+
+<link type="text/css" rel="stylesheet" href="dist/css/lightgallery-bundle.css" />
+
+
+<script src="catalog/view/theme/basel/js/jquery.matchHeight.min.js"></script>
+<script src="catalog/view/theme/basel/js/countdown.js"></script>
+<script src="catalog/view/theme/basel/js/live_search.js"></script>
+<script src="catalog/view/theme/basel/js/featherlight.js"></script>
+{% if view_popup %}
+<!-- Popup -->
+<script>
+$(document).ready(function() {
+if ($(window).width() > {{ popup_width_limit }}) {
+setTimeout(function() {
+$.featherlight({ajax: 'index.php?route=extension/basel/basel_features/basel_popup', variant:'popup-wrapper'});
+}, {{ popup_delay }});
+}
+});
+</script>
+{% endif %}
+{% if sticky_columns %}
+<!-- Sticky columns -->
+<script>
+if ($(window).width() > 767) {
+$('#column-left, #column-right').theiaStickySidebar({containerSelector:$(this).closest('.row'),additionalMarginTop:{{ sticky_columns_offset }}});
+}
+</script>
+{% endif %}
+{% if view_cookie_bar %}
+<!-- Cookie bar -->
+<div class="basel_cookie_bar">
+<div class="table">
+<div class="table-cell w100">{{ basel_cookie_info }}</div>
+<div class="table-cell button-cell">
+<a class="btn btn-tiny btn-light-outline" onclick="$(this).parent().parent().parent().fadeOut(400);">{{ basel_cookie_btn_close }}</a>
+{% if href_more_info is defined %}
+<a class="more-info anim-underline light" href="{{ href_more_info }}">{{ basel_cookie_btn_more_info }}</a>
+{% endif %}
+</div>
+</div>
+</div>
+{% endif %}
+
+</div><!-- .outer-container ends -->
+
+{% if basel_copyright %}
+    <div class="container">
+    <div class="footer-copyright row">
+
+        <div class="col-md-6 text-left">
+
+            <p class="blue">{{ basel_copyright }}</p>
+
+        </div>
+        <div class="col-md-6">
+
+
+            <a href="https://www.corvuspay.com/" target="_blank" title="CorvusPay - internet Payment Gateway" target="_blank"><img src="image/corvus-logo.png" style="margin-right:3px" alt="Corvus Payment"></a>
+
+              <a href="https://www.mastercard.hr/hr-hr/consumers/find-card-products/debit-cards/maestro-debit.html" target="_blank"><img style="height: 40px;margin-right:3px" src="image/catalog/credit-cards/Maestro_logo.svg.png"></a>
+
+            <a href="http://www.visa.com.hr/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/visa.png"></a>
+          
+            <a href="http://www.mastercard.com/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/Mastercard-logo.svg.png"></a>
+            <a href="https://www.dinersclub.com/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/logo-diners-club-png.png"></a>
+         <!--   <a href="https://www.pbzcard.hr/hr/sigurnost/sigurnost-kupnje/verified-by-visa/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/visa-secure.svg"></a>
+            <a href="https://www.pbzcard.hr/hr/sigurnost/sigurnost-kupnje/mastercard-securecode/" target="_blank"><img style="margin-right:3px" src="image/catalog/credit-cards/mastercard-secure.svg"></a> -->
+<a href="sigurnost-placanja" target="_blank"><img style="margin-right:3px" src="image/ssl.svg" alt="SSL certifikat - 100% sigurna kupnja" title="SSL certifikat - 100% sigurna kupnja"></a>
+  
+        </div>
+
+    </div>
+
+    </div>
+{% endif %}
+<a class="scroll-to-top primary-bg-color " onclick="$('html, body').animate({scrollTop:0});"><i class="icon-arrow-right"></i></a>
+<div id="featherlight-holder"></div>
+
+
+
+
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/66f6b827e5982d6c7bb5a510/1i8ps10ve';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+
+ <script>
+      var smdObject = {
+        Key: "Cro_2155",
+        Type: "floatingbar",
+          Version: 2,
+          BadgeClassName: "smdWrapperTag",
+          BadgeZoom: 1
+      };
+      var smdWrapper = document.createElement("script");
+      smdWrapper.id = "_cpxTag";
+      smdWrapper.type = "text/javascript";
+      smdWrapper.src = "https://cpx.smind.hr/Log/LogData?data=" + encodeURIComponent(JSON.stringify(smdObject));
+      var smdScript = document.getElementsByTagName("script")[0];
+      smdScript.parentNode.insertBefore(smdWrapper, smdScript);
+    </script>
+
+
+
+</body></html>

@@ -1,0 +1,183 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+      </div>
+      <div class="panel-body">
+		 
+    <form  method="post" enctype="multipart/form-data" id="form-record">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+				<thead>
+					<tr>
+						<td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+						<td class="text-left">{{ column_productname }}</td>
+						
+						<!--Filed Heading-->
+						{% for heading in filedheading %}
+								<td class="text-left">						
+								{{ heading.label }}						
+								</td>
+						{% endfor %}
+						
+						<!--Filed Heading-->
+						<td class="text-left">{{ column_ip }}
+						</td>
+						
+						<td class="text-left">{% if sort == 'date' %}
+							<a href="{{ sort_date }}" class="{{ order|lower }}">{{ column_date }}</a>
+							{% else %}
+							<a href="{{ sort_date }}">{{ column_date }}</a>
+							{% endif %}
+						</td>						
+						<td class="text-left">{{ column_action }}</td>
+												
+					</tr>
+				</thead>
+					{% if records %}
+					{% for report in records %}
+					<tr>
+						<td class="text-center">{% if report.form_id in selected %}
+							<input type="checkbox" name="selected[]" value="{{ report.form_id }}" checked="checked" />
+							{% else %}
+							<input type="checkbox" name="selected[]" value="{{ report.form_id }}" />
+							{% endif %}
+						</td>
+						
+						<td class="text-left">{{ report.productname }}</td>
+							{% for values in report.filedvalue %}
+								<td class="text-left">						
+									{{ values.value }}						
+								</td>
+							{% endfor %}
+						
+						<td class="text-left">{{ report.ip }}</td>
+						<td class="text-left">{{ report.date_added }}</td>
+						<td class="text-left">
+						<a href="{{ report['view'] }}" data-toggle="tooltip" title="{{ button_view }}" class="btn btn-primary"><i class="fa fa-eye"></i></a>
+						
+						 <a data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger button-delete deletbtn{{ report['fs_id'] }}" rel="{{ report['fs_id'] }}" ><i class="fa fa-trash"></i></a>						
+						</td>
+						
+				</tr>
+						{% endfor %} 
+						{% else %}
+					<tr>
+						<td class="text-center" colspan="6">{{ text_no_results }}</td>
+					</tr>
+					{% endif %}
+            </table>
+        </div>
+    </form>
+        <div class="row">
+			<div class="col-sm-6 text-left">{{ pagination }}</div>
+          	<div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+$('.button-delete').on('click', function() {
+		var rel = $(this).attr("rel");
+		
+		$.ajax({
+		url: 'index.php?route=extension/filedrecord/deleterecord&user_token={{ user_token }}',
+		type: 'post',
+		data: 'fs_id='+rel,
+		dataType: 'json',
+		beforeSend: function() {
+			$('.deletbtn'+rel).button('loading');
+		},
+		complete: function() {
+			$('.deletbtn'+rel).button('reset');
+		},
+		
+		success: function(json) {
+		$('.alert, .text-danger').remove();
+		
+			if (json['error']) {
+				$('.breadcrumb').after('<div class="text-danger">');
+					
+					$('.warning').fadeIn('slow');
+			}
+
+			if (json['success']) {
+				location='{{ recordurl }}';			
+			}
+			}
+			});
+	});
+	
+	
+$('#button-filter').on('click', function() {
+	var url = 'index.php?route=extension/record&user_token={{ user_token }}';
+	
+	var filter_title = $('input[name=\'form_id\']').val();
+
+	if (filter_title) {
+		url += '&filter_title=' + encodeURIComponent(filter_title);
+	}
+	
+	var filter_name = $('input[name=\'filter_name\']').val();
+
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	}
+	
+	var filter_ip = $('input[name=\'filter_ip\']').val();
+
+	if (filter_ip) {
+		url += '&filter_ip=' + encodeURIComponent(filter_ip);
+	}
+	
+	var filter_date = $('input[name=\'filter_date\']').val();
+
+	if (filter_date) {
+		url += '&filter_date=' + encodeURIComponent(filter_date);
+	}
+	
+		
+  location = url;
+});
+</script>
+
+  <script type="text/javascript"><!--
+$('.date').datetimepicker({
+	pickTime: false
+});
+
+$('.time').datetimepicker({
+	pickDate: false
+});
+
+$('.datetime').datetimepicker({
+	pickDate: true,
+	pickTime: true
+});
+//--></script>
+{{ footer }}

@@ -1,0 +1,385 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-bundle" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+       <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+       <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-bundle" class="form-horizontal">
+          <div class="form-group required">
+            <label class="col-sm-2 control-label">{{ entry_name }}</label>
+            <div class="col-sm-10">
+              {% for language in languages %}
+              <div class="input-group"><span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                <input type="text" name="bundle_language[{{ language.language_id }}][title]" value="{{ bundle_language[language.language_id] ? bundle_language[language.language_id].title }}" id="input-name{{ language.language_id }}" placeholder="{{ entry_name }}" class="form-control" />
+              </div>
+              {% if error_title[language.language_id] %}
+              <div class="text-danger">{{ error_title[language.language_id] }}</div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-product"><span data-toggle="tooltip" title="{{ help_date }}">{{ entry_date }}</span></label>
+            <div class="col-sm-4">
+              <div class="input-group date">
+                <input type="text" name="date_from" value="{{ date_from }}" data-date-format="YYYY-MM-DD" placeholder="{{ entry_datefrom }}" id="input-date_from" class="form-control" />
+                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+              </div>
+              {% if error_date_from %}
+              <div class="text-danger">{{ error_date_from }}</div>
+              {% endif %}
+            </div>
+            <div class="col-sm-4">
+              <div class="input-group tmddate">
+                <input type="text" name="date_to" value="{{ date_to }}" data-date-format="YYYY-MM-DD" placeholder="{{ entry_dateto }}" id="input-date_to" class="form-control" />
+                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+              </div>
+              {% if error_date_to %}
+              <div class="text-danger">{{ error_date_to }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+         <!-- <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_seourl }}</label>
+            <div class="col-sm-10">
+              <div class="table-responsive">
+                <table id="discount" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <th class="text-left">{{ entry_store }}</th> 
+                    <th class="text-left">{{ entry_keyboard }}</th> 
+                  </thead>
+                  <tbody>
+                    {% for store in stores %}
+                    <tr>
+                      <td class="text-left">{{ store.name }}</td>
+                      <td class="text-left">
+                        {% for language in languages %}
+                        <div class="input-group"><span class="input-group-addon"><img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>
+                          <div class="input-group col-sm-10">
+                          <input type="text" name="bundle_seo_url[{{ store.store_id }}][{{ language.language_id }}]" value="{% if bundle_seo_url[store.store_id][language.language_id] %}{{ bundle_seo_url[store.store_id][language.language_id] }}{% endif %}" placeholder="{{ entry_keyboard }}" class="form-control" />
+                          <span class="input-group-btn">
+                          <button type="button" id="button-seourls" rel="{{ store.store_id }}" rel1="{{ language.language_id }}" class="btn btn-info"><i class="fa fa-bolt"></i> Generate Seo</button>
+                          </span>
+                          </div>
+                           {% if error_keyword[store.store_id][language.language_id] %}
+                             <div class="text-danger">{{ error_keyword[store.store_id][language.language_id] }}</div>
+                          {% endif %} 
+                        </div>
+                        {% endfor %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div> -->
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label">{{ entry_discount }}</label>
+            <div class="col-sm-10">
+              <div class="table-responsive">
+                <table id="discount" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <th class="text-left">{{ entry_customergroup }}</th> 
+                    <th class="text-left">{{ entry_doption }}</th> 
+                    <th class="text-left">{{ entry_adddiscount }}</th> 
+                  </thead>
+                  <tbody>
+                    {% for group in customer_groups %}
+                    <tr>
+                      <td class="text-left">{{ group.name }}</td>
+                      <td class="text-left">
+
+                        <div class="form-group">
+                          <div class="col-sm-10">
+                            <select name="customer_group[{{ group.customer_group_id }}][discount_option]" id="input-discount_option" class="form-control">
+                              {% if customer_group[group.customer_group_id]['discount_option'] == 'Percentage' %}
+                                <option value="Percentage" selected="selected">{{ text_percent }}</option>
+                                <option value="Fixed">{{ text_fixed }}</option>
+                                {% else %}
+                                <option value="Percentage">{{ text_percent }}</option>
+                                <option value="Fixed" selected="selected">{{ text_fixed }}</option>
+                                {% endif %}
+                              </select>
+                            </select>
+                          </div>
+                        </div>
+
+                      </td>
+                      <td class="text-left"><input type="text" name="customer_group[{{ group.customer_group_id }}][add_discount]" value="{% if customer_group[group.customer_group_id]%}{{ customer_group[group.customer_group_id].add_discount }}{% endif %}" placeholder="{{ entry_adddiscount }}" class="form-control" /></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-sort-order">{{ entry_sort_order }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="sort_order" value="{{ sort_order }}" placeholder="{{ entry_sort_order }}" id="input-sort-order" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="status" id="input-status" class="form-control">
+                {% if status %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-product"><span data-toggle="tooltip" title="{{ help_product }}">{{ entry_product }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="product" value="" placeholder="{{ entry_product }}" id="input-product" class="form-control" />
+              <div id="bundle-product" class="well" style="height: 500px; overflow: auto;">
+                {% set rows = 0 %}
+                {% for bundle_product in bundle_products %}
+                <div class="form-group rmvfield{{ rows }}">
+                  <label class="col-sm-3 control-label" for="input-qty{{ bundle_product.product_id }}">{{ bundle_product.name }}</label>
+                  <div class="col-sm-6">
+                    <div class="input-group">
+                      <input type="hidden" name="bundle_product[{{ bundle_product.product_id }}][product_id]" value="{{ bundle_product.product_id }}" placeholder="{{ bundle_product.name }}" id="input-quantity{{ bundle_product.product_id }}" class="form-control">
+
+
+                      <div class="row">
+                       <label class="col-sm-3 control-label" >Količina</label>
+                      <input type="text" style="max-width:200px" name="bundle_product[{{ bundle_product.product_id }}][quantity]" value="{{ bundle_product.quantity }}" placeholder="Količina" id="input-quantity{{ bundle_product.product_id }}" class="form-control col-sm-9">
+                      </div>
+
+                     
+                       <div class="row">
+                          <label class="col-sm-3 control-label" >Poredak</label>
+                          <input type="text" style="max-width:200px" name="bundle_product[{{ bundle_product.product_id }}][sort_order]" value="{{ bundle_product.sort_order }}" placeholder="Poredak" id="input-id_default{{ bundle_product.product_id }}" class="form-control col-sm-9">
+                      </div>
+
+                      <div class="row">
+                            <label class="col-sm-3 control-label" >Pokaži na artiklu</label>
+                           <select style="max-width:200px" name="bundle_product[{{ bundle_product.product_id }}][id_default]" id="input-id_default{{ bundle_product.product_id }}" class="form-control col-sm-9">
+                                {% if bundle_product.id_default %}
+                                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                                  <option value="0">{{ text_disabled }}</option>
+                                  {% else %}
+                                  <option value="1">{{ text_enabled }}</option>
+                                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %}
+                           </select>
+
+                      </div>
+
+                      <span class="input-group-btn">
+                        <button class="btn btn-danger" onclick="$('.rmvfield{{ rows }}').remove();" type="button"><i class="fa fa-trash"></i></button>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {% set rows = rows + 1 %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-category"><span data-toggle="tooltip" title="{{ help_category }}">{{ entry_category }}</span></label>
+            <div class="col-sm-10">
+              <input type="text" name="category" value="" placeholder="{{ entry_category }}" id="input-category" class="form-control" />
+              <div id="bundle-category" class="well well-sm" style="height: 150px; overflow: auto;"> 
+                {% for bundle_category in bundle_categories %}
+                <div id="bundle-category{{ bundle_category.bundle_category_id }}"><i class="fa fa-minus-circle"></i> {{ bundle_category.name }}
+                  <input type="hidden" name="bundle_category[]" value="{{ bundle_category.bundle_category_id }}" />
+                </div>
+                {% endfor %}</div>
+            </div>
+          </div>
+         <div class="form-group">
+          <label class="col-sm-2 control-label">{{ entry_store }}</label>
+          <div class="col-sm-10">
+            <div class="well well-sm" style="height: 150px; overflow: auto;">
+              {% for store in stores %}
+              <div class="checkbox">
+                <label>
+                  {% if store.store_id in bundleproduct_store %}
+                  <input type="checkbox" name="bundleproduct_store[]" value="{{ store.store_id }}" checked="checked" />
+                  {{ store.name }}
+                  {% else %}
+                  <input type="checkbox" name="bundleproduct_store[]" value="{{ store.store_id }}" />
+                  {{ store.name }}
+                  {% endif %}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}
+<script type="text/javascript"><!--
+$('.date').datetimepicker({
+  pickTime: false
+});
+
+$('.time').datetimepicker({
+  pickDate: false
+});
+
+$('.datetime').datetimepicker({
+  pickDate: true,
+  pickTime: true
+});
+//--></script>
+
+<script type="text/javascript">
+  var dateToday = new Date();
+  $('.tmddate').datetimepicker({
+    pickDate: true,
+    pickTime: false,
+    minDate: dateToday
+  });
+</script>
+
+<script>
+var rows = 0;
+$('input[name=\'product\']').autocomplete({
+  'source': function(request, response) {
+    $.ajax({
+      url: 'index.php?route=extension/bundleproduct/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+      dataType: 'json',
+      success: function(json) {
+        response($.map(json, function(item) {
+          return {
+            label: item['name'],
+            value: item['product_id'],
+            price: item['price']
+          }
+        }));
+      }
+    });
+  },
+  'select': function(item) {
+    html  = '';
+    html += ' <input type="hidden" name="bundle_product[' + item['value'] + '][name]" value="' + item['label'] + '" />';
+    html += ' <input type="hidden" name="bundle_product[' + item['value'] + '][product_id]" value="' + item['value'] + '" />';
+
+    html += ' <div class="form-group rmvfield'+rows+'"">';
+    html += '   <label class="col-sm-3 control-label" for="input-required' + item['value'] + '">'+item['label']+'</label>';
+    html += '   <div class="col-sm-6"><div class="input-group">';
+    html += '<div class="row">';
+    html += '<label class="col-sm-3 control-label" >Količina</label>';
+    html +='<input style="max-width:200px" type="text" name="bundle_product[' + item['value'] + '][quantity]" placeholder="Količina" id="input-required' + item['value'] + '" class="form-control col-sm-9">';
+    html += '</div>';
+    html += '<div class="row">';
+    html += '<label class="col-sm-3 control-label" >Poredak</label>';
+    html +='<input style="max-width:200px" type="text" name="bundle_product[' + item['value'] + '][sort_order]" placeholder="Poredak" id="input-required' + item['value'] + '" class="form-control col-sm-9">';
+    html += '</div>';
+    html += '<div class="row">';
+    html += '<label class="col-sm-3 control-label" >Pokaži na artiklu</label>';
+       html +='<select style="max-width:200px" name="bundle_product[' + item['value'] + '][id_default]" id="input-required' + item['value'] + '" class="form-control col-sm-9">';
+           {% if bundle_product.id_default %}
+                                  html +=' <option value="1" selected="selected">{{ text_enabled }}</option>';
+                                  html +=' <option value="0">{{ text_disabled }}</option>';
+                                  {% else %}
+                                  html +=' <option value="1">{{ text_enabled }}</option>';
+                                  html +=' <option value="0" selected="selected">{{ text_disabled }}</option>';
+                                {% endif %}
+                           html +=' </select>';
+                      html +=' </div>';
+    html += ' <span class="input-group-btn">';
+    html += ' <button class="btn btn-danger removess" onclick="$(\'.rmvfield' + rows + '\').remove();" type="button"><i class="fa fa-trash"></i></button>';
+    html += ' </span>';
+    html += ' </div></div>';
+    html += ' </div>';
+    $('#bundle-product').append(html);
+    rows++;
+  }
+});
+
+$('#bundle-product').delegate('.fa-minus-circle', 'click', function() {
+  $(this).parent().remove();
+});
+
+/// Categories
+$('input[name=\'category\']').autocomplete({
+  'source': function(request, response) {
+    $.ajax({
+      url: 'index.php?route=extension/bundlecategory/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+      dataType: 'json',
+      success: function(json) {
+        response($.map(json, function(item) {
+          return {
+            label: item['name'],
+            value: item['bundle_category_id'],
+          }
+        }));
+      }
+    });
+  },
+  'select': function(item) {
+    $('input[name=\'category\']').val('');
+
+    $('#bundle-category' + item['value']).remove();
+
+    $('#bundle-category').append('<div id="bundle-category' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="bundle_category[]" value="' + item['value'] + '" /></div>');
+  }
+});
+
+$('#bundle-category').delegate('.fa-minus-circle', 'click', function() {
+  $(this).parent().remove();
+});
+</script>
+
+<!-- Seo -->
+<script type="text/javascript">
+$(document).on('click','#button-seourls',function() {
+  rel=$(this).attr('rel');
+  rel1=$(this).attr('rel1');
+  title=$('#input-name'+rel1).val();
+  $.ajax({
+    url: 'index.php?route=extension/bundleproduct/SeoText&user_token={{ user_token }}&title='+title,
+    type: 'post',
+    data: '',
+    dataType: 'json',
+    beforeSend: function() {
+    },
+    complete: function() {
+    },
+    success: function(json) {
+      if (json['success']) {
+        $('input[name=\'bundle_seo_url['+rel+']['+rel1+']\']').val(json['title']);
+      }
+    },
+  });
+});
+</script>
+<!-- Seo -->

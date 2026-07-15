@@ -1,0 +1,111 @@
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  <style>
+		body { font-family: DejaVu Sans, sans-serif; }
+	</style>
+</head>
+<body>
+		<form action="" method="post" enctype="multipart/form-data" id="form-tmdformrecord" class="form-horizontal">
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="panel panel-default">
+				  <div class="panel-heading">
+					<h3 class="panel-title"><i class="fa fa-file" aria-hidden="true"></i> {{ text_detail }}</h3>
+				  </div>
+				  <div class="table-responsive">
+					<table class="table">
+					  <tbody>
+						<tr>
+						  <td class="text-left">  {{ title }}</a></td>
+						</tr>
+						<tr>
+						  <td class="text-left">  {{ sname }}</a></td>
+						</tr>
+						<tr>
+						  <td class="text-left">  {{ lname }}</a></td>
+						</tr>
+						<tr>
+						  <td class="text-left"> {{ date_added }}</a></td>
+						</tr>
+					  </tbody>
+					</table>
+				  </div>
+				</div>		
+			</div>
+			<div class="col-sm-6">
+				<div class="panel panel-default">
+				  <div class="panel-heading">
+					<h3 class="panel-title"><i class="fa fa-user" aria-hidden="true"></i> {{ text_custdetail }}</h3>
+				  </div>
+				  <div class="table-responsive">
+					<table class="table">
+					  <tbody>
+						<tr>
+							{% if customer_name %}
+							<td class="text-left">  {{ customer_name }}</a></td>
+							{% else %}
+							<td class="text-left">  Guest</a></td>
+							{% endif %}
+						</tr>
+						<tr>
+						  <td class="text-left">  {{ ip }}</a></td>
+						</tr>
+						<tr>
+						  <td class="text-left"> {{ user_agent }}...</a></td>
+						</tr>
+					  </tbody>
+					</table>
+				  </div>
+				</div>		
+			</div>		
+		</div>
+		<div class="row fields">
+			<div class="col-sm-12">
+				<div class="panel panel-default">
+				  <div class="panel-heading">
+					<h3 class="panel-title"><i class="fa fa-info-circle" aria-hidden="true"></i> {{ text_fields }}</h3>
+				  </div>
+				  <div class="table-responsive">
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<td class="text-left" style="width:25%;">{{ entry_fieldname }}</td>
+								<td class="text-left">{{ entry_fieldvalue }}</td>
+							</tr>
+						</thead>
+						{% for fieldinfo in field_infos %}
+						<tbody>
+							<tr>
+							  <td class="text-left"><label>{{ fieldinfo.label }}</label></td>
+							  <td class="text-left">{{ fieldinfo.value }}</td>
+							</tr>
+						</tbody>
+						{% endfor %}
+					</table>
+				  </div>
+				</div>		
+			</div>	
+		</div>		
+		</form>
+	</body>
+	</html>
+<style>
+.table td a span{
+	margin-right:5px;
+}
+.table td a{
+	color:#333;
+}
+.panel > .table-responsive > .table-bordered{
+	border:1px solid #dddddd;
+}
+.fields .table-responsive{
+	padding:15px !important;
+}
+</style>

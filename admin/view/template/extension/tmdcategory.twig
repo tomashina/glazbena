@@ -1,0 +1,59 @@
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">{{ entry_managecategoriess }}</h3>
+      <div class="pull-right">
+        <button type="submit" form="form-managecate" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}"><button type="button" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></button></a>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="tmdsuccess"></div>
+      <form action="{{ cateaction }}" method="post" enctype="multipart/form-data" id="form-managecate" class="addresss<?php echo $order_id; ?> form-horizontal">
+        <div class="form-group">
+          <label class="col-sm-2 control-label" for="input-category"><span data-toggle="tooltip" title="{{ help_category }}">{{ entry_category }}</span></label>
+          <div class="col-sm-10">
+            <input type="text" name="category" value="" placeholder="{{ entry_category }}" id="input-category" class="form-control" />
+            <div id="bundle-category" class="well well-sm" style="height: 150px; overflow: auto;"> 
+              {% for bundle_category in bundle_categories %}
+              <div id="bundle-category{{ bundle_category.bundle_category_id }}"><i class="fa fa-minus-circle"></i> {{ bundle_category.name }}
+                <input type="hidden" name="bundle_category[]" value="{{ bundle_category.bundle_category_id }}" />
+              </div>
+              {% endfor %}</div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+$('input[name=\'category\']').autocomplete({
+  'source': function(request, response) {
+    $.ajax({
+      url: 'index.php?route=extension/bundlecategory/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+      dataType: 'json',
+      success: function(json) {
+        response($.map(json, function(item) {
+          return {
+            label: item['name'],
+            value: item['bundle_category_id'],
+          }
+        }));
+      }
+    });
+  },
+  'select': function(item) {
+    $('input[name=\'category\']').val('');
+
+    $('#bundle-category' + item['value']).remove();
+
+    $('#bundle-category').append('<div id="bundle-category' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="bundle_category[]" value="' + item['value'] + '" /></div>');
+  }
+});
+
+$('#bundle-category').delegate('.fa-minus-circle', 'click', function() {
+  $(this).parent().remove();
+});
+</script>
+

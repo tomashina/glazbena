@@ -1,0 +1,582 @@
+<!--popup-->
+<link href="catalog/view/theme/default/stylesheet/popup_stylesheet.css" rel="stylesheet" media="screen" />
+
+<div class="modal-dialog modal-md">
+	<div class="modal-content">
+		<div class="modal-header">
+			<h4 class="modal-title">{{ productname }}</h4>
+			<div class="pull-right">
+			<button type="button" data-dismiss="modal" aria-hidden="true" class="btn btn-default"><i class="fa fa-times" aria-hidden="true"></i></button>
+			</div>
+		</div>
+		<div class="modal-body"> 
+		 <div class="image">
+		{% if thumb %}
+			<img src="{{ thumb }}" class="img-responsive" alt="image" title="image"/>
+		{% endif %}
+			
+		 </div>
+		<div class="topdescrption">{{ top_description }}</div>
+		 
+			<form class="form-horizontal">
+			<div id="formbuilder">
+				<input type="hidden" name="product_id" value="{{ product_id }}" />
+				<input type="hidden" name="form_id" value="{{ form_id }}"/>
+				
+				{% if form_fields %}
+				 {% for optionfield in form_fields %}
+					{% if optionfield.type == 'select' %}
+					<div class="form-group{% if optionfield.required %} required {% endif %}">
+					  <label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					  </label>
+						<div class="col-sm-9">	
+							<div id="input-formfields{{ optionfield.field_id }}">
+								<select name="formfields[{{ optionfield.field_id }}]"  class="form-control">
+									<option value="">{{ text_select }}</option>
+									{% for option_value in optionfield.form_field_option %}
+										{% if formfields.optionfield.field_id==option_value.name %}						
+										<option value="{{ option_value.name }}" selected="selected">{{ option_value.name }}</option>
+										{% else %}
+										<option value="{{ option_value.name }}">{{ option_value.name }}</option>
+										{% endif %} 
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+					</div>
+					{% endif %}
+					{% if optionfield.type == 'radio' %}
+					<div class="form-group{% if optionfield.required %} required {% endif %}">
+						<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					  </label>
+					  <div class="col-sm-9">
+						<div id="input-formfields{{ optionfield.field_id }}">
+							{% for option_value in optionfield.form_field_option %}
+							<div class="radio">
+								<label>
+									<input type="radio" name="formfields[{{ optionfield.field_id }}]" value="{{ option_value.name }}" />							                    
+									{{ option_value.name }}
+								</label>
+							</div>
+							{% endfor %}
+						</div>			
+					  </div>
+					</div>
+					{% endif %}
+					{% if optionfield.type == 'checkbox' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+				  <div class="col-sm-9">
+				  <div id="input-formfields{{ optionfield.field_id }}">
+					{% for option_value in optionfield.form_field_option %}
+					<div class="checkbox">
+					  <label>
+						<input type="checkbox" name="formfields[{{ optionfield.field_id }}][]" value="{{ option_value.name }}" />    
+						{{ option_value.name }} 
+					  </label>
+					</div>
+					{% endfor %}
+				  </div>
+				  </div>
+				</div>
+				{% endif %}
+				{% if optionfield.type == 'text' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+						<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" placeholder="{{ optionfield.placeholder }}" id="input-formfields{{ optionfield.field_id }}" class="form-control" />					
+					</div>
+				</div>
+				{% endif %}
+				{% if optionfield.type == 'textarea' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+				  <label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+				  <div class="col-sm-9">
+				  <textarea name="formfields[{{ optionfield.field_id }}]" rows="5" placeholder="{{ optionfield.placeholder }}" id="input-formfields{{ optionfield.field_id }}" class="form-control"></textarea>
+				  </div>
+				</div>
+				{% endif %}
+					
+				{% if optionfield.type == 'number' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+						<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" placeholder="{{ optionfield.placeholder }}" id="input-option{{ optionfield.field_id }}" class="form-control" />
+					</div>
+				</div>	
+				{% endif %}
+					
+				{% if optionfield.type == 'telephone' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+						<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" placeholder="{{ optionfield.placeholder }}" id="input-formfields{{ optionfield.field_id }}" class="form-control" />
+					</div>
+				</div>	
+				{% endif %}	
+					
+				{% if optionfield.type == 'email' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+						<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" placeholder="{{ optionfield.placeholder }}" id="input-formfields{{ optionfield.field_id }}" class="form-control" />
+						
+					</div>
+				</div>	
+				{% endif %}	
+				{% if optionfield.type == 'emaile_exists' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+						<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" placeholder="{{ optionfield.placeholder }}" id="input-formfields{{ optionfield.field_id }}" class="form-control" />
+					</div>
+				</div>		
+				{% endif %}	
+				{% if optionfield.type == 'password' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+						<input type="password" name="formfields[{{ optionfield.field_id }}]" value="" placeholder="{{ optionfield.placeholder }}" id="input-formfields{{ optionfield.field_id }}" class="form-control" />
+					</div>
+				</div>		
+				{% endif %}	
+				{% if optionfield.type == 'confirm' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+						<input type="password" name="formfields[{{ optionfield.field_id }}]" value="" placeholder="{{ optionfield.placeholder }}" id="input-formfields{{ optionfield.field_id }}" class="form-control" />
+					</div>
+				</div>	
+				{% endif %}	
+				{% if optionfield.type == 'file' %}
+				
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+				  <label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+				  <div class="col-sm-4">
+				  <button type="button" id="button-upload{{ optionfield.field_id }}" data-loading-text="{{ text_loading }}" class="btn btn-default btn-block"><i class="fa fa-upload"></i> {{ button_upload }} </button>
+				  <input type="hidden" name="formfields[{{ optionfield.field_id }}]" value="" id="input-formfields{{ optionfield.field_id }}" />
+				  </div>
+				</div>
+				{% endif %}
+				{% if optionfield.type == 'date' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+				    <label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+				  <div class="col-sm-9">
+				  <div class="input-group date">
+					<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" data-date-format="YYYY-MM-DD" id="input-option{{ optionfield.field_id }}" class="form-control" />
+					<span class="input-group-btn">
+					<button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+					</span></div>
+					</div>
+				</div>
+				{% endif %}
+				{% if optionfield.type == 'datetime' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+				   <div class="col-sm-9">
+				  <div class="input-group datetime">
+					<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" data-date-format="YYYY-MM-DD HH:mm" id="input-option{{ optionfield.field_id }}" class="form-control" />
+					<span class="input-group-btn">
+					<button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+					</span></div>
+					</div>
+				</div>
+				{% endif %}
+				{% if optionfield.type == 'time' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+				    <label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+					<div class="input-group time">
+					<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" data-date-format="HH:mm" id="input-option{{ optionfield.field_id }}" class="form-control" />
+					<span class="input-group-btn">
+					<button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+					</span></div>
+				   </div>
+				</div>
+				{% endif %}
+				{% if optionfield.type == 'country' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">	
+						<select name="formfields[{{ optionfield.field_id }}]" id="input-formfields{{ optionfield.field_id }}" class="form-control country_id">
+							<option value="">{{ text_select }} </option>
+							{% for country in countries %}
+								{% if country.country_id == optionfield.field_id %}
+								<option value="{{ country.country_id }}" selected="selected">{{ country.name }} </option>
+								{% else %}
+								<option value="{{ country.country_id }}">{{ country.name }} </option>
+								{% endif %}
+							{% endfor %}
+						</select>
+					</div>
+				</div>	
+				{% endif %}
+				{% if optionfield.type == 'zone' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">	
+					<select name="formfields[{{ optionfield.field_id }}]" id="input-formfields{{ optionfield.field_id }}" class="form-control zone_id">
+					</select>
+					</div>
+				</div>	
+				{% endif %}	
+					
+				{% if optionfield.type == 'address' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+						<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" placeholder="{{ optionfield.placeholder }}" id="input-formfields{{ optionfield.field_id }}" class="form-control" />
+					</div>
+				</div>
+				{% endif %}	
+				{% if optionfield.type == 'postcode' %}
+				<div class="form-group{% if optionfield.required %} required {% endif %}">
+					<label class="col-sm-3 control-label" for="input-formfields{{ optionfield.field_id }}">
+						{% if optionfield.help_text %}
+							<span data-toggle="tooltip" title="{{ optionfield.help_text }}">
+						{% endif %}
+						  {{ optionfield.field_name }}
+						{% if optionfield.help_text %}
+							<i class="fa fa-question-circle" aria-hidden="true"></i> </span>
+						{% endif %}
+					</label>
+					<div class="col-sm-9">
+						<input type="text" name="formfields[{{ optionfield.field_id }}]" value="" placeholder="{{ optionfield.name }}" id="input-formfields{{ optionfield.field_id }}" class="form-control" />
+					</div>
+				</div>
+				{% endif %}	
+			  
+				{% endfor %}
+				{% endif %}	
+				{% if captchastatus==1 %}
+					
+					 {{ captcha }}
+					<div id="g-recaptcha"></div>
+					
+					{% endif %}	
+					
+						<div class="form-group">	
+                        <div  id="wait" class="loader hide">
+							<img src="image/loader.gif" 	alt="loading" title="loading"/>
+						</div>
+							<div class="buttons">
+								<div class="pull-right">
+									<button type="button" id="button-formbulider" data-loading-text="{{ text_loading }}" class="btn btn-primary btn-lg btn-block">{{ button_name }} </button>
+									{% if resetbutton==1 %}					
+									<input type="reset" value="{{ resetbutton_name }}"  class="btn btn-default btn-lg btn-block"/>
+									{% endif %}
+								</div>				
+							</div>	
+						</div>						
+				</div>
+			</form>
+		  <div class="bottomdescrption">{{ bottom_description }} </div>	  
+		</div>
+	</div>
+</div>
+<script type="text/javascript"><!--
+$('#button-formbulider').on('click', function() {
+	$.ajax({
+		url: 'index.php?route=extension/popupform/addpoup',
+		type: 'post',
+		data: $('#formbuilder input[type=\'text\'], #formbuilder input[type=\'password\'], #formbuilder input[type=\'hidden\'], #formbuilder input[type=\'radio\']:checked, #formbuilder input[type=\'checkbox\']:checked, #formbuilder select, #formbuilder textarea'),
+		dataType: 'json',
+		beforeSend: function() {
+			$('#button-formbulider').button('loading');
+           // $('.loader').removeClass('hide');
+		},
+		complete: function() {
+			$('#button-formbulider').button('reset');
+		},
+		success: function(json) {
+			$('.alert, .text-danger').remove();
+			/* validation class has error */
+			$('.form-group').removeClass('has-error');	
+			/* validation class has error */
+            $('.loader').addClass('hide');
+
+			if (json['error']) {
+				if (json['error']['formfields']) {
+					for (i in json['error']['formfields']) {
+						var element = $('#input-formfields' + i.replace('_', '-'));
+
+						if (element.parent().hasClass('input-group')) {
+							element.parent().after('<div class="text-danger">' + json['error']['formfields'][i] + '</div>');
+						} else {
+							element.after('<div class="text-danger">' + json['error']['formfields'][i] + '</div>');
+						}
+					}
+					/* validation class has error */			
+					$('.text-danger').parentsUntil('.form-group').parent().addClass('has-error');
+					/* validation class has error */
+				}
+
+				if(json['error']['g-recaptcha-response']!=''){
+				$('#g-recaptcha').after('<div class="col-sm-offset-2 text-danger">' + json['error']['g-recaptcha-response'] + '</div>');
+				}
+
+				/* warning code */
+				if (json['warning']) {	
+					
+					$('.form-horizontal').before('<div class="alert alert-danger warning"> <i class="fa fa-exclamation-circle"></i> ' + json['warning'] + '<button type="button" class="close" data-dismiss="alert">×</button> </div>');
+					$('.modal').animate({ scrollTop: 0 }, 'slow');
+				}	
+				/* warning code */
+			
+			}
+			if (json['success']) {
+				location='{{ producturl }}';
+			}
+		}
+	});
+});
+
+
+$('button[id^=\'button-upload\']').on('click', function() {
+	var node = this;
+
+	$('#form-upload').remove();
+
+	$('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
+
+	$('#form-upload input[name=\'file\']').trigger('click');
+
+	if (typeof timer != 'undefined') {
+    	clearInterval(timer);
+	}
+
+	timer = setInterval(function() {
+		if ($('#form-upload input[name=\'file\']').val() != '') {
+			clearInterval(timer);
+
+			$.ajax({
+				url: 'index.php?route=tool/upload',
+				type: 'post',
+				dataType: 'json',
+				data: new FormData($('#form-upload')[0]),
+				cache: false,
+				contentType: false,
+				processData: false,
+				beforeSend: function() {
+					$(node).button('loading');
+				},
+				complete: function() {
+					$(node).button('reset');
+				},
+				success: function(json) {
+					$('.text-danger').remove();
+
+					if (json['error']) {
+						$(node).parent().find('input').after('<div class="text-danger">' + json['error'] + '</div>');
+					}
+
+					if (json['success']) {
+						alert(json['success']);
+
+						$(node).parent().find('input').attr('value', json['code']);
+					}
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+				}
+			});
+		}
+	}, 500);
+});
+
+
+$('.date').datetimepicker({
+	pickTime: false
+});
+
+$('.datetime').datetimepicker({
+	pickDate: true,
+	pickTime: true
+});
+
+$('.time').datetimepicker({
+	pickDate: false
+});
+
+$('.country_id').on('change', function() {
+	$.ajax({
+		url: 'index.php?route=account/account/country&country_id=' + this.value,
+		dataType: 'json',
+		beforeSend: function() {
+			$('.country_id').after(' <i class="fa fa-circle-o-notch fa-spin"></i>');
+		},
+		complete: function() {
+			$('.fa-spin').remove();
+		},
+		success: function(json) {
+			
+			html = '<option value="">{{ text_select }} </option>';
+
+			if (json['zone'] && json['zone'] != '') {
+				for (i = 0; i < json['zone'].length; i++) {
+					html += '<option value="' + json['zone'][i]['zone_id'] + '"';
+
+					if (json['zone'][i]['zone_id'] == '') {
+						html += ' selected="selected"';
+					}
+
+					html += '>' + json['zone'][i].name + '</option>';
+				}
+			} else {
+				html += '<option value="0" selected="selected">{{ text_none }} </option>';
+			}
+
+			$('.zone_id').html(html);
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+$('select .country_id').trigger('change');
+//--></script>
+<style>
+{{ customcss }} 
+</style>

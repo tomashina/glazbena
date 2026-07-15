@@ -1,0 +1,150 @@
+{{ header }}
+<div class="container">
+
+ <ul class="breadcrumb">
+        <li><a href="{{ HTTPS_SERVER }}"><i class="fa fa-home"></i></a></li>
+        <li><a href="special">Akcije</a></li>
+      </ul>
+      <!-- breadcrumb -->
+<div class="breadcrumb-holder">
+
+<span id="title-holder">&nbsp;</span>
+<div class="links-holder">
+<a class="basel-back-btn" onClick="history.go(-1); return false;"><i></i></a><span>&nbsp;</span>
+</div>
+
+</div>
+
+  <div class="row">
+<div style="display:none">
+  {{ column_left }}
+</div>
+
+    {% if column_left and column_right %}
+    {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'col-md-12' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+    <div id="content" class="{{ class }}">
+
+    {{ content_top }}
+      <h1 id="page-title">{{ heading_title }}</h1>
+
+
+
+           {% if product_categories %}
+
+
+
+
+   <div class="grid-holder categories carousel grid-holder grid6 prod_module0 carousel">
+
+
+         {% for category in product_categories|sort %}
+                   <div class="item single-product">
+            <a href="https://www.glazbena-kutija.hr/special?category_id={{ category.id }}"><img src="{{ category.thumb }}" alt="{{ category.name }}" title="{{ category.name }}" /></a>
+            <a href="https://www.glazbena-kutija.hr/special?category_id={{ category.id }}">{{ category.name }}</a></div>
+          {% endfor %}
+
+           
+        </div>
+
+
+        
+
+
+
+
+       
+     {% endif %}
+
+      {% if products %}
+      <div id="product-view" class="grid">
+
+      <div class="table filter">
+
+    
+
+
+          <div class="table-cell nowrap hidden-xs">
+          <a id="grid-view" class="view-icon grid" data-toggle="tooltip" data-title="{{ button_grid }}"><i class="fa fa-th"></i></a>
+
+          </div>
+
+          <div class="table-cell w100">
+          <a href="{{ compare }}" id="compare-total" class="hidden-xs">{{ text_compare }}</a>
+          </div>
+
+          <div class="table-cell nowrap text-right">
+          <div class="sort-select">
+          <span class="hidden-xs">{{ text_sort }}</span>
+          <select id="input-sort" class="form-control input-sm inline" onchange="location = this.value;">
+            {% for sorts in sorts %}
+            {% if sorts.value == '%s-%s'|format(sort, order) %}
+            <option value="{{ sorts.href }}" selected="selected"> {{ sorts.text }}</option>
+            {% else %}
+            <option value="{{ sorts.href }}" >{{ sorts.text }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+          </div>
+          </div>
+
+          <div class="table-cell nowrap text-right hidden-xs hidden-sm">
+          <span>{{ text_limit }}</span>
+          <select id="input-limit" class="form-control input-sm inline" onchange="location = this.value;">
+            {% for limits in limits %}
+            {% if limits.value == limit %}
+            <option value="{{ limits.href }}" selected="selected">{{ limits.text }}</option>
+            {% else %}
+            <option value="{{ limits.href }}">{{ limits.text }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+          </div>
+
+      </div>
+
+      <div class="grid-holder product-holder grid4">
+        {% for product in products %}
+        {% include 'basel/template/product/single_product.twig' %}
+        {% endfor %}
+      </div>
+      </div> <!-- #product-view ends -->
+
+      <div class="row pagination-holder">
+        <div class="col-sm-6 xs-text-center">{{ pagination }}</div>
+        <div class="col-sm-6 text-right xs-text-center"><span class="pagination-text">{{ results }}</span></div>
+      </div>
+
+      {% else %}
+      	<p>{{ text_empty }}</p>
+      {% endif %}
+
+    </div>
+    {{ column_right }}</div>
+</div>
+{{ content_bottom }}
+
+ <script>
+             /* $('.grid-holder.prod_module0').slick({
+                  prevArrow: "<a class=\"arrow-left icon-arrow-left\"></a>",
+                  nextArrow: "<a class=\"arrow-right icon-arrow-right\"></a>",
+                  dots:true,
+                  respondTo:'min',
+                  infinite: false,
+                  rows:1,
+                  slidesToShow:5,slidesToScroll:2,responsive:[{breakpoint:960,settings:{slidesToShow:4,slidesToScroll:0}},{breakpoint:600,settings:{slidesToShow:2,slidesToScroll:2}},
+                  ]
+              });
+              $('.product-style2 .single-product .icon').attr('data-placement', 'top');
+              $('[data-toggle=\'tooltip\']').tooltip({container: 'body'});*/
+          </script>
+
+{{ footer }}
+
+
+
+      
