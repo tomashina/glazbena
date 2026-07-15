@@ -54,7 +54,7 @@ class ControllerToolBackup extends Controller {
 			
 			move_uploaded_file($this->request->files['import']['tmp_name'], $filename);
 		} elseif (isset($this->request->get['import'])) {
-			$filename = html_entity_decode($this->request->get['import'], ENT_QUOTES, 'UTF-8');
+			$filename = DIR_UPLOAD . basename(html_entity_decode($this->request->get['import'], ENT_QUOTES, 'UTF-8'));
 		} else {
 			$filename = '';
 		}
@@ -89,7 +89,7 @@ class ControllerToolBackup extends Controller {
 					$start = true;
 				}
 
-				if ($i > 0 && (substr($line, 0, 24) == 'TRUNCATE TABLE `oc_user`' || substr($line, 0, 30) == 'TRUNCATE TABLE `oc_user_group`')) {
+				if ($i > 0 && (substr($line, 0, 24) == 'TRUNCATE TABLE `' . DB_PREFIX .  'user`' || substr($line, 0, 30) == 'TRUNCATE TABLE `' . DB_PREFIX . 'user_group`')) {
 					fseek($handle, $position, SEEK_SET);
 
 					break;
@@ -101,7 +101,11 @@ class ControllerToolBackup extends Controller {
 				
 				if ($start && substr($line, -2) == ";\n") {
 					$this->db->query(substr($sql, 0, strlen($sql) -2));
-					
+
+					$start = false;
+				} else if ($start && substr($line, -3) == ";\r\n") {
+					$this->db->query(substr($sql, 0, strlen($sql) -3));
+
 					$start = false;
 				}
 					

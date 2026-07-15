@@ -20,7 +20,7 @@ class ModelExtensionPaymentGlobalpay extends Model {
 			  `account` VARCHAR(30) NOT NULL,
 			  `total` DECIMAL( 10, 2 ) NOT NULL,
 			  PRIMARY KEY (`globalpay_order_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
 		$this->db->query("
 			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "globalpay_order_transaction` (
@@ -30,14 +30,14 @@ class ModelExtensionPaymentGlobalpay extends Model {
 			  `type` ENUM('auth', 'payment', 'rebate', 'void') DEFAULT NULL,
 			  `amount` DECIMAL( 10, 2 ) NOT NULL,
 			  PRIMARY KEY (`globalpay_order_transaction_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 	}
 
 	public function void($order_id) {
 		$globalpay_order = $this->getOrder($order_id);
 
 		if (!empty($globalpay_order)) {
-			$timestamp = strftime("%Y%m%d%H%M%S");
+			$timestamp = date("YmdHis");
 			$merchant_id = $this->config->get('payment_globalpay_merchant_id');
 			$secret = $this->config->get('payment_globalpay_secret');
 
@@ -84,7 +84,7 @@ class ModelExtensionPaymentGlobalpay extends Model {
 		$globalpay_order = $this->getOrder($order_id);
 
 		if (!empty($globalpay_order) && $globalpay_order['capture_status'] == 0) {
-			$timestamp = strftime("%Y%m%d%H%M%S");
+			$timestamp = date("YmdHis");
 			$merchant_id = $this->config->get('payment_globalpay_merchant_id');
 			$secret = $this->config->get('payment_globalpay_secret');
 
@@ -153,7 +153,7 @@ class ModelExtensionPaymentGlobalpay extends Model {
 		$globalpay_order = $this->getOrder($order_id);
 
 		if (!empty($globalpay_order) && $globalpay_order['rebate_status'] != 1) {
-			$timestamp = strftime("%Y%m%d%H%M%S");
+			$timestamp = date("YmdHis");
 			$merchant_id = $this->config->get('payment_globalpay_merchant_id');
 			$secret = $this->config->get('payment_globalpay_secret');
 

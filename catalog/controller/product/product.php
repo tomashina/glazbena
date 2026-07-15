@@ -113,7 +113,7 @@ class ControllerProductProduct extends Controller {
 			}
 
 			if (isset($this->request->get['tag'])) {
-				$url .= '&tag=' . $this->request->get['tag'];
+				$url .= '&tag=' . urlencode(html_entity_decode(trim($this->request->get['tag']), ENT_QUOTES, 'UTF-8'));
 			}
 
 			if (isset($this->request->get['description'])) {
@@ -194,7 +194,7 @@ class ControllerProductProduct extends Controller {
 			}
 
 			if (isset($this->request->get['tag'])) {
-				$url .= '&tag=' . $this->request->get['tag'];
+				$url .= '&tag=' . urlencode(html_entity_decode(trim($this->request->get['tag']), ENT_QUOTES, 'UTF-8'));
 			}
 
 			if (isset($this->request->get['description'])) {
@@ -346,7 +346,7 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 			}
 
 			if ($this->config->get('config_tax')) {
-				$data['tax'] = $this->currency->format((float)$product_info['special'] ? $product_info['special'] : $product_info['price'], $this->session->data['currency']);
+				$data['tax'] = $this->currency->format($tax_price, $this->session->data['currency']);
 			} else {
 				$data['tax'] = false;
 			}
@@ -507,9 +507,9 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 					$special = false;
 					$specialeur  ='';
 				}
-
+	
 				if ($this->config->get('config_tax')) {
-					$tax = $this->currency->format((float)$result['special'] ? $result['special'] : $result['price'], $this->session->data['currency']);
+					$tax = $this->currency->format($tax_price, $this->session->data['currency']);
 				} else {
 					$tax = false;
 				}
@@ -563,7 +563,7 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 				foreach ($tags as $tag) {
 					$data['tags'][] = array(
 						'tag'  => trim($tag),
-						'href' => $this->url->link('product/search', 'tag=' . trim($tag))
+						'href' => $this->url->link('product/search', 'tag=' . urlencode(html_entity_decode(trim($tag), ENT_QUOTES, 'UTF-8')))
 					);
 				}
 			}
@@ -600,7 +600,7 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 			}
 
 			if (isset($this->request->get['tag'])) {
-				$url .= '&tag=' . $this->request->get['tag'];
+				$url .= '&tag=' . urlencode(html_entity_decode(trim($this->request->get['tag']), ENT_QUOTES, 'UTF-8'));
 			}
 
 			if (isset($this->request->get['description'])) {
@@ -659,7 +659,7 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 		$this->load->model('catalog/review');
 
 		if (isset($this->request->get['page'])) {
-			$page = $this->request->get['page'];
+			$page = (int)$this->request->get['page'];
 		} else {
 			$page = 1;
 		}
@@ -697,36 +697,40 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 
 		$json = array();
 
-		if ($this->request->server['REQUEST_METHOD'] == 'POST') {
-			if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 25)) {
-				$json['error'] = $this->language->get('error_name');
-			}
+		if (isset($this->request->get['product_id']) && $this->request->get['product_id']) {
+			if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+				if ((utf8_strlen($this->request->post['name']) < 3) || (utf8_strlen($this->request->post['name']) > 25)) {
+					$json['error'] = $this->language->get('error_name');
+				}
 
-			if ((utf8_strlen($this->request->post['text']) < 25) || (utf8_strlen($this->request->post['text']) > 1000)) {
-				$json['error'] = $this->language->get('error_text');
-			}
+				if ((utf8_strlen($this->request->post['text']) < 25) || (utf8_strlen($this->request->post['text']) > 1000)) {
+					$json['error'] = $this->language->get('error_text');
+				}
+			
+				if (empty($this->request->post['rating']) || $this->request->post['rating'] < 0 || $this->request->post['rating'] > 5) {
+					$json['error'] = $this->language->get('error_rating');
+				}
 
-			if (empty($this->request->post['rating']) || $this->request->post['rating'] < 0 || $this->request->post['rating'] > 5) {
-				$json['error'] = $this->language->get('error_rating');
-			}
+				// Captcha
+				if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
+					$captcha = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha') . '/validate');
 
-			// Captcha
-			if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
-				$captcha = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha') . '/validate');
+					if ($captcha) {
+						$json['error'] = $captcha;
+					}
+				}
 
-				if ($captcha) {
-					$json['error'] = $captcha;
+				if (!isset($json['error'])) {
+					$this->load->model('catalog/review');
+
+					$this->model_catalog_review->addReview($this->request->get['product_id'], $this->request->post);
+
+					$json['success'] = $this->language->get('text_success');
 				}
 			}
-
-			if (!isset($json['error'])) {
-				$this->load->model('catalog/review');
-
-				$this->model_catalog_review->addReview($this->request->get['product_id'], $this->request->post);
-
-				$json['success'] = $this->language->get('text_success');
-			}
-		}
+		} else {
+			$json['error'] = $this->language->get('error_product');
+		} 
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));

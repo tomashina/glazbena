@@ -36,7 +36,7 @@ class ControllerMailOrder extends Controller {
 			
 			// If order status is not 0 then send update text email
 			if ($order_info['order_status_id'] && $order_status_id && $notify) {
-				$this->edit($order_info, $order_status_id, $comment, $notify);
+				$this->edit($order_info, $order_status_id, $comment);
 			}		
 		}
 	}
@@ -517,6 +517,7 @@ class ControllerMailOrder extends Controller {
 			$emails = explode(',', $this->config->get('config_mail_alert_email'));
 
 			foreach ($emails as $email) {
+				$email = trim($email);
 				if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
 					$mail->setTo($email);
 					//$mail->send();

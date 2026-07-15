@@ -1,9 +1,26 @@
 <?php
 class ControllerCommonHome extends Controller {
 	public function index() {
-		$this->document->setTitle($this->config->get('config_meta_title'));
-		$this->document->setDescription($this->config->get('config_meta_description'));
-		$this->document->setKeywords($this->config->get('config_meta_keyword'));
+		$language_id = (int)$this->config->get('config_language_id');
+		$meta_title = $this->config->get('config_meta_title');
+		$meta_description = $this->config->get('config_meta_description');
+		$meta_keyword = $this->config->get('config_meta_keyword');
+
+		if (is_array($meta_title)) {
+			$meta_title = isset($meta_title[$language_id]) ? $meta_title[$language_id] : '';
+		}
+
+		if (is_array($meta_description)) {
+			$meta_description = isset($meta_description[$language_id]) ? $meta_description[$language_id] : '';
+		}
+
+		if (is_array($meta_keyword)) {
+			$meta_keyword = isset($meta_keyword[$language_id]) ? $meta_keyword[$language_id] : '';
+		}
+
+		$this->document->setTitle($meta_title ?: $this->config->get('config_name'));
+		$this->document->setDescription($meta_description);
+		$this->document->setKeywords($meta_keyword);
 
 		if (isset($this->request->get['route'])) {
 			$this->document->addLink($this->config->get('config_url'), 'canonical');

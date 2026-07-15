@@ -1,5 +1,7 @@
 <?php
 class ControllerExtensionReportCustomerSearch extends Controller {
+	private $error = array();
+
 	public function index() {
 		$this->load->language('extension/report/customer_search');
 
@@ -103,7 +105,7 @@ class ControllerExtensionReportCustomerSearch extends Controller {
 		}
 
 		if (isset($this->request->get['page'])) {
-			$page = $this->request->get['page'];
+			$page = (int)$this->request->get['page'];
 		} else {
 			$page = 1;
 		}
@@ -114,13 +116,13 @@ class ControllerExtensionReportCustomerSearch extends Controller {
 		$data['searches'] = array();
 
 		$filter_data = array(
-			'filter_date_start'	=> $filter_date_start,
-			'filter_date_end'	=> $filter_date_end,
+			'filter_date_start' => $filter_date_start,
+			'filter_date_end'   => $filter_date_end,
 			'filter_keyword'    => $filter_keyword,
 			'filter_customer'   => $filter_customer,
 			'filter_ip'         => $filter_ip,
-			'start'             => ($page - 1) * 20,
-			'limit'             => 20
+			'start'             => ($page - 1) * $this->config->get('config_limit_admin'),
+			'limit'             => $this->config->get('config_limit_admin')
 		);
 
 		$search_total = $this->model_extension_report_customer->getTotalCustomerSearches($filter_data);
@@ -174,10 +176,6 @@ class ControllerExtensionReportCustomerSearch extends Controller {
 
 		if (isset($this->request->get['filter_ip'])) {
 			$url .= '&filter_ip=' . $this->request->get['filter_ip'];
-		}
-
-		if (isset($this->request->get['page'])) {
-			$url .= '&page=' . $this->request->get['page'];
 		}
 
 		$pagination = new Pagination();

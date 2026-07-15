@@ -6,12 +6,12 @@ class ModelExtensionFraudIp extends Model {
 		  `ip` varchar(40) NOT NULL,
 		  `date_added` datetime NOT NULL,
 		  PRIMARY KEY (`ip`)
-		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 		");
 	}
 
 	public function uninstall() {
-		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "ip`");
+		$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "fraud_ip`");
 	}
 
     public function addIp($ip) {

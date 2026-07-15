@@ -20,7 +20,7 @@ class ModelExtensionPaymentRealex extends Model {
 			  `account` VARCHAR(30) NOT NULL,
 			  `total` DECIMAL( 10, 2 ) NOT NULL,
 			  PRIMARY KEY (`realex_order_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
 		$this->db->query("
 			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "realex_order_transaction` (
@@ -30,14 +30,14 @@ class ModelExtensionPaymentRealex extends Model {
 			  `type` ENUM('auth', 'payment', 'rebate', 'void') DEFAULT NULL,
 			  `amount` DECIMAL( 10, 2 ) NOT NULL,
 			  PRIMARY KEY (`realex_order_transaction_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 	}
 
 	public function void($order_id) {
 		$realex_order = $this->getOrder($order_id);
 
 		if (!empty($realex_order)) {
-			$timestamp = strftime("%Y%m%d%H%M%S");
+			$timestamp = date("YmdHis");
 			$merchant_id = $this->config->get('payment_realex_merchant_id');
 			$secret = $this->config->get('payment_realex_secret');
 
@@ -84,7 +84,7 @@ class ModelExtensionPaymentRealex extends Model {
 		$realex_order = $this->getOrder($order_id);
 
 		if (!empty($realex_order) && $realex_order['capture_status'] == 0) {
-			$timestamp = strftime("%Y%m%d%H%M%S");
+			$timestamp = date("YmdHis");
 			$merchant_id = $this->config->get('payment_realex_merchant_id');
 			$secret = $this->config->get('payment_realex_secret');
 
@@ -153,7 +153,7 @@ class ModelExtensionPaymentRealex extends Model {
 		$realex_order = $this->getOrder($order_id);
 
 		if (!empty($realex_order) && $realex_order['rebate_status'] != 1) {
-			$timestamp = strftime("%Y%m%d%H%M%S");
+			$timestamp = date("YmdHis");
 			$merchant_id = $this->config->get('payment_realex_merchant_id');
 			$secret = $this->config->get('payment_realex_secret');
 

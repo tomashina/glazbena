@@ -1,6 +1,5 @@
 <?php
-
-use \googleshopping\exception\Connection as ConnectionException;
+use \googleshopping\Exception\Connection as ConnectionException;
 use \googleshopping\Googleshopping;
 
 class ModelExtensionAdvertiseGoogle extends Model {
@@ -338,7 +337,7 @@ class ModelExtensionAdvertiseGoogle extends Model {
         }
     }
 
-    public function insertNewProducts($product_ids = array(), $store_id) {
+    public function insertNewProducts($product_ids, $store_id) {
         $sql = "INSERT INTO `" . DB_PREFIX . "googleshopping_product` (`product_id`, `store_id`, `google_product_category`) SELECT p.product_id, p2s.store_id, (SELECT c2gpc.google_product_category FROM `" . DB_PREFIX . "product_to_category` p2c LEFT JOIN `" . DB_PREFIX . "category_path` cp ON (p2c.category_id = cp.category_id) LEFT JOIN `" . DB_PREFIX . "googleshopping_category` c2gpc ON (c2gpc.category_id = cp.path_id AND c2gpc.store_id = " . (int)$store_id . ") WHERE p2c.product_id = p.product_id AND c2gpc.google_product_category IS NOT NULL ORDER BY cp.level DESC LIMIT 0,1) as `google_product_category` FROM `" . DB_PREFIX . "product` p LEFT JOIN `" . DB_PREFIX . "product_to_store` p2s ON (p2s.product_id = p.product_id AND p2s.store_id = " . (int)$store_id . ") LEFT JOIN `" . DB_PREFIX . "googleshopping_product` pag ON (pag.product_id = p.product_id AND pag.store_id=p2s.store_id) WHERE pag.product_id IS NULL AND p2s.store_id IS NOT NULL";
 
         if (!empty($product_ids)) {
@@ -410,7 +409,7 @@ class ModelExtensionAdvertiseGoogle extends Model {
         return "`google_product_category`=VALUES(`google_product_category`), `condition`=VALUES(`condition`), `adult`=VALUES(`adult`), `multipack`=VALUES(`multipack`), `is_bundle`=VALUES(`is_bundle`), `age_group`=VALUES(`age_group`), `color`=VALUES(`color`), `gender`=VALUES(`gender`), `size_type`=VALUES(`size_type`), `size_system`=VALUES(`size_system`), `size`=VALUES(`size`), `is_modified`=VALUES(`is_modified`)";
     }
 
-    public function getCategories($data = array(), $store_id) {
+    public function getCategories($data, $store_id) {
         $sql = "SELECT cp.category_id AS category_id, GROUP_CONCAT(cd1.name ORDER BY cp.level SEPARATOR '&nbsp;&nbsp;&gt;&nbsp;&nbsp;') AS name, c1.parent_id, c1.sort_order FROM " . DB_PREFIX . "category_path cp LEFT JOIN `" . DB_PREFIX . "category_to_store` c2s ON (c2s.category_id = cp.category_id AND c2s.store_id=" . (int)$store_id . ") LEFT JOIN " . DB_PREFIX . "category c1 ON (cp.category_id = c1.category_id) LEFT JOIN " . DB_PREFIX . "category c2 ON (cp.path_id = c2.category_id) LEFT JOIN " . DB_PREFIX . "category_description cd1 ON (cp.path_id = cd1.category_id) LEFT JOIN " . DB_PREFIX . "category_description cd2 ON (cp.category_id = cd2.category_id) WHERE c2s.store_id IS NOT NULL AND cd1.language_id = '" . (int)$this->config->get('config_language_id') . "' AND cd2.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
         if (!empty($data['filter_name'])) {
@@ -571,7 +570,7 @@ class ModelExtensionAdvertiseGoogle extends Model {
             `is_modified` TINYINT(1) NOT NULL DEFAULT '0',
             PRIMARY KEY (`product_advertise_google_id`),
             UNIQUE `product_id_store_id` (`product_id`, `store_id`)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "googleshopping_product_status` (
             `product_id` INT(11),
@@ -582,14 +581,14 @@ class ModelExtensionAdvertiseGoogle extends Model {
             `item_level_issues` TEXT NOT NULL,
             `google_expiration_date` INT(11) NOT NULL DEFAULT '0',
             PRIMARY KEY (`product_id`, `store_id`, `product_variation_id`)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "googleshopping_product_target` (
             `product_id` INT(11) NOT NULL,
             `store_id` INT(11) NOT NULL DEFAULT '0',
             `advertise_google_target_id` INT(11) UNSIGNED NOT NULL,
             PRIMARY KEY (`product_id`, `advertise_google_target_id`)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "googleshopping_category` (
             `google_product_category` VARCHAR(10) NOT NULL,
@@ -597,7 +596,7 @@ class ModelExtensionAdvertiseGoogle extends Model {
             `category_id` INT(11) NOT NULL,
             INDEX `category_id_store_id` (`category_id`, `store_id`),
             PRIMARY KEY (`google_product_category`, `store_id`)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "googleshopping_target` (
             `advertise_google_target_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -611,7 +610,7 @@ class ModelExtensionAdvertiseGoogle extends Model {
             `status` ENUM('paused','active') NOT NULL DEFAULT 'paused',
             INDEX `store_id` (`store_id`),
             PRIMARY KEY (`advertise_google_target_id`)
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+        ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
 
     public function fixColumns() {

@@ -6,8 +6,8 @@ $_['date_format_short']     = 'd/m/Y';
 $_['date_format_long']      = 'l dS F Y';
 $_['time_format']           = 'h:i:s A';
 $_['datetime_format']       = 'd/m/Y H:i:s';
-$_['decimal_point']         = ',';
-$_['thousand_point']        = '.';
+$_['decimal_point']         = '.';
+$_['thousand_point']        = ',';
 
 // Text
 $_['text_home']             = '<i class="fa fa-home"></i>';
@@ -24,7 +24,7 @@ $_['text_no_results']       = 'No results!';
 $_['button_address_add']    = 'Add Address';
 $_['button_back']           = 'Back';
 $_['button_continue']       = 'Continue';
-$_['button_cart']           = 'Add to Basket';
+$_['button_cart']           = 'Add to Cart';
 $_['button_cancel']         = 'Cancel';
 $_['button_compare']        = 'Compare this Product';
 $_['button_wishlist']       = 'Add to Wish List';

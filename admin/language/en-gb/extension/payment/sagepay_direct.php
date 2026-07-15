@@ -6,13 +6,11 @@ $_['heading_title']			  = 'SagePay Direct';
 $_['text_extension']		  = 'Extensions';
 $_['text_success']			  = 'Success: You have modified SagePay account details!';
 $_['text_edit']               = 'Edit SagePay Direct';
-$_['text_sagepay_direct']	  = '<a href="https://support.sagepay.com/apply/default.aspx?PartnerID=E511AF91-E4A0-42DE-80B0-09C981A3FB61" target="_blank"><img src="view/image/payment/sagepay.png" alt="SagePay" title="SagePay" style="border: 1px solid #EEEEEE;" /></a>';
-$_['text_sim']				  = 'Simulator';
 $_['text_test']				  = 'Test';
 $_['text_live']				  = 'Live';
 $_['text_defered']			  = 'Defered';
 $_['text_authenticate']		  = 'Authenticate';
-$_['text_payment']		  = 'Payment';
+$_['text_payment']			  = 'Payment';
 $_['text_release_ok']		  = 'Release was successful';
 $_['text_release_ok_order']	  = 'Release was successful, order status updated to success - settled';
 $_['text_rebate_ok']		  = 'Rebate was successful';
@@ -54,6 +52,9 @@ $_['help_debug']			  = 'Enabling debug will write sensitive data to a log file. 
 $_['help_transaction']		  = 'Transaction method MUST be set to Payment to allow subscription payments';
 $_['help_cron_job_token']	  = 'Make this long and hard to guess';
 $_['help_cron_job_url']		  = 'Set a cron job to call this URL';
+$_['text_void']               = 'Void';
+$_['text_payment']            = "Payment";
+$_['text_rebate']             = 'Rebate';
 
 // Button
 $_['button_release']		  = 'Release';

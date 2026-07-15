@@ -24,6 +24,7 @@ class ControllerStartupPermission extends Controller {
 				'extension/dashboard',
 				'extension/analytics',
 				'extension/captcha',
+				'extension/currency',
 				'extension/extension',
 				'extension/feed',
 				'extension/fraud',
@@ -32,8 +33,7 @@ class ControllerStartupPermission extends Controller {
 				'extension/shipping',
 				'extension/theme',
 				'extension/total',
-				'extension/report',
-                'extension/openbay'
+				'extension/report'
 			);
 
 			if (isset($part[2]) && in_array($route, $extension)) {

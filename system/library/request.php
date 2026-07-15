@@ -13,6 +13,7 @@
 class Request {
 	public $get = array();
 	public $post = array();
+	public $request = array();
 	public $cookie = array();
 	public $files = array();
 	public $server = array();
@@ -31,7 +32,7 @@ class Request {
 	
 	/**
      * 
-	 * @param	array	$data
+	 * @param	mixed	$data
 	 *
      * @return	array
      */
@@ -39,11 +40,10 @@ class Request {
 		if (is_array($data)) {
 			foreach ($data as $key => $value) {
 				unset($data[$key]);
-
 				$data[$this->clean($key)] = $this->clean($value);
 			}
 		} else {
-			$data = htmlspecialchars($data, ENT_COMPAT, 'UTF-8');
+			$data = trim(htmlspecialchars($data ?? '', ENT_COMPAT, 'UTF-8'));
 		}
 
 		return $data;

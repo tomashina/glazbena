@@ -15,7 +15,6 @@ class Settlement extends ResultObject
 
     /** @type string Three-letter ISO currency code representing the currency in
         which the settlement was made.
-        Supported currencies: EUR, USD.
         Value assigned by Cardinity. */
     private $currency;
 
@@ -56,7 +55,7 @@ class Settlement extends ResultObject
     /** @type string Settlement description provided by a merchant.
         Maximum length 255 characters. */
     private $description;
- 
+
     /**
      * Gets the value of id.
      * @return mixed
@@ -65,7 +64,7 @@ class Settlement extends ResultObject
     {
         return $this->id;
     }
- 
+
     /**
      * Sets the value of id.
      * @param mixed $id the id
@@ -75,7 +74,7 @@ class Settlement extends ResultObject
     {
         $this->id = $id;
     }
- 
+
     /**
      * Gets the value of amount.
      * @return mixed
@@ -84,7 +83,7 @@ class Settlement extends ResultObject
     {
         return $this->amount;
     }
- 
+
     /**
      * Sets the value of amount.
      * @param mixed $amount the amount
@@ -94,7 +93,7 @@ class Settlement extends ResultObject
     {
         $this->amount = $amount;
     }
- 
+
     /**
      * Gets the value of currency.
      * @return mixed
@@ -103,7 +102,7 @@ class Settlement extends ResultObject
     {
         return $this->currency;
     }
- 
+
     /**
      * Sets the value of currency.
      * @param mixed $currency the currency
@@ -113,7 +112,7 @@ class Settlement extends ResultObject
     {
         $this->currency = $currency;
     }
- 
+
     /**
      * Gets the value of type.
      * @return mixed
@@ -122,7 +121,7 @@ class Settlement extends ResultObject
     {
         return $this->type;
     }
- 
+
     /**
      * Sets the value of type.
      * @param mixed $type the type
@@ -132,7 +131,7 @@ class Settlement extends ResultObject
     {
         $this->type = $type;
     }
- 
+
     /**
      * Gets the value of created.
      * @return mixed
@@ -141,7 +140,7 @@ class Settlement extends ResultObject
     {
         return $this->created;
     }
- 
+
     /**
      * Sets the value of created.
      * @param mixed $created the created
@@ -151,7 +150,7 @@ class Settlement extends ResultObject
     {
         $this->created = $created;
     }
- 
+
     /**
      * Gets the value of live.
      * @return mixed
@@ -160,7 +159,7 @@ class Settlement extends ResultObject
     {
         return $this->live;
     }
- 
+
     /**
      * Sets the value of live.
      * @param mixed $live the live
@@ -170,7 +169,7 @@ class Settlement extends ResultObject
     {
         $this->live = $live;
     }
- 
+
     /**
      * Gets the value of parentId.
      * @return mixed
@@ -179,7 +178,7 @@ class Settlement extends ResultObject
     {
         return $this->parentId;
     }
- 
+
     /**
      * Sets the value of parentId.
      * @param mixed $parentId the parent id
@@ -189,7 +188,7 @@ class Settlement extends ResultObject
     {
         $this->parentId = $parentId;
     }
- 
+
     /**
      * Gets the value of status.
      * @return mixed
@@ -198,7 +197,7 @@ class Settlement extends ResultObject
     {
         return $this->status;
     }
- 
+
     /**
      * Sets the value of status.
      * @param mixed $status the status
@@ -208,7 +207,7 @@ class Settlement extends ResultObject
     {
         $this->status = $status;
     }
- 
+
     /**
      * Gets the value of error.
      * @return mixed
@@ -217,7 +216,7 @@ class Settlement extends ResultObject
     {
         return $this->error;
     }
- 
+
     /**
      * Sets the value of error.
      * @param mixed $error the error
@@ -227,7 +226,7 @@ class Settlement extends ResultObject
     {
         $this->error = $error;
     }
- 
+
     /**
      * Gets the value of orderId.
      * @return mixed
@@ -236,7 +235,7 @@ class Settlement extends ResultObject
     {
         return $this->orderId;
     }
- 
+
     /**
      * Sets the value of orderId.
      * @param mixed $orderId the order id
@@ -246,7 +245,7 @@ class Settlement extends ResultObject
     {
         $this->orderId = $orderId;
     }
- 
+
     /**
      * Gets the value of description.
      * @return mixed
@@ -255,7 +254,7 @@ class Settlement extends ResultObject
     {
         return $this->description;
     }
- 
+
     /**
      * Sets the value of description.
      * @param mixed $description the description
@@ -264,5 +263,23 @@ class Settlement extends ResultObject
     public function setDescription($description)
     {
         $this->description = $description;
+    }
+
+    /**
+     * Check if settlement is approved
+     * @return boolean
+     */
+    public function isApproved()
+    {
+        return $this->getStatus() === 'approved';
+    }
+
+    /**
+     * Check if settlement is declined
+     * @return boolean
+     */
+    public function isDeclined()
+    {
+        return $this->getStatus() === 'declined';
     }
 }

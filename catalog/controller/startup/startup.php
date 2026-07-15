@@ -1,5 +1,17 @@
 <?php
 class ControllerStartupStartup extends Controller {
+
+	public function __isset($key) {
+		// To make sure that calls to isset also support dynamic properties from the registry
+		// See https://www.php.net/manual/en/language.oop5.overloading.php#object.isset
+		if ($this->registry) {
+			if ($this->registry->get($key)!==null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public function index() {
 		// Store
 		if ($this->request->server['HTTPS']) {
@@ -30,6 +42,14 @@ class ControllerStartupStartup extends Controller {
 			} else {
 				$this->config->set($result['key'], json_decode($result['value'], true));
 			}
+		}
+
+		// Set time zone
+		if ($this->config->get('config_timezone')) {
+			date_default_timezone_set($this->config->get('config_timezone'));
+
+			// Sync PHP and DB time zones.
+			$this->db->query("SET time_zone = '" . $this->db->escape(date('P')) . "'");
 		}
 
 		// Theme
@@ -184,7 +204,7 @@ class ControllerStartupStartup extends Controller {
 		}
 
 		if (!isset($this->request->cookie['language']) || $this->request->cookie['language'] != $code) {
-			setcookie('language', $code, time() + 60 * 60 * 24 * 30, '/', $this->request->server['HTTP_HOST']);
+			setcookie('language', $code, time() + 60 * 60 * 24 * 30, '/');
 		}
 
 		// Overwrite the default language object
@@ -209,6 +229,8 @@ class ControllerStartupStartup extends Controller {
 			$this->config->set('config_customer_group_id', $this->customer->getGroupId());
 		} elseif (isset($this->session->data['guest']) && isset($this->session->data['guest']['customer_group_id'])) {
 			$this->config->set('config_customer_group_id', $this->session->data['guest']['customer_group_id']);
+		} else {
+			$this->config->set('config_customer_group_id', $this->config->get('config_customer_group_id'));
 		}
 
 		// Tracking Code
@@ -258,7 +280,7 @@ class ControllerStartupStartup extends Controller {
 			$this->tax->setShippingAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
 		}
 
-		if (isset($this->session->data['payment_address'])) {
+		if (isset($this->session->data['payment_address']['country_id']) && isset($this->session->data['payment_address']['zone_id'])) {
 			$this->tax->setPaymentAddress($this->session->data['payment_address']['country_id'], $this->session->data['payment_address']['zone_id']);
 		} elseif ($this->config->get('config_tax_default') == 'payment') {
 			$this->tax->setPaymentAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
@@ -281,7 +303,5 @@ class ControllerStartupStartup extends Controller {
 		// Encryption
 		$this->registry->set('encryption', new Encryption($this->config->get('config_encryption')));
 
-		// OpenBay Pro
-		$this->registry->set('openbay', new Openbay($this->registry));
 	}
 }

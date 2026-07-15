@@ -17,6 +17,7 @@ system/storage/modification/*
 system/storage/session/*
 system/storage/upload/*
 system/storage/download/*
+system/storage/upgrade-unlocked
 
 # Generated thumbnails and large product-media library (stored separately)
 image/cache/
@@ -26,6 +27,7 @@ image/tmp/
 # Database dumps and private import feeds
 *.sql
 SHOP_sync.xml
+upgrade-backups/
 
 # Temporary/backup files
 *~
@@ -35,4 +37,3 @@ SHOP_sync.xml
 *.zip
 *-old
 *----
-

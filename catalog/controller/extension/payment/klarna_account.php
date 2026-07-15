@@ -3,6 +3,10 @@ class ControllerExtensionPaymentKlarnaAccount extends Controller {
 	public function index() {
 		$this->load->model('checkout/order');
 
+		if(!isset($this->session->data['order_id'])) {
+			return false;
+		}
+
 		$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 
 		if ($order_info) {
@@ -270,6 +274,10 @@ class ControllerExtensionPaymentKlarnaAccount extends Controller {
 
 		$this->load->model('checkout/order');
 
+		if(!isset($this->session->data['order_id'])) {
+			return false;
+		}
+
 		$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
 
 		// Order must have identical shipping and billing address or have no shipping address at all
@@ -420,7 +428,7 @@ class ControllerExtensionPaymentKlarnaAccount extends Controller {
 				$digest = '';
 
 				foreach ($goods_list as $goods) {
-					$digest .= utf8_decode(htmlspecialchars(html_entity_decode($goods['goods']['title'], ENT_COMPAT, 'UTF-8'))) . ':';
+					$digest .= htmlspecialchars(html_entity_decode($goods['goods']['title'], ENT_COMPAT, 'UTF-8')) . ':';
 				}
 
 				$digest = base64_encode(pack('H*', hash('sha256', $digest . $klarna_account[$order_info['payment_iso_code_3']]['secret'])));

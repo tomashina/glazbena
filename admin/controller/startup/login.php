@@ -6,12 +6,7 @@ class ControllerStartupLogin extends Controller {
 		$ignore = array(
 			'common/login',
 			'common/forgotten',
-			'common/reset',
-            'catalog/product/importProductsFromXML',
-            'catalog/product/importProductsWithoutCodesFromXML',
-            'catalog/product/importProductsTranslationsFromXML',
-            'catalog/product/updateProductsPrices',
-            'catalog/product/testing'
+			'common/reset'
 		);
 
 		// User
@@ -28,12 +23,7 @@ class ControllerStartupLogin extends Controller {
 				'common/forgotten',
 				'common/reset',
 				'error/not_found',
-				'error/permission',
-                'catalog/product/importProductsFromXML',
-                'catalog/product/importProductsWithoutCodesFromXML',
-                'catalog/product/importProductsTranslationsFromXML',
-                'catalog/product/updateProductsPrices',
-                'catalog/product/testing'
+				'error/permission'
 			);
 
 			if (!in_array($route, $ignore) && (!isset($this->request->get['user_token']) || !isset($this->session->data['user_token']) || ($this->request->get['user_token'] != $this->session->data['user_token']))) {

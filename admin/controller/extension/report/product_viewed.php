@@ -1,5 +1,7 @@
 <?php
 class ControllerExtensionReportProductViewed extends Controller {
+	private $error = array();
+
 	public function index() {
 		$this->load->language('extension/report/product_viewed');
 
@@ -73,12 +75,12 @@ class ControllerExtensionReportProductViewed extends Controller {
 		$this->load->language('extension/report/product_viewed');
 
 		if (isset($this->request->get['page'])) {
-			$page = $this->request->get['page'];
+			$page = (int)$this->request->get['page'];
 		} else {
 			$page = 1;
 		}
 		
-		$data['reset'] = $this->url->link('extension/report/product_viewed/reset', 'user_token=' . $this->session->data['user_token'] . '&page={page}', true);
+		$data['reset'] = $this->url->link('extension/report/product_viewed/reset', 'user_token=' . $this->session->data['user_token'], true);
 
 		$this->load->model('extension/report/product');
 
@@ -144,6 +146,6 @@ class ControllerExtensionReportProductViewed extends Controller {
 			$this->session->data['success'] = $this->language->get('text_success');
 		}
 
-		$this->response->redirect($this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=product_viewed' . $url, true));
+		$this->response->redirect($this->url->link('report/report', 'user_token=' . $this->session->data['user_token'] . '&code=product_viewed', true));
 	}
 }

@@ -211,7 +211,7 @@ class ControllerExtensionModuleBaselProducts extends Controller {
 						'jan'  => $result['jan'],
 						'thumb'   	 => $image,
 						'thumb2' 	 => $this->model_tool_image->resize($image2, $setting['image_width'], $setting['image_height']),
-						'sale_end_date'  => $date_end['date_end'],
+							'sale_end_date'  => $date_end ? $date_end['date_end'] : '',
 						'name'    	 => $result['name'],
 						'price'   	 => $price,
 						'new_label'  => $is_new,

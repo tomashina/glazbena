@@ -193,7 +193,7 @@ class ModelExtensionShippingECShip extends Model {
 			'ESP'                            => 'ESA',
 			'LKA'                            => 'LKA',
 			'KNA'                            => 'KNA',
-			'SHN'                            => 'SHA',
+			'SHN'                            => array('SHA','TAA'),
 			'LCA'                            => 'LCA',
 			'SPM'                            => 'PMA',
 			'VCT'                            => 'VCA',
@@ -210,7 +210,6 @@ class ModelExtensionShippingECShip extends Model {
 			'TGO'                            => 'TGA',
 			'TON'                            => 'TOA',
 			'TTO'                            => 'TTA',
-			'SHN'                            => 'TAA',
 			'TUN'                            => 'TNA',
 			'TUR'                            => 'TRA',
 			'TKM'                            => 'TMA',
@@ -237,14 +236,13 @@ class ModelExtensionShippingECShip extends Model {
 			),
 			'CHN'                  => array(
 				'BE'                         => 'CNA',
-				'FU'                         => 'CNB',
+				'FU'                         => array('CNB', 'CNJ'),
 				'GU'                         => 'CNC',
 				'ZH'                         => 'CND',
 				'YU'                         => 'CNE',
 				'SG'                         => 'CNF',
 				'OTHERS'                     => 'CNG',
 				'TI'                         => 'CNH',
-				'FU'                         => 'CNJ',
 			),
 			'MYS'                  => array(
 				'OTHERS'                     => 'MYA',
@@ -426,11 +424,7 @@ class ModelExtensionShippingECShip extends Model {
 				$error = $this->language->get('text_unavailable');
 			}
 
-			if (!$this->config->get('shipping_ec_ship_test')) {
-				$url = 'https://www.ec-ship.hk/API/services/Calculator?wsdl';
-			} else {
-				$url = 'http://www.ec-ship.hk/API-trial/services/Calculator?wsdl';
-			}
+ 			$url = 'https://service.hongkongpost.hk/API-trial/services/Calculator?wsdl'; 
 
 			// Creating date using yyyy-mm-ddThh:mm:ssZ format
 			$tm_created = gmdate('Y-m-d\TH:i:s\Z');

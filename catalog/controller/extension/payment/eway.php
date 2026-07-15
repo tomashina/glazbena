@@ -20,8 +20,8 @@ class ControllerExtensionPaymentEway extends Controller {
 
 		for ($i = $today['year']; $i < $today['year'] + 11; $i++) {
 			$data['year_expire'][] = array(
-				'text'  => strftime('%Y', mktime(0, 0, 0, 1, 1, $i)),
-				'value' => strftime('%Y', mktime(0, 0, 0, 1, 1, $i))
+				'text'  => sprintf('%02d', $i % 100),
+				'value' => sprintf('%04d', $i)
 			);
 		}
 
@@ -84,7 +84,7 @@ class ControllerExtensionPaymentEway extends Controller {
 			$item->SKU = (string)substr($product['product_id'], 0, 12);
 			$item->Description = (string)substr($product['name'], 0, 26);
 			$item->Quantity = strval($product['quantity']);
-			$item->UnitCost = strval($item_price * 100);
+			$item->UnitCost = $this->lowestDenomination($item_price, $order_info['currency_code']);
 			$item->Total = $this->lowestDenomination($item_total, $order_info['currency_code']);
 
 			$request->Items[] = $item;

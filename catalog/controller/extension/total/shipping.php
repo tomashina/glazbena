@@ -53,7 +53,7 @@ class ControllerExtensionTotalShipping extends Controller {
 			$json['error']['country'] = $this->language->get('error_country');
 		}
 
-		if (!isset($this->request->post['zone_id']) || $this->request->post['zone_id'] == '') {
+		if (!isset($this->request->post['zone_id']) || $this->request->post['zone_id'] == '' || !is_numeric($this->request->post['zone_id'])) {
 			$json['error']['zone'] = $this->language->get('error_zone');
 		}
 
@@ -61,13 +61,19 @@ class ControllerExtensionTotalShipping extends Controller {
 
 		$country_info = $this->model_localisation_country->getCountry($this->request->post['country_id']);
 
-		if ($country_info && $country_info['postcode_required'] && (utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {
+		if ($country_info && $country_info['postcode_required'] && (utf8_strlen($this->request->post['postcode']) < 2 || utf8_strlen($this->request->post['postcode']) > 10)) {
 			$json['error']['postcode'] = $this->language->get('error_postcode');
 		}
 
 		if (!$json) {
+			$this->tax->unsetRates();
 			$this->tax->setShippingAddress($this->request->post['country_id'], $this->request->post['zone_id']);
-
+			if (isset($this->session->data['payment_address']['country_id']) && isset($this->session->data['payment_address']['zone_id'])) {
+				$this->tax->setPaymentAddress($this->session->data['payment_address']['country_id'], $this->session->data['payment_address']['zone_id']);
+			} elseif ($this->config->get('config_tax_default') == 'payment') {
+				$this->tax->setPaymentAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
+			}
+			$this->tax->setStoreAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
 			if ($country_info) {
 				$country = $country_info['name'];
 				$iso_code_2 = $country_info['iso_code_2'];

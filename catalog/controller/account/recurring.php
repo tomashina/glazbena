@@ -35,10 +35,12 @@ class ControllerAccountRecurring extends Controller {
 		);
 
 		if (isset($this->request->get['page'])) {
-			$page = $this->request->get['page'];
+			$page = (int)$this->request->get['page'];
 		} else {
 			$page = 1;
 		}
+
+		$limit = 10;
 
 		$data['recurrings'] = array();
 
@@ -46,7 +48,7 @@ class ControllerAccountRecurring extends Controller {
 
 		$recurring_total = $this->model_account_recurring->getTotalOrderRecurrings();
 
-		$results = $this->model_account_recurring->getOrderRecurrings(($page - 1) * 10, 10);
+		$results = $this->model_account_recurring->getOrderRecurrings(($page - 1) * $limit, $limit);
 
 		foreach ($results as $result) {
 			if ($result['status']) {
@@ -67,8 +69,7 @@ class ControllerAccountRecurring extends Controller {
 		$pagination = new Pagination();
 		$pagination->total = $recurring_total;
 		$pagination->page = $page;
-		$pagination->limit = 10;
-		$pagination->text = $this->language->get('text_pagination');
+		$pagination->limit = $limit;
 		$pagination->url = $this->url->link('account/recurring', 'page={page}', true);
 
 		$data['pagination'] = $pagination->render();
@@ -89,7 +90,7 @@ class ControllerAccountRecurring extends Controller {
 		$this->load->language('account/recurring');
 
 		if (isset($this->request->get['order_recurring_id'])) {
-			$order_recurring_id = $this->request->get['order_recurring_id'];
+			$order_recurring_id = (int)$this->request->get['order_recurring_id'];
 		} else {
 			$order_recurring_id = 0;
 		}
@@ -135,7 +136,7 @@ class ControllerAccountRecurring extends Controller {
 				'href' => $this->url->link('account/recurring/info', 'order_recurring_id=' . $this->request->get['order_recurring_id'] . $url, true),
 			);
 
-			$data['order_recurring_id'] = $this->request->get['order_recurring_id'];
+			$data['order_recurring_id'] = (int)$this->request->get['order_recurring_id'];
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($recurring_info['date_added']));
 
 			if ($recurring_info['status']) {

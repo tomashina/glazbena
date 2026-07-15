@@ -148,15 +148,16 @@ class ModelExtensionFraudFraudLabsPro extends Model {
 		}
 
 		if ($json->fraudlabspro_status == 'REJECT') {
-			return $this->config->get('fraudlabspro_reject_status_id');
+			return $this->config->get('fraud_fraudlabspro_reject_status_id');
 		}
 	}
 
 	private function hashIt($s) {
 		$hash = 'fraudlabspro_' . $s;
 
-		for ($i = 0; $i < 65536; $i++)
+		for ($i = 0; $i < 65536; $i++) {
 			$hash = sha1('fraudlabspro_' . $hash);
+		}
 
 		return $hash;
 	}

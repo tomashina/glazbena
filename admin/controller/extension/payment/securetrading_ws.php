@@ -263,19 +263,14 @@ class ControllerExtensionPaymentSecureTradingWs extends Controller {
 
 		$response = $this->model_extension_payment_securetrading_ws->getCsv($csv_data);
 
-		header('Content-Type: application/octet-stream');
-		header('Content-Disposition: attachment; filename="' . $this->language->get('text_transactions') . '.csv"');
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		header('Pragma: public');
-		header('Content-Length: ' . strlen($response));
+		$this->response->addheader('Content-Type: application/octet-stream');
+		$this->response->addheader('Content-Disposition: attachment; filename="' . $this->language->get('text_transactions') . '.csv"');
+		$this->response->addheader('Expires: 0');
+		$this->response->addheader('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		$this->response->addheader('Pragma: public');
+		$this->response->addheader('Content-Length: ' . strlen($response));
 
-		if (ob_get_level()) {
-			ob_end_clean();
-		}
-
-		echo $response;
-		exit();
+		$this->response->setOutput($response);
 	}
 
 	public function showTransactions() {
@@ -351,9 +346,9 @@ class ControllerExtensionPaymentSecureTradingWs extends Controller {
 
 				$data['auto_settle'] = $securetrading_ws_order['settle_type'];
 
-				$data['order_id'] = $this->request->get['order_id'];
+				$data['order_id'] = (int)$this->request->get['order_id'];
 				
-				$data['user_token'] = $this->request->get['user_token'];
+				$data['user_token'] = $this->session->data['user_token'];
 				
 				return $this->load->view('extension/payment/securetrading_ws_order', $data);
 			}
@@ -384,7 +379,7 @@ class ControllerExtensionPaymentSecureTradingWs extends Controller {
 					$this->model_extension_payment_securetrading_ws->addTransaction($securetrading_ws_order['securetrading_ws_order_id'], 'reversed', 0.00);
 					$this->model_extension_payment_securetrading_ws->updateVoidStatus($securetrading_ws_order['securetrading_ws_order_id'], 1);
 
-					$this->data = array(
+					$post_data = array(
 						'order_status_id' => $this->config->get('payment_securetrading_ws_authorisation_reversed_order_status_id'),
 						'notify' => false,
 						'comment' => '',
@@ -392,7 +387,7 @@ class ControllerExtensionPaymentSecureTradingWs extends Controller {
 
 					$this->load->model('sale/order');
 
-					$this->model_sale_order->addOrderHistory($this->request->post['order_id'], $this->data);
+					$this->model_sale_order->addOrderHistory($this->request->post['order_id'], $post_data);
 
 					$json['msg'] = $this->language->get('text_authorisation_reversed');
 					$json['data']['created'] = date("Y-m-d H:i:s");
@@ -416,7 +411,7 @@ class ControllerExtensionPaymentSecureTradingWs extends Controller {
 
 		$amount = number_format($this->request->post['amount'], 2);
 
-		if (isset($this->request->post['order_id']) && $this->request->post['order_id'] != '' && isset($amount) && $amount > 0) {
+		if (isset($this->request->post['order_id']) && $this->request->post['order_id'] != '' && $amount > 0) {
 			$this->load->model('extension/payment/securetrading_ws');
 
 			$securetrading_ws_order = $this->model_extension_payment_securetrading_ws->getOrder($this->request->post['order_id']);

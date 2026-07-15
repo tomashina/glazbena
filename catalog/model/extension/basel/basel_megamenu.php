@@ -104,6 +104,10 @@ class ModelExtensionBaselBaselMegamenu extends Model {
 		
 		foreach ($query->rows as $row) {
             $content = json_decode($row['content'],true);
+
+			if (!is_array($content)) {
+				$content = array();
+			}
             
 			if(isset($content['html']['text'][$lang_id])) {
                 $html = htmlspecialchars_decode($content['html']['text'][$lang_id]);
@@ -167,28 +171,29 @@ class ModelExtensionBaselBaselMegamenu extends Model {
 				$date_end = false;
             }
 
-            if(isset($product['image'])) {
+			if (is_array($product) && isset($product['image'])) {
                 $product_image = $model_image->resize($product['image'], $content['product']['img_w'], $content['product']['img_h']);
             } else {
                 $product_image = false;
             }
-			
-			$image2 = $this->model_catalog_product->getProductImages($content['product']['id']);
-			if(isset($image2[0]['image']) && !empty($image2[0]['image'])){
-				$image2 = $model_image->resize($image2[0]['image'], $content['product']['img_w'], $content['product']['img_h']);
-			} else {
-				$image2 = false;
-			}
-			
-			if ((float)$product['special']) {						
-				$date_end = $this->model_extension_basel_basel->getSpecialEndDate($content['product']['id']);
-			} else {
-				$date_end = false;
-			}
-			if (strtotime($product['date_available']) > strtotime('-' . $this->config->get('newlabel_status') . ' day')) {
-				$is_new = true;
-			} else {
-				$is_new = false;
+
+			$image2 = false;
+			$is_new = false;
+
+			if (is_array($product)) {
+				$product_images = $this->model_catalog_product->getProductImages($product['product_id']);
+
+				if (!empty($product_images[0]['image'])) {
+					$image2 = $model_image->resize($product_images[0]['image'], $content['product']['img_w'], $content['product']['img_h']);
+				}
+
+				if ((float)$product['special']) {
+					$date_end = $this->model_extension_basel_basel->getSpecialEndDate($product['product_id']);
+				}
+
+				if (!empty($product['date_available']) && strtotime($product['date_available']) > strtotime('-' . (int)$this->config->get('newlabel_status') . ' day')) {
+					$is_new = true;
+				}
 			}
 			
 			$description = false;
@@ -211,14 +216,14 @@ class ModelExtensionBaselBaselMegamenu extends Model {
                 'content_type' => $row['content_type'],
                 'html' => $html,
                 'product' => array(
-					'name' => $product['name'],
-					'id' => $product['product_id'],
-					'minimum' => $product['minimum'] > 0 ? $product['minimum'] : 1,
+					'name' => is_array($product) ? $product['name'] : '',
+					'id' => is_array($product) ? $product['product_id'] : 0,
+					'minimum' => is_array($product) && $product['minimum'] > 0 ? $product['minimum'] : 1,
                     'link' => $product_link,
                     'image' => $product_image,
 					'image2' => $image2,
-					'rating' => $product['rating'],
-					'sale_end_date' => $date_end['date_end'],
+					'rating' => is_array($product) ? $product['rating'] : 0,
+					'sale_end_date' => $date_end ? $date_end['date_end'] : '',
                     'price' => $price,
 					'new_label' => $is_new,
                     'special' => $special
@@ -247,6 +252,16 @@ class ModelExtensionBaselBaselMegamenu extends Model {
 	public function getCategories($array = array()) {
         $output = false;
 		$registry = $this->registry;
+		$categories = isset($array['categories']) ? $array['categories'] : array();
+
+		if (is_string($categories)) {
+			$decoded_categories = json_decode($categories, true);
+			$categories = is_array($decoded_categories) ? $decoded_categories : array();
+		}
+
+		if (!is_array($categories)) {
+			$categories = array();
+		}
         // Category model
         $this->load->model('catalog/category');
         $model = $registry->get('model_catalog_category');
@@ -261,16 +276,16 @@ class ModelExtensionBaselBaselMegamenu extends Model {
         if(!($array['columns'] > 0 && $array['columns'] < 7)) { $array['columns'] = 1; }
         $menu_class = 'hover-menu';
         if($array['submenu'] == 2) { $menu_class = 'static-menu'; }
-		$limit = (isset($array['limit']) && $array['limit']) ? $array['limit'] : count($array['categories']);
-        for ($i = 0; $i < count($array['categories']);) {
+		$limit = (isset($array['limit']) && $array['limit']) ? $array['limit'] : count($categories);
+		for ($i = 0; $i < count($categories);) {
             $output .= '<div class="col-sm-'.$row_fluid.' '.$menu_class.'">';
             //$output .= '<div class="menu">';
             $output .= '<ul>';
-            $j = $i + ceil(count($array['categories']) / $array['columns']);
+			$j = $i + ceil(count($categories) / $array['columns']);
 			$lim = (isset($array['limit']) && $array['limit']) ? $array['limit'] : $j;
             for (; $i < $j; $i++) {
-                if(isset($array['categories'][$i]['id'])) {
-                    $info_category = $model->getCategory($array['categories'][$i]['id']);
+				if(isset($categories[$i]['id'])) {
+					$info_category = $model->getCategory($categories[$i]['id']);
                     if(isset($info_category['category_id'])) {
                         $path = '';
                         if($info_category['parent_id'] > 0) {
@@ -291,7 +306,7 @@ class ModelExtensionBaselBaselMegamenu extends Model {
                         if(is_array($info_category)) {
                             $link = $this->url->link('product/category', 'path=' . $path . $info_category['category_id']);
                             
-							if(isset($array['categories'][$i]['children']) && $array['categories'][$i]['children']) {
+							if(isset($categories[$i]['children']) && $categories[$i]['children']) {
 								if($array['submenu'] == 2) {
 								$output .= '<li class="has-sub"><a href="'.$link.'">'.$info_category['name'].'<i class="fa fa-angle-right"></i></a>';
 								} else {
@@ -300,9 +315,9 @@ class ModelExtensionBaselBaselMegamenu extends Model {
 							} else {
 								$output .= '<li><a href="'.$link.'">'.$info_category['name'].'</a>';
 							}
-                            if(isset($array['categories'][$i]['children'])) {
-                                if(!empty($array['categories'][$i]['children'])) {
-                                    $output .= $this->getCategoriesChildren($array['categories'][$i]['children'], $info_category['category_id'], $array['submenu_columns'], $array['submenu'],$limit);
+							if(isset($categories[$i]['children'])) {
+								if(!empty($categories[$i]['children'])) {
+									$output .= $this->getCategoriesChildren($categories[$i]['children'], $info_category['category_id'], $array['submenu_columns'], $array['submenu'],$limit);
                                 }
                             }
                             $output .= '</li>';
@@ -318,7 +333,7 @@ class ModelExtensionBaselBaselMegamenu extends Model {
         return $output;
     }
 
-    public function getCategoriesChildren($array = array(), $path, $columns, $type, $submenu = false,$limit=4) {
+    public function getCategoriesChildren($array, $path, $columns, $type, $submenu = false, $limit = 4) {
         $output = false;
 		$registry = $this->registry;
         // Category model

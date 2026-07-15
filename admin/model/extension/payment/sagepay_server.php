@@ -19,7 +19,7 @@ class ModelExtensionPaymentSagepayServer extends Model {
 			  `currency_code` CHAR(3) NOT NULL,
 			  `total` DECIMAL( 10, 2 ) NOT NULL,
 			  PRIMARY KEY (`sagepay_server_order_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
 		$this->db->query("
 			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "sagepay_server_order_transaction` (
@@ -29,7 +29,7 @@ class ModelExtensionPaymentSagepayServer extends Model {
 			  `type` ENUM('auth', 'payment', 'rebate', 'void') DEFAULT NULL,
 			  `amount` DECIMAL( 10, 2 ) NOT NULL,
 			  PRIMARY KEY (`sagepay_server_order_transaction_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
 		$this->db->query("
 			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "sagepay_server_order_recurring` (
@@ -48,7 +48,7 @@ class ModelExtensionPaymentSagepayServer extends Model {
 			  `currency_code` CHAR(3) NOT NULL,
 			  `total` DECIMAL( 10, 2 ) NOT NULL,
 			  PRIMARY KEY (`sagepay_server_order_recurring_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
 		$this->db->query("
 			CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "sagepay_server_card` (
@@ -60,7 +60,7 @@ class ModelExtensionPaymentSagepayServer extends Model {
 			  `expiry` VARCHAR(5) NOT NULL,
 			  `type` VARCHAR(50) NOT NULL,
 			  PRIMARY KEY (`card_id`)
-			) ENGINE=MyISAM DEFAULT COLLATE=utf8_general_ci;");
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 	}
 
 	public function uninstall() {
@@ -78,14 +78,15 @@ class ModelExtensionPaymentSagepayServer extends Model {
 			$void_data = array();
 
 			if ($this->config->get('payment_sagepay_server_test') == 'live') {
-				$url = 'https://live.sagepay.com/gateway/service/void.vsp';
-				$void_data['VPSProtocol'] = '3.00';
+//				$url = 'https://live.sagepay.com/gateway/service/void.vsp';
+				$url = 'https://live.opayo.eu.elavon.com/gateway/service/void.vsp';
+//				$void_data['VPSProtocol'] = '3.00';
+				$void_data['VPSProtocol'] = '4.00';
 			} elseif ($this->config->get('payment_sagepay_server_test') == 'test') {
-				$url = 'https://test.sagepay.com/gateway/service/void.vsp';
-				$void_data['VPSProtocol'] = '3.00';
-			} elseif ($this->config->get('payment_sagepay_server_test') == 'sim') {
-				$url = 'https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=VendorVoidTx';
-				$void_data['VPSProtocol'] = '2.23';
+//				$url = 'https://test.sagepay.com/gateway/service/void.vsp';
+				$url = 'https://sandbox.opayo.eu.elavon.com/gateway/service/void.vsp';
+//				$void_data['VPSProtocol'] = '3.00';
+				$void_data['VPSProtocol'] = '4.00';
 			}
 
 			$void_data['TxType'] = 'VOID';
@@ -115,14 +116,15 @@ class ModelExtensionPaymentSagepayServer extends Model {
 			$release_data = array();
 
 			if ($this->config->get('payment_sagepay_server_test') == 'live') {
-				$url = 'https://live.sagepay.com/gateway/service/release.vsp';
-				$release_data['VPSProtocol'] = '3.00';
+//				$url = 'https://live.sagepay.com/gateway/service/release.vsp';
+				$url = 'https://live.opayo.eu.elavon.com/gateway/service/release.vsp';
+//				$release_data['VPSProtocol'] = '3.00';
+				$release_data['VPSProtocol'] = '4.00';
 			} elseif ($this->config->get('payment_sagepay_server_test') == 'test') {
-				$url = 'https://test.sagepay.com/gateway/service/release.vsp';
-				$release_data['VPSProtocol'] = '3.00';
-			} elseif ($this->config->get('payment_sagepay_server_test') == 'sim') {
-				$url = 'https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=VendorReleaseTx';
-				$release_data['VPSProtocol'] = '2.23';
+//				$url = 'https://test.sagepay.com/gateway/service/release.vsp';
+				$url = 'https://sandbox.opayo.eu.elavon.com/gateway/service/release.vsp';
+//				$release_data['VPSProtocol'] = '3.00';
+				$release_data['VPSProtocol'] = '4.00';
 			}
 
 			$release_data['TxType'] = 'RELEASE';
@@ -157,14 +159,15 @@ class ModelExtensionPaymentSagepayServer extends Model {
 			$refund_data = array();
 
 			if ($this->config->get('payment_sagepay_server_test') == 'live') {
-				$url = 'https://live.sagepay.com/gateway/service/refund.vsp';
-				$refund_data['VPSProtocol'] = '3.00';
+//				$url = 'https://live.sagepay.com/gateway/service/refund.vsp';
+				$url = 'https://live.opayo.eu.elavon.com/gateway/service/refund.vsp';
+//				$refund_data['VPSProtocol'] = '3.00';
+				$refund_data['VPSProtocol'] = '4.00';
 			} elseif ($this->config->get('payment_sagepay_server_test') == 'test') {
-				$url = 'https://test.sagepay.com/gateway/service/refund.vsp';
-				$refund_data['VPSProtocol'] = '3.00';
-			} elseif ($this->config->get('payment_sagepay_server_test') == 'sim') {
-				$url = 'https://test.sagepay.com/Simulator/VSPServerGateway.asp?Service=VendorRefundTx';
-				$refund_data['VPSProtocol'] = '2.23';
+//				$url = 'https://test.sagepay.com/gateway/service/refund.vsp';
+				$url = 'https://sandbox.opayo.eu.elavon.com/gateway/service/refund.vsp';
+///				$refund_data['VPSProtocol'] = '3.00';
+				$refund_data['VPSProtocol'] = '4.00';
 			}
 
 			$refund_data['TxType'] = 'REFUND';
@@ -245,8 +248,8 @@ class ModelExtensionPaymentSagepayServer extends Model {
 
 		$response_info = explode(chr(10), $response);
 
-		foreach ($response_info as $string) {
-			if (strpos($string, '=') && isset($i)) {
+		foreach ($response_info as $i => $string) {
+			if (strpos($string, '=')) {
 				$parts = explode('=', $string, 2);
 				$data['RepeatResponseData_' . $i][trim($parts[0])] = trim($parts[1]);
 			} elseif (strpos($string, '=')) {

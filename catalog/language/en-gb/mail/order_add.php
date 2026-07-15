@@ -1,7 +1,7 @@
 <?php
 // Text
 $_['text_subject']          = '%s - Order %s';
-$_['text_greeting']         = 'Thank you for your trust<span style="display:none">%s</span>. Your order has been received and will be processed once payment has been confirmed.';
+$_['text_greeting']         = 'Thank you for your interest in %s products. Your order has been received and will be processed once payment has been confirmed.';
 $_['text_link']             = 'To view your order click on the link below:';
 $_['text_order_detail']     = 'Order Details';
 $_['text_instruction']      = 'Instructions';
@@ -11,7 +11,7 @@ $_['text_order_status']     = 'Order Status:';
 $_['text_payment_method']   = 'Payment Method:';
 $_['text_shipping_method']  = 'Shipping Method:';
 $_['text_email']            = 'E-mail:';
-$_['text_telephone']        = 'Mobile:';
+$_['text_telephone']        = 'Telephone:';
 $_['text_ip']               = 'IP Address:';
 $_['text_payment_address']  = 'Payment Address';
 $_['text_shipping_address'] = 'Shipping Address';

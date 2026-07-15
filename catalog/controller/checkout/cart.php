@@ -2,8 +2,6 @@
 class ControllerCheckoutCart extends Controller {
 	public function index() {
 		$this->load->language('checkout/cart');
-		$this->load->language('product/product');
-		$this->load->model('catalog/category');
 
 		$this->document->setTitle($this->language->get('heading_title'));
 
@@ -59,86 +57,6 @@ class ControllerCheckoutCart extends Controller {
 
 			$products = $this->cart->getProducts();
 
-			$this->load->model('catalog/product');
-			foreach ($products as $product) {
-			    $arrs[] = $results = $this->model_catalog_product->getProductRelated($product['product_id']);
-
-
-			}
-			if ($arrs) {
-				$data['related'] = array();
-			    foreach ($arrs as $arr) {
-			    	
-			        foreach ($arr as $result) {
-
-
-					    if ($result['image']) {
-							$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
-						} else {
-							$image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_related_height'));
-						}
-
-							if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-							$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-						} else {
-							$price = false;
-						}
-
-						if ((float)$result['special']) {
-							$special = $this->currency->format(round($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax'))), $this->session->data['currency']);
-						} else {
-							$special = false;
-						}
-
-					
-
-						
-
-		                $query_categories = $this->model_catalog_product->getCategories($result['product_id']);
-
-
-
-		                foreach ($query_categories as  $cat) {
-
-		                    if ($cat['product_id'] == $result['product_id'] && $cat['category_id']) {
-		                        $ocb_category = $this->model_catalog_category->getCategory($cat['category_id']);
-
-		                        $category_info['category_id'] = $ocb_category['category_id'];
-		                        $data['category'] = $ocb_category['name'];
-
-		                    }
-		                }
-
-
-							$data['related'][] = array(
-							'product_id'  => $result['product_id'],
-							'thumb'       => $image,
-							'name'        => $result['name'],
-		                    'category'  => $ocb_category['name'],
-							'price'       => $price,
-							'special'     => $special,
-							
-							'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
-							
-							'href'        => $this->url->link('product/product', 'product_id=' . $result['product_id'])
-						);
-
-
-
-
-			        
-
-
-
-
-
-
-			        }
-			    }
-			}
-
-
-
 			foreach ($products as $product) {
 				$product_total = 0;
 
@@ -163,7 +81,6 @@ class ControllerCheckoutCart extends Controller {
 				foreach ($product['option'] as $option) {
 					if ($option['type'] != 'file') {
 						$value = $option['value'];
-						$image = $this->model_tool_image->resize($option['option_image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_cart_height'));;
 					} else {
 						$upload_info = $this->model_tool_upload->getUploadByCode($option['value']);
 
@@ -176,7 +93,6 @@ class ControllerCheckoutCart extends Controller {
 
 					$option_data[] = array(
 						'name'  => $option['name'],
-						'option_image'  => $option['option_image'],
 						'value' => (utf8_strlen($value) > 20 ? utf8_substr($value, 0, 20) . '..' : $value)
 					);
 				}
@@ -291,35 +207,11 @@ class ControllerCheckoutCart extends Controller {
 			$data['totals'] = array();
 
 			foreach ($totals as $total) {
-
-				  if($this->session->data['currency']=='HRK'){
-                    $text =  $this->currency->format($total['value'], $this->session->data['currency']);
-                }
-                else{
-                    $text =  $this->currency->format($total['value'], $this->session->data['currency']);
-                }
-
-
 				$data['totals'][] = array(
 					'title' => $total['title'],
-					'text'  => $text
+					'text'  => $this->currency->format($total['value'], $this->session->data['currency'])
 				);
 			}
-
-			$data['lang'] = $this->language->get('code');
-
-			 if ($this->cart->getTotal() < 50 && $data['lang'] == 'hr') {
-
-                    $razlika = 50 - $this->cart->getTotal();
-
-                    $razlika = number_format($razlika, 2, ',', '');
-                    $data['freeshipppingnotification'] =   sprintf($this->language->get('freeshipppingnotification'), $razlika);
-
-
-
-                } else {
-                    $data['freeshipppingnotification'] = '';
-                }
 
 			$data['continue'] = $this->url->link('common/home');
 

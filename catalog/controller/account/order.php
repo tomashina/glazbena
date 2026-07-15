@@ -35,10 +35,12 @@ class ControllerAccountOrder extends Controller {
 		);
 
 		if (isset($this->request->get['page'])) {
-			$page = $this->request->get['page'];
+			$page = (int)$this->request->get['page'];
 		} else {
 			$page = 1;
 		}
+
+		$limit = 10;
 
 		$data['orders'] = array();
 
@@ -46,7 +48,7 @@ class ControllerAccountOrder extends Controller {
 
 		$order_total = $this->model_account_order->getTotalOrders();
 
-		$results = $this->model_account_order->getOrders(($page - 1) * 10, 10);
+		$results = $this->model_account_order->getOrders(($page - 1) * $limit, $limit);
 
 		foreach ($results as $result) {
 			$product_total = $this->model_account_order->getTotalOrderProductsByOrderId($result['order_id']);
@@ -66,12 +68,12 @@ class ControllerAccountOrder extends Controller {
 		$pagination = new Pagination();
 		$pagination->total = $order_total;
 		$pagination->page = $page;
-		$pagination->limit = 10;
+		$pagination->limit = $limit;
 		$pagination->url = $this->url->link('account/order', 'page={page}', true);
 
 		$data['pagination'] = $pagination->render();
 
-		$data['results'] = sprintf($this->language->get('text_pagination'), ($order_total) ? (($page - 1) * 10) + 1 : 0, ((($page - 1) * 10) > ($order_total - 10)) ? $order_total : ((($page - 1) * 10) + 10), $order_total, ceil($order_total / 10));
+		$data['results'] = sprintf($this->language->get('text_pagination'), ($order_total) ? (($page - 1) * $limit) + 1 : 0, ((($page - 1) * $limit) > ($order_total - $limit)) ? $order_total : ((($page - 1) * $limit) + $limit), $order_total, ceil($order_total / $limit));
 
 		$data['continue'] = $this->url->link('account/account', '', true);
 
@@ -157,7 +159,7 @@ class ControllerAccountOrder extends Controller {
 				$data['invoice_no'] = '';
 			}
 
-			$data['order_id'] = $this->request->get['order_id'];
+			$data['order_id'] = (int)$this->request->get['order_id'];
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($order_info['date_added']));
 
 			if ($order_info['payment_address_format']) {
@@ -378,7 +380,7 @@ class ControllerAccountOrder extends Controller {
 						} elseif ($order_option['type'] == 'text' || $order_option['type'] == 'textarea' || $order_option['type'] == 'date' || $order_option['type'] == 'datetime' || $order_option['type'] == 'time') {
 							$option_data[$order_option['product_option_id']] = $order_option['value'];
 						} elseif ($order_option['type'] == 'file') {
-							$option_data[$order_option['product_option_id']] = $this->encryption->encrypt($this->config->get('config_encryption'), $order_option['value']);
+							$option_data[$order_option['product_option_id']] = $order_option['value'];
 						}
 					}
 

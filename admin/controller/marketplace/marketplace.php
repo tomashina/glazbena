@@ -108,9 +108,9 @@ class ControllerMarketplaceMarketplace extends Controller {
 		$string .= VERSION . "\n";
 		$string .= $time . "\n";
 
-		$signature = base64_encode(hash_hmac('sha1', $string, $this->config->get('opencart_secret'), 1));
+		$signature = base64_encode(hash_hmac('sha1', $string, (string)$this->config->get('opencart_secret'), 1));
 
-		$url  = '&username=' . urlencode($this->config->get('opencart_username'));
+		$url  = '&username=' . urlencode((string)$this->config->get('opencart_username'));
 		$url .= '&domain=' . $this->request->server['HTTP_HOST'];
 		$url .= '&version=' . urlencode(VERSION);
 		$url .= '&time=' . $time;
@@ -150,21 +150,20 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 		$curl = curl_init(OPENCART_SERVER . 'index.php?route=marketplace/api' . $url);
 
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($curl, CURLOPT_FORBID_REUSE, 1);
-		curl_setopt($curl, CURLOPT_FRESH_CONNECT, 1);
-		curl_setopt($curl, CURLOPT_POST, 1);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($curl, CURLOPT_FORBID_REUSE, true);
+		curl_setopt($curl, CURLOPT_FRESH_CONNECT, true);
+		curl_setopt($curl, CURLOPT_POST, true);
 
 		$response = curl_exec($curl);
 
 		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-		curl_close($curl);
-
 		$response_info = json_decode($response, true);
 
-		$extension_total = $response_info['extension_total'];
+		$extension_total = $response_info['extension_total'] ?? 0;
 
 		$url  = '';
 
@@ -202,7 +201,7 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 		$data['promotions'] = array();
 
-		if ($response_info['promotions'] && $page == 1) {
+		if (isset($response_info['promotions']) && $response_info['promotions'] && $page == 1) {
 			foreach ($response_info['promotions'] as $result) {
 				$data['promotions'][] = array(
 					'name'         => $result['name'],
@@ -219,11 +218,11 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 		$data['extensions'] = array();
 
-		if ($response_info['extensions']) {
+		if (isset($response_info['extensions']) && $response_info['extensions']) {
 			foreach ($response_info['extensions'] as $result) {
 				$data['extensions'][] = array(
-					'name'         => utf8_decode($result['name']),
-					'description'  => utf8_decode($result['description']),
+					'name'         => $result['name'],
+					'description'  => $result['description'],
 					'image'        => $result['image'],
 					'license'      => $result['license'],
 					'price'        => $result['price'],
@@ -525,9 +524,9 @@ class ControllerMarketplaceMarketplace extends Controller {
 		$string .= $extension_id . "\n";
 		$string .= $time . "\n";
 
-		$signature = base64_encode(hash_hmac('sha1', $string, $this->config->get('opencart_secret'), 1));
+		$signature = base64_encode(hash_hmac('sha1', $string, (string)$this->config->get('opencart_secret'), 1));
 
-		$url  = '&username=' . urlencode($this->config->get('opencart_username'));
+		$url  = '&username=' . urlencode((string)$this->config->get('opencart_username'));
 		$url .= '&domain=' . $this->request->server['HTTP_HOST'];
 		$url .= '&version=' . urlencode(VERSION);
 		$url .= '&extension_id=' . $extension_id;
@@ -546,8 +545,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-		curl_close($curl);
-
 		$response_info = json_decode($response, true);
 
 		if ($response_info) {
@@ -558,7 +555,7 @@ class ControllerMarketplaceMarketplace extends Controller {
 			if (isset($response_info['error'])) {
 				$data['error_signature'] = $response_info['error'];
 			} else {
-        $data['error_signature'] = '';
+				$data['error_signature'] = '';
 			}
 
 			$data['user_token'] = $this->session->data['user_token'];
@@ -730,8 +727,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 			$response = curl_exec($curl);
 
-			curl_close($curl);
-
 			$response_info = json_decode($response, true);
 
 			if (isset($response_info['success'])) {
@@ -862,8 +857,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 			$response_info = json_decode($response, true);
 
-			curl_close($curl);
-
 			if (isset($response_info['download'])) {
 				if (substr($response_info['filename'], -10) == '.ocmod.zip') {
 					$this->session->data['install'] = token(10);
@@ -957,8 +950,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 
 			$response = curl_exec($curl);
 
-			curl_close($curl);
-
 			$response_info = json_decode($response, true);
 
 			if (isset($response_info['success'])) {
@@ -984,7 +975,7 @@ class ControllerMarketplaceMarketplace extends Controller {
 		}
 
 		if (isset($this->request->get['page'])) {
-			$page = $this->request->get['page'];
+			$page = (int)$this->request->get['page'];
 		} else {
 			$page = 1;
 		}
@@ -992,7 +983,7 @@ class ControllerMarketplaceMarketplace extends Controller {
 		$data['button_more'] = $this->language->get('button_more');
 		$data['button_reply'] = $this->language->get('button_reply');
 
-		$curl = curl_init(OPENCART_SERVER . 'index.php?route=marketplace/api/comment&extension_id=' . $extension_id . '&page=' . $page);
+		$curl = curl_init(OPENCART_SERVER . 'index.php?route=api/marketplace/comment&extension_id=' . $extension_id . '&page=' . $page);
 
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -1001,8 +992,6 @@ class ControllerMarketplaceMarketplace extends Controller {
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 
 		$response = curl_exec($curl);
-
-		curl_close($curl);
 
 		$json = json_decode($response, true);
 
@@ -1063,7 +1052,7 @@ class ControllerMarketplaceMarketplace extends Controller {
 		}
 
 		if (isset($this->request->get['page'])) {
-			$page = $this->request->get['page'];
+			$page = (int)$this->request->get['page'];
 		} else {
 			$page = 1;
 		}
