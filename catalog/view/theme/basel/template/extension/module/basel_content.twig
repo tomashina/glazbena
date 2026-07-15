@@ -137,12 +137,18 @@ slidesToShow:1,slidesToScroll:1,responsive:[]
 }).parents('.cm_block_wrapper').addClass('has-testimonials');
 
 $(window).load(function() {
+var $testimonial_module = $('.grid-holder.tm_module');
+if (!$testimonial_module.length) {
+return;
+}
+var p_c_o = $testimonial_module.offset().top;
+var p_c_o_b = p_c_o + $testimonial_module.outerHeight(true) - 100;
 var p_sticky_arrows = function(){
 var p_m_o = $(window).scrollTop() + ($(window).height()/2);
 if (p_m_o > p_c_o && p_m_o < p_c_o_b) {
-$('.grid-holder.tm_module .slick-arrow').addClass('visible').css('top', p_m_o - p_c_o + 'px');
+$testimonial_module.find('.slick-arrow').addClass('visible').css('top', p_m_o - p_c_o + 'px');
 } else {
-$('.grid-holder.tm_module .slick-arrow').removeClass('visible');
+$testimonial_module.find('.slick-arrow').removeClass('visible');
 }
 };
 $(window).scroll(function() {p_sticky_arrows();});

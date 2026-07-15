@@ -89,6 +89,7 @@ class ControllerStartupSeoUrl extends Controller {
 		parse_str($url_info['query'], $data);
 
 		$static_routes = array(
+			'common/home' => '',
 			'information/contact' => 'kontakt',
 			'extension/account/contract_withdrawal' => 'raskid-ugovora',
 			'product/special' => 'special'

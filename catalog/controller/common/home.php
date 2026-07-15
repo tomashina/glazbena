@@ -1,6 +1,18 @@
 <?php
 class ControllerCommonHome extends Controller {
 	public function index() {
+		if (isset($this->request->get['route']) && $this->request->get['route'] === 'common/home') {
+			$query = $this->request->get;
+			unset($query['route'], $query['_route_']);
+
+			$home = !empty($this->request->server['HTTPS']) ? $this->config->get('config_ssl') : $this->config->get('config_url');
+			if ($query) {
+				$home .= '?' . http_build_query($query);
+			}
+
+			$this->response->redirect($home, 301);
+		}
+
 		$this->load->language('common/home');
 
 		$language_id = (int)$this->config->get('config_language_id');
