@@ -199,11 +199,10 @@ try {
 	}
 
 	$run(array(PHP_BINARY, $root . '/tools/upgrade/patch_modifications.php'));
+	$run(array(PHP_BINARY, $root . '/tools/upgrade/remove_seo_pack_pro.php'));
 
 	foreach ($statuses as $status) {
-		// This legacy package is not PHP 8/OpenCart 3.0.5 compatible. Core SEO,
-		// multilingual URLs and the direct homepage meta fix remain enabled.
-		$enabled = $status['code'] === 'Opencart SEO Pack PRO' ? 0 : (int)$status['status'];
+		$enabled = (int)$status['status'];
 		$statement = $database->prepare(
 			"UPDATE `" . DB_PREFIX . "modification` SET `status` = ? WHERE `modification_id` = ?"
 		);

@@ -32,9 +32,9 @@ The script:
 - applies the Glazbena compatibility patches and refreshes OCMOD;
 - restores the previous maintenance state.
 
-`Opencart SEO Pack PRO` is intentionally left disabled because its legacy OCMOD
-is incompatible with PHP 8.1/OpenCart 3.0.5.0. OpenCart SEO URLs and the existing
-multilingual URL handling remain active.
+`Opencart SEO Pack PRO` is removed completely because its legacy OCMOD and admin
+tools are incompatible with PHP 8.1/OpenCart 3.0.5.0. OpenCart SEO URLs and the
+existing multilingual URL handling remain active.
 
 ## Verification
 
