@@ -35,6 +35,12 @@ class ControllerInformationInformation extends Controller {
 			$data['description'] = html_entity_decode($information_info['description'], ENT_QUOTES, 'UTF-8');
 
 			$data['continue'] = $this->url->link('common/home');
+			$this->document->addLink($this->url->link('information/information', 'information_id=' . $information_id), 'canonical');
+			$this->registry->set('seo_entity', array(
+				'type'        => 'information',
+				'data'        => $information_info,
+				'breadcrumbs' => $data['breadcrumbs']
+			));
 
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');

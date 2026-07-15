@@ -77,77 +77,6 @@ max-height:600px;
         {% if category.category_id %}
 
 				
-				{% if richsnippets.breadcrumbs %} 
-				<span itemscope itemtype="http://schema.org/BreadcrumbList">
-				{% for mbreadcrumb in mbreadcrumbs %} {% if mbreadcrumb.text|striptags %}
-				<span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
-					<a itemprop="item" href="{{ mbreadcrumb.href}}" alt="{{ mbreadcrumb.text|striptags }}"><meta itemprop="name" content="{{ mbreadcrumb.text|striptags }}" ></a>
-					<meta itemprop="position" content="{{ loop.index0 }}" />
-				</span>
-				
-				{% endif %}  {% endfor %} </span> {% endif %} 				
-				
-				
-				{% if richsnippets.product %}
-				
-				<span itemscope itemtype="http://schema.org/Product">
-				{%  set mlink = breadcrumbs|last %}
-				<meta itemprop="url" content="{{ mlink.href }}" >
-				<meta itemprop="name" content="{{ heading_title }}" >
-				<meta itemprop="model" content="{{ model }}" >
-				<meta itemprop="manufacturer" content="{{ manufacturer }}" >
-				<meta itemprop="brand" content="{{ manufacturer }}" >
-				<meta itemprop="sku" content="{{ sku }}" >
-				<meta itemprop="mpn" content="{{ mpn }}" >
-				<meta itemprop="description" content="{{ meta_description }}" >
-				
-				{% if thumb %} 
-				<meta itemprop="image" content="{{ thumb }}" >
-				{% endif %} 
-				
-				{% if images %} {% for image in images %}
-				<meta itemprop="image" content="{{ image.thumb }}" >
-				{% endfor %} {% endif %} 
-				
-				{% if richsnippets.offer %} 
-				<span itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-				<meta itemprop="price" content="{{ rprice }}" />
-				<meta itemprop="priceCurrency" content="{{ currency_code }}" />
-				<meta itemprop="priceValidUntil" content="2099-12-31" />				
-				<link itemprop="availability" href="http://schema.org/{{ (quantity > 0) ? "InStock" : "OutOfStock"}}" />
-				<meta itemprop="url" content="{{ mlink.href }}" >
-				</span>
-				{% endif %} 
-				
-				{% if richsnippets.rating  and  review_no %} 
-				<span itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
-				<meta itemprop="reviewCount" content="{{ review_no }}">
-				<meta itemprop="ratingValue" content="{{ rating }}">
-				<meta itemprop="bestRating" content="5">
-				<meta itemprop="worstRating" content="1">
-				</span>
-				
-					{% for mreview in mreviews %}			
-						 <span itemprop="review" itemscope itemtype="http://schema.org/Review">
-						 
-						 <meta itemprop="author" content="{{ mreview.author }}">
-						 <meta itemprop="description" content="{{ mreview.text }}">
-						<meta itemprop="datePublished" content="{{ mreview.date_added }}">
-							<span itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
-							  <meta itemprop="ratingValue" content="{{ mreview.rating }}">
-							  <meta itemprop="bestRating" content="5">
-							  <meta itemprop="worstRating" content="1">
-							</span>
-							
-						</span>
-					{% endfor %}
-				
-				{% endif %} 
-				
-				</span>
-				
-				{% endif %} 
-            
             <h1 class="cat_title">{{category.name}}</h1>
         {% endif %}
     {% endfor %}
@@ -220,13 +149,13 @@ max-height:600px;
                                     <!--   <span class="badge out_of_stock_badge"><i>{{ basel_text_out_of_stock}}</i></span> -->
                                 {% endif %}
   
- <img src="{{ thumb }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail" alt="{{ custom_alt ? custom_alt : heading_title }}" /></a></li>
+ <img src="{{ thumb }}" width="{{ img_w }}" height="{{ img_h }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail" alt="{{ custom_alt ? custom_alt : heading_title }}" fetchpriority="high" decoding="async" /></a></li>
   
   
 
 {% for image in images %}
         <li>
-        <a class="linkk"  href="{{ image.popup }}" ><img src="{{ image.popup }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail" alt="{{ custom_alt ? custom_alt : heading_title }}" /></a>
+        <a class="linkk"  href="{{ image.popup }}" ><img src="{{ image.large }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail" alt="{{ custom_alt ? custom_alt : heading_title }}" loading="lazy" decoding="async" /></a>
         </li>
         {% endfor %}
                             </ul>
@@ -236,10 +165,10 @@ max-height:600px;
 
                                              {% if images %}
                             <ul class="image-additional">
-                                  <li><img src="{{ thumb_sm }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail"  alt="{{ custom_alt ? custom_alt : heading_title }}" /></li>
+                                  <li><img src="{{ thumb_sm }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail"  alt="{{ custom_alt ? custom_alt : heading_title }}" decoding="async" /></li>
                             {% for image in images %}
                             <li>
-                     <img src="{{ image.thumb }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail"  alt="{{ custom_alt ? custom_alt : heading_title }}" />
+                     <img src="{{ image.thumb }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail"  alt="{{ custom_alt ? custom_alt : heading_title }}" loading="lazy" decoding="async" />
                             </li>
                             {% endfor %}
                                
@@ -806,7 +735,7 @@ max-height:600px;
                                     {% elseif manufacturer_name=='Lanikai' %}
                                         <img src="image/ikonesvg1g{{ lang }}.png" class="img-responsive" />
                                     {% elseif manufacturer_name=='Konig & Meyer' %}
-                                        <img src="image/ikonesvg5g{{ lang }}.pngg" class="img-responsive" />
+                                        <img src="image/ikonesvg5g{{ lang }}.png" class="img-responsive" loading="lazy" decoding="async" />
                                     {% else %}
                                         <img src="image/ikonesvg{{ lang }}.png" class="img-responsive" />
                                     {% endif %}
@@ -1423,45 +1352,6 @@ $('.main-image').slick({
 
 
 
-<script type="application/ld+json">
-{
-"@context": "http://schema.org",
-"@type": "Product",
-"image": [
-{% if thumb %}
-"{{ thumb }}"
-{% endif %}
-],
-"description": "{{ meta_description }}",
-{% if review_qty %}
-"aggregateRating": {
-"@type": "AggregateRating",
-"ratingValue": "{{ rating }}",
-"reviewCount": "{{ review_qty }}"},
-{% endif %}
-"name": "{{ heading_title }}",
-"sku": "{{ model }}",
-{% if manufacturer %}
-"brand": "{{ manufacturer }}",
-{% endif %}
-"offers": {
-"@type": "Offer",
-{% if qty > 0 %}
-"availability": "http://schema.org/InStock",
-{% else %}
-"availability": "http://schema.org/OutOfStock",
-{% endif %}
-{% if price %}
-    {% if special %}
-"price": "{{ special_snippet }}",
-{% else %}
-"price": "{{ price_snippet }}",
-{% endif %}
-"priceCurrency": "{{ currency_code }}"
-{% endif %}
-}
-}
-</script>
 <script type="text/javascript"><!--
   $(document).on('click', '.number-spinner button', function () {
     var btn = $(this),

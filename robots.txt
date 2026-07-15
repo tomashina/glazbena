@@ -1,4 +1,6 @@
 User-agent: *
+User-agent: OAI-SearchBot
+Allow: /
 Disallow: /*?page=$
 Disallow: /*&page=$
 Disallow: /*?sort=
@@ -15,3 +17,5 @@ Disallow: /*?filter_description=
 Disallow: /*&filter_description=
 Disallow: /*?route=product/search
 Disallow: /*&route=product/search
+
+Sitemap: https://www.glazbena-kutija.hr/sitemap-index.xml

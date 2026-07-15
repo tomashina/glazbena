@@ -5,10 +5,13 @@ class ModelToolImage extends Model {
 			return;
 		}
 
-		$extension = pathinfo($filename, PATHINFO_EXTENSION);
+		$extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+		$accept = isset($this->request->server['HTTP_ACCEPT']) ? $this->request->server['HTTP_ACCEPT'] : '';
+		$webp = function_exists('imagewebp') && strpos($accept, 'image/webp') !== false && in_array($extension, array('jpg', 'jpeg', 'png', 'webp'), true);
+		$output_extension = $webp ? 'webp' : $extension;
 
 		$image_old = $filename;
-		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . '.' . $extension;
+		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . '.' . $output_extension;
 
 		if (!is_file(DIR_IMAGE . $image_new) || (filemtime(DIR_IMAGE . $image_old) > filemtime(DIR_IMAGE . $image_new))) {
 			list($width_orig, $height_orig, $image_type) = getimagesize(DIR_IMAGE . $image_old);
@@ -33,10 +36,12 @@ class ModelToolImage extends Model {
 				}
 			}
 
-			if ($width_orig != $width || $height_orig != $height) {
+			if ($width_orig != $width || $height_orig != $height || $output_extension !== $extension) {
 				$image = new Image(DIR_IMAGE . $image_old);
-				$image->resize($width, $height);
-				$image->save(DIR_IMAGE . $image_new);
+				if ($width_orig != $width || $height_orig != $height) {
+					$image->resize($width, $height);
+				}
+				$image->save(DIR_IMAGE . $image_new, $webp ? 82 : 88);
 			} else {
 				copy(DIR_IMAGE . $image_old, DIR_IMAGE . $image_new);
 			}

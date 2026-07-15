@@ -13,6 +13,24 @@
 <base href="{{ base }}" />
 {% if description %}<meta name="description" content="{{ description }}" />{% endif %}
 {% if keywords %}<meta name="keywords" content= "{{ keywords }}" />{% endif %}
+<meta name="robots" content="{{ seo.robots }}" />
+<meta property="og:type" content="{{ seo.og_type }}" />
+<meta property="og:title" content="{{ seo.og_title }}" />
+{% if seo.og_description %}<meta property="og:description" content="{{ seo.og_description }}" />{% endif %}
+<meta property="og:url" content="{{ seo.og_url }}" />
+<meta property="og:site_name" content="{{ seo.og_site_name }}" />
+<meta property="og:locale" content="{{ seo.og_locale }}" />
+{% if seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}" />{% endif %}
+{% if seo.product_price %}<meta property="product:price:amount" content="{{ seo.product_price }}" />
+<meta property="product:price:currency" content="{{ seo.product_currency }}" />
+<meta property="product:availability" content="{{ seo.product_available }}" />{% endif %}
+<meta name="twitter:card" content="{{ seo.twitter_card }}" />
+<meta name="twitter:title" content="{{ seo.og_title }}" />
+{% if seo.og_description %}<meta name="twitter:description" content="{{ seo.og_description }}" />{% endif %}
+{% if seo.og_image %}<meta name="twitter:image" content="{{ seo.og_image }}" />{% endif %}
+<script type="application/ld+json">{{ seo_json_ld|raw }}</script>
+<link href="{{ seo.canonical }}" rel="canonical" />
+{% if seo.preload_image %}<link rel="preload" as="image" href="{{ seo.preload_image }}" fetchpriority="high" />{% endif %}
     <!-- Load essential resources -->
     <script src="catalog/view/javascript/jquery/jquery-2.1.1.min.js"></script>
     <link href="catalog/view/javascript/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
@@ -41,9 +59,7 @@
 
 <!-- Page specific meta information -->
 {% for link in links %}
-{% if link.rel == 'image' %}
-<meta property="og:image" content="{{ link.href }}" />
-{% else %}
+{% if link.rel != 'image' and link.rel != 'canonical' %}
 <link href="{{ link.href }}" rel="{{ link.rel }}" />
 {% endif %}
 {% endfor %}

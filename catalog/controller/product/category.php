@@ -398,6 +398,12 @@ class ControllerProductCategory extends Controller {
 
 			$data['continue'] = $this->url->link('common/home');
 
+			$this->registry->set('seo_entity', array(
+				'type'        => 'category',
+				'data'        => $category_info,
+				'breadcrumbs' => $data['breadcrumbs']
+			));
+
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');

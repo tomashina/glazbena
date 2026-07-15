@@ -114,19 +114,20 @@ class Image {
 	 * @param	int		$quality
      */
 	public function save($file, int $quality = 90) {
+		$quality = max(0, min(100, $quality));
 		$info = pathinfo($file);
 
 		$extension = strtolower($info['extension']);
 
 		if (is_object($this->image) || is_resource($this->image)) {
 			if ($extension == 'jpeg' || $extension == 'jpg') {
-				imagejpeg($this->image, $file);
+				imagejpeg($this->image, $file, $quality);
 			} elseif ($extension == 'png') {
 				imagepng($this->image, $file);
 			} elseif ($extension == 'gif') {
 				imagegif($this->image, $file);
 			} elseif ($extension == 'webp') {
-				imagewebp($this->image, $file);
+				imagewebp($this->image, $file, $quality);
 			}
 		}
 	}

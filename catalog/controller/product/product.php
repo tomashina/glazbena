@@ -159,6 +159,7 @@ class ControllerProductProduct extends Controller {
 		$this->load->model('catalog/product');
 
 		$product_info = $this->model_catalog_product->getProduct($product_id);
+		$original_product_info = $product_info;
 
         $query_categories = $this->model_catalog_product->getCategories($product_id);
 
@@ -303,6 +304,7 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 			foreach ($results as $result) {
 				$data['images'][] = array(
 					'popup' => 'image/'.$result['image'],
+					'large' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')),
 					'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height'))
 				);
 			}
@@ -556,6 +558,9 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 			}
 
 			$data['tags'] = array();
+			// Some legacy variant OCMODs reuse $product_info for each variant.
+			// Restore the requested product before tags, SEO and final rendering.
+			$product_info = $original_product_info;
 
 			if ($product_info['tag']) {
 				$tags = explode(',', $product_info['tag']);
@@ -571,6 +576,14 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 			$data['recurrings'] = $this->model_catalog_product->getProfiles($this->request->get['product_id']);
 
 			$this->model_catalog_product->updateViewed($this->request->get['product_id']);
+
+			$this->registry->set('seo_entity', array(
+				'type'        => 'product',
+				'data'        => $product_info,
+				'breadcrumbs' => $data['breadcrumbs'],
+				'category'    => !empty($data['categories'][0]['name']) ? $data['categories'][0]['name'] : '',
+				'preview_image' => $data['thumb']
+			));
 
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');

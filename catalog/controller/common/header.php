@@ -35,6 +35,10 @@ class ControllerCommonHeader extends Controller {
 		$data['lang'] = $this->language->get('code');
 		$data['direction'] = $this->language->get('direction');
 
+		// Central SEO output replaces legacy theme/extension markup.
+		$this->registry->set('seo_managed', true);
+		$this->load->model('extension/seo');
+
 		$data['name'] = $this->config->get('config_name');
 
 		if (is_file(DIR_IMAGE . $this->config->get('config_logo'))) {
@@ -42,6 +46,10 @@ class ControllerCommonHeader extends Controller {
 		} else {
 			$data['logo'] = '';
 		}
+
+		$seo = $this->model_extension_seo->build($data['title'], $data['description'], $data['links'], $data['logo']);
+		$data['seo'] = $seo['meta'];
+		$data['seo_json_ld'] = $seo['json_ld'];
 
 		$this->load->language('common/header');
 

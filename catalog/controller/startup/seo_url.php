@@ -8,6 +8,16 @@ class ControllerStartupSeoUrl extends Controller {
 
 		// Decode URL
 		if (isset($this->request->get['_route_'])) {
+			$static_routes = array(
+				'sitemap-index.xml' => 'extension/feed/boost_sitemap'
+			);
+
+			$route_key = trim($this->request->get['_route_'], '/');
+			if (isset($static_routes[$route_key])) {
+				$this->request->get['route'] = $static_routes[$route_key];
+				return;
+			}
+
 			$parts = explode('/', $this->request->get['_route_']);
 
 			// remove any empty arrays from trailing

@@ -50,7 +50,7 @@ class ControllerExtensionModulePathManager extends Controller {
 					$data['breadcrumbs'] = $this->getCategoryBreadcrumbs($this->request->get);
 				}
 
-				if (!empty($breadcrumb_options['json']) && method_exists($this->document, 'addCustomScript')) {
+				if (!empty($breadcrumb_options['json']) && !$this->registry->has('seo_managed') && method_exists($this->document, 'addCustomScript')) {
 					$data['json_breadcrumbs'] = $this->getBreadcrumbsJson($data['breadcrumbs']);
 
 					$this->document->addCustomScript('header', $route, $data['json_breadcrumbs'], 'application/ld+json');
@@ -97,7 +97,7 @@ class ControllerExtensionModulePathManager extends Controller {
 		if ($this->config->get('module_path_manager_status')) {
 			$breadcrumb_options = $this->config->get('module_path_manager')['breadcrumbs'];
 
-			if (!empty($breadcrumb_options['json']) && method_exists($this->document, 'getCustomScripts')) {
+			if (!empty($breadcrumb_options['json']) && !$this->registry->has('seo_managed') && method_exists($this->document, 'getCustomScripts')) {
 				$scripts = '';
 
 				if ($this->document->getCustomScripts('header')) {

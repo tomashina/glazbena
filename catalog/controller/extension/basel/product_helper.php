@@ -30,7 +30,7 @@
 	$data['price_snippet'] = str_replace( ',', '.', $price_snippet);
 	if ((float)$product_info['special']) {
 	$date_end = $this->model_extension_basel_basel->getSpecialEndDate($product_info['product_id']);
-	$data['sale_end_date'] = $date_end['date_end'];	
+	$data['sale_end_date'] = is_array($date_end) && !empty($date_end['date_end']) ? $date_end['date_end'] : '';
 	$special_snippet = preg_replace("/[^0-9,.]/","", $data['special']);
 	$data['special_snippet'] = str_replace( ',', '.', $special_snippet);
 	}
