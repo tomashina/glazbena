@@ -153,8 +153,6 @@ background-color:
 #header .navbar-brand {
     margin-left: 8px;
 }
-#header .navbar-brand img{width:auto;max-width:120px;max-height:52px}
-
 #header .navbar-nav > li {
     display: inline-block;
 }
