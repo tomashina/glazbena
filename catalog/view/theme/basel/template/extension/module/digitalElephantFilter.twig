@@ -23,9 +23,10 @@
                 {% if filter_data['price']['show'] %}
                     <div class="filter_element_wrap">
                         <div
-                            class="filter_element_title"
+                            class="filter_element_title {% if not filter_data['price']['open'] %}is_closed{% endif %}"
                             data-section-name="price"
                             data-section-id="price"
+                            aria-expanded="{% if filter_data['price']['open'] %}true{% else %}false{% endif %}"
                             >
                             {{ text_price_range }}
                         </div>
@@ -79,10 +80,10 @@
                                     <div class="filter_element_wrap">
 
                                         <div
-                                            class="filter_element_title {% if is_show_group_attributes and section_group['group_name'] %}is-attribute-child{% endif %}"
+                                            class="filter_element_title {% if not section['open'] %}is_closed{% endif %} {% if is_show_group_attributes and section_group['group_name'] %}is-attribute-child{% endif %}"
                                             data-section-name="{{ section['name'] }}"
                                             data-section-id="{{ section['id'] }}"
-
+                                            aria-expanded="{% if section['open'] %}true{% else %}false{% endif %}"
                                             data-section-uri="{{ newURL }}"
                                             >{{ section['name'] }}</div>
 
@@ -190,6 +191,11 @@
     </div>
 </div>
 <style>
+#digitalElephantFilter_box .digitalElephantFilter_category_link {
+  display: block;
+  width: 100%;
+  color: inherit;
+}
 @media (max-width: 767px) {
   .filter-container {
     padding-bottom: 0 !important;

@@ -27,7 +27,7 @@ Class ControllerExtensionModuleDigitalElephantFilterPanelCategory extends Contro
         $categories_setting = $setting['DEF_settings']['categories'][0];
         $categories_setting_advance = $setting['DEF_settings']['advance']['categories'];
 
-        $section_groups = $this->cache->get('DEF_panel_cat_' . $category_id);
+        $section_groups = $this->cache->get('DEF_panel_cat_nav_v1_' . $category_id);
 
         if (($this->helperUrl->isAjaxRequest() || !$section_groups  || !isset($setting['DEF_settings']['cache']['isset'])) && !isset($categories_setting['hide'])) {
 
@@ -35,6 +35,12 @@ Class ControllerExtensionModuleDigitalElephantFilterPanelCategory extends Contro
 
             $section_groups = [];
             $sections = [];
+            $current_path = isset($this->request->get['path']) ? preg_replace('/[^0-9_]/', '', (string)$this->request->get['path']) : '';
+
+            if (!$current_path) {
+                $current_path = (string)(int)$category_id;
+            }
+
             //if (count($categories) > 1) {
                 //conversion of the interface
                 $values = [];
@@ -69,6 +75,7 @@ Class ControllerExtensionModuleDigitalElephantFilterPanelCategory extends Contro
                         'input_value' => $category['category_id'],
                         'input_name' => 'category',
                         'input_label' => $input_label,
+                        'input_href' => $this->url->link('product/category', 'path=' . $current_path . '_' . (int)$category['category_id']),
                         'value_id' => $category['category_id'],
                         'image' => $image,
                         'is_enable' => $is_enable

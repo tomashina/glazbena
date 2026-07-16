@@ -1,5 +1,11 @@
 <div class="digitalElephantFilter_type_checkbox">
     {% for input_data in inputs_data %}
+        {% if input_data['input_href'] is defined and input_data['input_href'] and input_data['is_enable'] %}
+        <a class="checkbox-inline digitalElephantFilter_category_link" href="{{ input_data['input_href'] }}" aria-label="{{ input_data['input_label']|striptags }}">
+            <input type="checkbox" tabindex="-1" aria-hidden="true">
+            <span>{{ input_data['input_label'] }}</span>
+        </a>
+        {% else %}
         <label class="checkbox-inline">
             {% set attr_checked = '' %}
 
@@ -21,5 +27,6 @@
             >
             <span>{{ input_data['input_label'] }}</span>
         </label>
+        {% endif %}
     {% endfor %}
 </div>
