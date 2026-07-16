@@ -18,16 +18,16 @@ class ControllerExtensionPaymentCorvusPay extends Controller {
 		}
 
 
-		if (isset($this->error['error_service_key'])) {
-			$data['error_service_key'] = $this->error['error_service_key'];
+		if (isset($this->error['merchant'])) {
+			$data['error_merchant'] = $this->error['merchant'];
 		} else {
-			$data['error_service_key'] = '';
+			$data['error_merchant'] = '';
 		}
 
-		if (isset($this->error['error_client_key'])) {
-			$data['error_client_key'] = $this->error['error_client_key'];
+		if (isset($this->error['password'])) {
+			$data['error_password'] = $this->error['password'];
 		} else {
-			$data['error_client_key'] = '';
+			$data['error_password'] = '';
 		}
 
 		$data['heading_title'] = $this->language->get('heading_title');
@@ -54,9 +54,11 @@ class ControllerExtensionPaymentCorvusPay extends Controller {
 		$data['entry_test'] = $this->language->get('entry_test');
 		$data['entry_total'] = $this->language->get('entry_total');
 		$data['entry_order_status'] = $this->language->get('entry_order_status');
+		$data['entry_pending_status'] = $this->language->get('entry_pending_status');
 		$data['entry_geo_zone'] = $this->language->get('entry_geo_zone');
 		$data['entry_status'] = $this->language->get('entry_status');
 		$data['entry_sort_order'] = $this->language->get('entry_sort_order');
+		$data['help_entry_pending_status'] = $this->language->get('help_entry_pending_status');
 
 		$data['button_save'] = $this->language->get('button_save');
 		$data['button_cancel'] = $this->language->get('button_cancel');
@@ -110,7 +112,7 @@ class ControllerExtensionPaymentCorvusPay extends Controller {
 		}
 
 
-		$data['callback'] = HTTP_CATALOG . 'index.php?route=extension/payment/corvuspay/callback';
+		$data['callback'] = HTTPS_CATALOG . 'index.php?route=extension/payment/corvuspay/callback';
 
 		if (isset($this->request->post['payment_corvuspay_test'])) {
 			$data['payment_corvuspay_test'] = $this->request->post['payment_corvuspay_test'];
@@ -131,9 +133,25 @@ class ControllerExtensionPaymentCorvusPay extends Controller {
 			$data['payment_corvuspay_order_status_id'] = $this->config->get('payment_corvuspay_order_status_id');
 		} 
 
+		if (isset($this->request->post['payment_corvuspay_pending_status_id'])) {
+			$data['payment_corvuspay_pending_status_id'] = $this->request->post['payment_corvuspay_pending_status_id'];
+		} else {
+			$data['payment_corvuspay_pending_status_id'] = $this->config->get('payment_corvuspay_pending_status_id');
+		}
+
 		$this->load->model('localisation/order_status');
 
 		$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
+		$processing_statuses = array_map('intval', (array)$this->config->get('config_processing_status'));
+		$complete_statuses = array_map('intval', (array)$this->config->get('config_complete_status'));
+		$blocked_pending_statuses = array_unique(array_merge($processing_statuses, $complete_statuses));
+		$data['pending_order_statuses'] = array();
+
+		foreach ($data['order_statuses'] as $order_status) {
+			if (!in_array((int)$order_status['order_status_id'], $blocked_pending_statuses, true)) {
+				$data['pending_order_statuses'][] = $order_status;
+			}
+		}
 
 		if (isset($this->request->post['payment_corvuspay_geo_zone_id'])) {
 			$data['payment_corvuspay_geo_zone_id'] = $this->request->post['payment_corvuspay_geo_zone_id'];
@@ -146,7 +164,7 @@ class ControllerExtensionPaymentCorvusPay extends Controller {
 		$data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
 
 		if (isset($this->request->post['payment_corvuspay_status'])) {
-			$data['payment_corvuspay_status'] = $this->request->post['payment_spay_status'];
+			$data['payment_corvuspay_status'] = $this->request->post['payment_corvuspay_status'];
 		} else {
 			$data['payment_corvuspay_status'] = $this->config->get('payment_corvuspay_status');
 		}
@@ -169,12 +187,29 @@ class ControllerExtensionPaymentCorvusPay extends Controller {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
-		if (!$this->request->post['payment_corvuspay_merchant']) {
+		if (empty($this->request->post['payment_corvuspay_merchant'])) {
 			$this->error['merchant'] = $this->language->get('error_merchant');
 		}
 
-		if (!$this->request->post['payment_corvuspay_password']) {
+		if (empty($this->request->post['payment_corvuspay_password'])) {
 			$this->error['password'] = $this->language->get('error_password');
+		}
+
+		if (empty($this->request->post['payment_corvuspay_order_status_id'])) {
+			$this->error['warning'] = $this->language->get('error_order_status');
+		}
+
+		$pending_status_id = isset($this->request->post['payment_corvuspay_pending_status_id'])
+			? (int)$this->request->post['payment_corvuspay_pending_status_id']
+			: 0;
+
+		if ($pending_status_id > 0) {
+			$processing_statuses = array_map('intval', (array)$this->config->get('config_processing_status'));
+			$complete_statuses = array_map('intval', (array)$this->config->get('config_complete_status'));
+
+			if (in_array($pending_status_id, array_unique(array_merge($processing_statuses, $complete_statuses)), true)) {
+				$this->error['warning'] = $this->language->get('error_pending_status');
+			}
 		}
 
         return !$this->error;

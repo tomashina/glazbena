@@ -1,36 +1,46 @@
-<form name="pay" action="{{ action }}" method="post">
+<form id="corvuspay-form" action="{{ action }}" method="post">
+  {% for name, value in parameters %}
+    <input type="hidden" name="{{ name }}" value="{{ value }}" />
+  {% endfor %}
 
-    <input type="hidden" name="amount" value="{{ total }}">
-    <input id="cart"  name="cart" value="Web shop kupnja {{ order_id }}" hidden="true"/>
-    <input id="currency" name="currency" value="{{ currency }}" hidden="true"/>
-    <input id="language" name="language" value="{{ language }}" hidden="true"/>
-    <input type="hidden" name="order_number" value="{{ order_id }}">
-    <input id="require_complete"  name="require_complete" value="false" hidden="true"/>
-    <input type="hidden" name="store_id" value="{{ merchant }}">
-    <input type="hidden" name="version" value="1.3">
-
-
-    <input type="hidden" name="cardholder_address" value="{{ address }}">
-    <input type="hidden" name="cardholder_city" value="{{ city}}">
-    <input type="hidden" name="cardholder_country" value="{{ country }}">
-    <input type="hidden" name="cardholder_email" value="{{ email }}">
-    <input type="hidden" name="cardholder_name" value="{{ firstname }}">
-    <input type="hidden" name="payment_all" value="{{ number_of_installments }}">
-    <input type="hidden" name="cardholder_phone" value="{{ telephone }}">
-    <input type="hidden" name="cardholder_surname" value="{{ lastname }}">
-    <input type="hidden" name="cardholder_zip_code" value="{{ postcode }}">
-
-    <input type="hidden" name="signature" value="{{ md5 }}">
-
-
-
-    <div class="buttons pull-right">
-        <input type="submit" value="{{ button_confirm }}" class="btn btn-primary btn-blue" />
-
-
-    </div>
-   
-
+  <div class="buttons pull-right">
+    {% if use_confirm %}
+    <input type="button" value="{{ button_confirm }}" id="button-corvuspay-confirm" data-loading-text="{{ text_loading }}" class="btn btn-primary btn-blue" />
+    {% else %}
+    <input type="submit" value="{{ button_confirm }}" class="btn btn-primary btn-blue" />
+    {% endif %}
+  </div>
 </form>
 
+{% if use_confirm %}
+<script type="text/javascript"><!--
+$('#button-corvuspay-confirm').on('click', function() {
+  var button = $(this);
 
+  $.ajax({
+    url: '{{ confirm_url }}',
+    type: 'post',
+    dataType: 'json',
+    beforeSend: function() {
+      button.button('loading');
+    },
+    complete: function() {
+      button.button('reset');
+    },
+    success: function(json) {
+      if (json['error']) {
+        alert(json['error']);
+      }
+
+      if (json['success']) {
+        document.getElementById('corvuspay-form').submit();
+      }
+    },
+    error: function(xhr, ajaxOptions, thrownError) {
+      console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+      alert(xhr.statusText);
+    }
+  });
+});
+//--></script>
+{% endif %}

@@ -10,4 +10,9 @@ $_['text_success_wait'] = '<b><span style="color: #FF0000">Please wait...</span>
 $_['text_failure']      = '... Your payment has been cancelled!';
 $_['text_failure_wait'] = '<b><span style="color: #FF0000">Please wait...</span></b><br>If you are not automatically re-directed in 10 seconds, please click <a href="%s">here</a>.';
 $_['text_pw_mismatch']  = 'CallbackPW does not match. Order requires investigation.';
+$_['text_pending_comment'] = 'Kupac je pokrenuo plaćanje putem CorvusPaya.';
+$_['text_success_comment'] = 'CorvusPay plaćanje odobreno. Autorizacijski kod: %s';
+
+$_['error_confirm_order'] = 'Narudžbu nije moguće poslati na plaćanje. Osvježite stranicu i pokušajte ponovno.';
+$_['error_invalid_response'] = 'Nije moguće potvrditi odgovor sustava za plaćanje. Kontaktirajte nas ako je kartica terećena.';
 ?>
