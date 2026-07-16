@@ -32,20 +32,6 @@ RewriteCond %{HTTP_HOST} !\.(test|localhost)$ [NC]
 RewriteCond %{HTTP_HOST} !^www\. [NC]
 RewriteRule .* https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Repair legacy filter links that used "&" where the query must start with "?".
-RewriteCond %{THE_REQUEST} \s/+[^?\ ]+&[^\ ]+ [NC]
-RewriteRule ^([^&]+)&(.+)$ /$1?$2 [R=301,L,NE]
-
-# The AJAX flag is internal and must never remain in an indexable public URL.
-RewriteCond %{QUERY_STRING} ^(.+)&ajax_digitalElephantFilter=1$ [NC]
-RewriteRule ^ %{REQUEST_URI}?%1 [R=301,L,NE]
-RewriteCond %{QUERY_STRING} ^ajax_digitalElephantFilter=1&(.+)$ [NC]
-RewriteRule ^ %{REQUEST_URI}?%1 [R=301,L,NE]
-RewriteCond %{QUERY_STRING} ^(.+)&ajax_digitalElephantFilter=1&(.+)$ [NC]
-RewriteRule ^ %{REQUEST_URI}?%1&%2 [R=301,L,NE]
-RewriteCond %{QUERY_STRING} ^ajax_digitalElephantFilter=1$ [NC]
-RewriteRule ^ %{REQUEST_URI} [R=301,L,QSD]
-
 
 RewriteCond %{REQUEST_URI} ^/blog/(.+)$
 
