@@ -255,6 +255,7 @@ class ControllerCheckoutCart extends Controller {
 
 			$this->response->setOutput($this->load->view('checkout/cart', $data));
 		} else {
+			$data['empty_cart'] = true;
 			$data['text_error'] = $this->language->get('text_empty');
 			
 			$data['continue'] = $this->url->link('common/home');

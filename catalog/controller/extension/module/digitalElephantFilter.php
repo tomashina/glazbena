@@ -73,26 +73,27 @@ class ControllerExtensionModuleDigitalElephantFilter extends Controller
 		}	
 		
         if ($this->language->get('direction') == 'rtl') {
-		$this->document->addScript($server . '/catalog/view/javascript/jquery/ui/jquery-ui-slider-rtl.min.js');	
+		$this->document->addScript(rtrim($server, '/') . '/catalog/view/javascript/jquery/ui/jquery-ui-slider-rtl.min.js', 'footer');
         } else { 
-		$this->document->addScript($server . '/catalog/view/javascript/jquery/ui/jquery-ui-slider.min.js');
+		$this->document->addScript(rtrim($server, '/') . '/catalog/view/javascript/jquery/ui/jquery-ui-slider.min.js', 'footer');
 		}
 		
-		$this->document->addScript($server . '/catalog/view/theme/basel/js/jquery.ui.touch-punch.min.js');
-		$this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/main.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/controller.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/helper.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/slider_price.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/url_private.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/url.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/pagination.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/show_more.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/quantity_products.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/sync.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/container_products.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/panel.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/limit.js');
-        $this->document->addScript($server . '/catalog/view/javascript/digitalElephantFilter/classes/sort.js');
+		$base = rtrim($server, '/');
+		$this->document->addScript($base . '/catalog/view/theme/basel/js/jquery.ui.touch-punch.min.js', 'footer');
+		$this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/main.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/controller.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/helper.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/slider_price.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/url_private.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/url.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/pagination.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/show_more.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/quantity_products.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/sync.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/container_products.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/panel.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/limit.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/sort.js', 'footer');
     }
 
     protected function setStyle()
@@ -103,7 +104,7 @@ class ControllerExtensionModuleDigitalElephantFilter extends Controller
 			$server = $this->config->get('config_url');
 		}
 		
-        $this->document->addStyle($server . '/catalog/view/javascript/jquery/ui/jquery-ui.min.css');
+        $this->document->addStyle(rtrim($server, '/') . '/catalog/view/javascript/jquery/ui/jquery-ui.min.css', 'stylesheet', 'screen', 'footer');
     }
 
     private function runSEO($setting) {
