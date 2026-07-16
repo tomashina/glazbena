@@ -1,11 +1,12 @@
 <div class="newsletter-wrap">
 <div class="input-group sign-up-field">
 
-<input type="text" id="subscribe-module{{ module }}" name="email" class="form-control" placeholder="{{ basel_subscribe_email }}" />
+<label class="sr-only" for="subscribe-module{{ module }}">{{ basel_subscribe_email }}</label>
+<input type="email" id="subscribe-module{{ module }}" name="email" class="form-control" placeholder="{{ basel_subscribe_email }}" autocomplete="email" />
 <span class="input-group-btn" style="min-width: 40px;padding:0px;">
-<a class=" nowrap" onclick="subscribe({{ module }});"><img src="image/buttonn.png" style="margin-left:5px"/></a>
+<button type="button" class="nowrap newsletter-submit" onclick="subscribe({{ module }});" aria-label="{{ basel_subscribe_btn }}"><img src="image/buttonn.png" style="margin-left:5px" alt="" width="40" height="40"/></button>
 </span>
 </div>
-<p  style="margin:10px 0"><input class="chk" name="terms" required type="checkbox"> <a href="https://www.glazbena-kutija.hr/opci-uvjeti" target="_blank">{{ basel_accept_terms }} </a></p>
+<label class="newsletter-terms"><input class="chk" name="terms" required type="checkbox"> <span>{{ basel_accept_terms }} <a href="https://www.glazbena-kutija.hr/opci-uvjeti" target="_blank" rel="noopener">Opći uvjeti</a></span></label>
 </div>
 <span class="sign-up-respond" id="subscribe-respond{{ module }}" style="margin-top: 5px;display: block;color: red;"></span>

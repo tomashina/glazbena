@@ -30,6 +30,8 @@ class ControllerCommonFooter extends Controller {
 		$data['wishlist'] = $this->url->link('account/wishlist', '', true);
 		$data['newsletter'] = $this->url->link('account/newsletter', '', true);
 		$data['is_error_page'] = isset($this->request->get['route']) && strpos($this->request->get['route'], 'error/') === 0;
+		$seo_entity = $this->registry->get('seo_entity');
+		$data['is_home'] = is_array($seo_entity) && isset($seo_entity['type']) && $seo_entity['type'] === 'home';
 
 		$data['powered'] = sprintf($this->language->get('text_powered'), $this->config->get('config_name'), date('Y', time()));
 

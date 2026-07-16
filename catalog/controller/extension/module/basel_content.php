@@ -31,12 +31,12 @@ class ControllerExtensionModuleBaselContent extends Controller {
 
 		// Video background
 		if ($setting['b_setting']['block_bgv']) {
-			$this->document->addScript('catalog/view/theme/basel/js/jquery.tuber.js');
+			$this->document->addScript('catalog/view/theme/basel/js/jquery.tuber.js', 'footer');
 		}
 
 		// Equal Height
 		if ($setting['c_setting']['eh']) {
-			$this->document->addScript('catalog/view/theme/basel/js/jquery.matchHeight.min.js');
+			$this->document->addScript('catalog/view/theme/basel/js/jquery.matchHeight.min.js', 'footer');
 		}
 
 		// RTL support
@@ -83,7 +83,7 @@ class ControllerExtensionModuleBaselContent extends Controller {
 		$data['block_style'] .= "background-repeat:" . $setting['b_setting']['bg_repeat'] . ";";
 			if ($setting['b_setting']['bg_par']) {
 			$data['block_style'] .= "background-attachment:fixed;";
-			$this->document->addScript('catalog/view/theme/basel/js/parallax.min.js');
+			$this->document->addScript('catalog/view/theme/basel/js/parallax.min.js', 'footer');
 			}
 		}
 
@@ -161,6 +161,7 @@ class ControllerExtensionModuleBaselContent extends Controller {
 				);
 
 				$data1 = html_entity_decode(str_replace($find,$replace,$column['data1'][$this->config->get('config_language_id')]), ENT_QUOTES, 'UTF-8');
+				$data1 = $this->optimizeEmbeddedContent($data1);
 
                 } else {
                     $data1 = false;
@@ -227,5 +228,31 @@ class ControllerExtensionModuleBaselContent extends Controller {
 
 		if ($this->config->get('theme_default_directory') == 'basel')
 		return $this->load->view('extension/module/basel_content', $data);
+	}
+
+	private function optimizeEmbeddedContent($html) {
+		$html = preg_replace_callback('/<iframe\b[^>]*>/i', function ($match) {
+			$tag = $match[0];
+			if (stripos($tag, 'google.com/maps/embed') === false) {
+				return $tag;
+			}
+			$tag = preg_replace('/\ssrc=(["\'])([^"\']+)\1/i', ' data-src=$1$2$1', $tag, 1);
+			if (!preg_match('/\btitle=/i', $tag)) {
+				$tag = preg_replace('/>$/', ' title="Lokacija Glazbene kutije">', $tag);
+			}
+			if (preg_match('/\bclass=(["\'])(.*?)\1/i', $tag)) {
+				$tag = preg_replace('/\bclass=(["\'])(.*?)\1/i', 'class=$1$2 gk-deferred-iframe$1', $tag, 1);
+			} else {
+				$tag = preg_replace('/>$/', ' class="gk-deferred-iframe">', $tag);
+			}
+			return $tag;
+		}, $html);
+
+		return preg_replace_callback('/<a\b([^>]*)>\s*<\/a>/i', function ($match) {
+			if (preg_match('/\baria-label=/i', $match[1])) {
+				return $match[0];
+			}
+			return '<a' . $match[1] . ' aria-label="Saznajte više"></a>';
+		}, $html);
 	}
 }

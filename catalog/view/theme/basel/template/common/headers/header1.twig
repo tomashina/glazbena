@@ -15,7 +15,7 @@
         <li class="">
 <a class=" " href="{{ home }}">
 
-<span class="top homeicon"> <img src="image/homeicon.svg"> </span>
+<span class="top homeicon"> <img src="image/homeicon.svg" alt="Početna"> </span>
 </a>
 </li>
 		{% if primary_menu == 'oc' %}
@@ -31,9 +31,9 @@
     {% if header_search %}
         <div class="icon-element srhpd">
             <div class="dropdown-wrapper-click from-top hidden-sx hidden-sm hidden-xs">
-                <a class="shortcut-wrapper search-trigger from-top clicker">
-                    <i class="icon-magnifier icon"></i>
-                </a>
+                <button type="button" class="shortcut-wrapper search-trigger from-top clicker" aria-label="Pretraži">
+                    <i class="icon-magnifier icon" aria-hidden="true"></i>
+                </button>
                 <div class="dropdown-content dropdown-left smarg">
                     <div class="search-dropdown-holder">
                         <div class="search-holder">
@@ -48,12 +48,12 @@
     <div class="icon-element is_wishlist hidden-sx hidden-sm hidden-xs">
         {% if lang_curr_title %}
             <div class="setting-ul">
-                <div class="setting-li dropdown-wrapper from-left lang-curr-trigger nowrap"><a>
+                <div class="setting-li dropdown-wrapper from-left lang-curr-trigger nowrap"><button type="button" aria-label="Odabir valute">
                         <span>
                       {{ lang_curr_title }}
 
                         </span>
-                    </a>
+                    </button>
                     <div class="dropdown-content dropdown-left lang-curr-wrapper">
 
                         {{ currency }}
@@ -72,9 +72,9 @@
 <div class="table-cell w20 logo text-center">
     {% if logo %}
     <div id="logo" >
-    <a href="{{ home }}" class="normal" ><img src="image/logo-glazbena.png"  class="normal" title="{{ name }}" alt="{{ name }}" /></a>
+    <a href="{{ home }}" class="normal" ><img src="image/logo-glazbena.png" class="normal" width="200" height="132" title="{{ name }}" alt="{{ name }}" /></a>
 
-     <a href="{{ home }}" class="sticky" ><img src="image/logo-glazbena-sticky.png"  class="sticky" title="{{ name }}" alt="{{ name }}" /></a>
+     <a href="{{ home }}" class="sticky" ><img src="image/logo-glazbena-sticky.png" class="sticky" width="73" height="60" title="{{ name }}" alt="{{ name }}" /></a>
     </div>
     {% endif %}
 </div>
@@ -88,15 +88,15 @@
     <div class="icon-element is_wishlist hidden-sx hidden-sm hidden-xs">
         {% if lang_curr_title %}
             <div class="setting-ul">
-                <div class="setting-li dropdown-wrapper from-left lang-curr-trigger nowrap"><a>
+                <div class="setting-li dropdown-wrapper from-left lang-curr-trigger nowrap"><button type="button" aria-label="Odabir jezika">
                         <span> {% if code =='hr' %}
-                                <img class="flag" src="image/hr.svg">
+                                <img class="flag" src="image/hr.svg" alt="Hrvatski">
 
                {% else %}
 
-                                <img class="flag" src="image/gb.svg">
+                                <img class="flag" src="image/gb.svg" alt="English">
                             {% endif %}</span>
-                    </a>
+                    </button>
                     <div class="dropdown-content dropdown-left lang-curr-wrapper">
                         {{ language }}
 
@@ -111,9 +111,9 @@
                <div class="wishlist-hover"> <span class=" hidden-sm hidden-xs">{{ basel_text_kontakt }}</span>
                </div>
            </a>
-           <a class="socka" href="https://www.facebook.com/GlazbenaKutijaDoo"><img src="image/facebook.svg"></a>
-               <a class="socka" href="https://www.instagram.com/glazbenakutija/"><img src="image/instagram.svg"></a>
-                   <a class="sockak" href="https://www.youtube.com/channel/UCgDP1zd_7Y7lHbvxqqfu0HA"><img src="image/youtube.svg"></a>
+           <a class="socka" href="https://www.facebook.com/GlazbenaKutijaDoo" aria-label="Facebook"><img src="image/facebook.svg" alt=""></a>
+               <a class="socka" href="https://www.instagram.com/glazbenakutija/" aria-label="Instagram"><img src="image/instagram.svg" alt=""></a>
+                   <a class="sockak" href="https://www.youtube.com/channel/UCgDP1zd_7Y7lHbvxqqfu0HA" aria-label="YouTube"><img src="image/youtube.svg" alt=""></a>
 
        </div>
 
@@ -121,10 +121,10 @@
        <div class="icon-element userlog is_wishlist">
 
         {% if logged %}
-            <a class="shortcut-wrapper wishlist" style="padding-right: 0px" href="{{ account }}"><div class="wishlist-hover"><img src="image/user.svg"> </div></a>  <a class="anim-underline hidden-sm hidden-xs" style="font-size:13px;font-weight:300" href="{{ logout }}">{{ text_logout }}</a> &nbsp;<!--  /
+            <a class="shortcut-wrapper wishlist" style="padding-right: 0px" href="{{ account }}" aria-label="Korisnički račun"><div class="wishlist-hover"><img src="image/user.svg" alt=""> </div></a>  <a class="anim-underline hidden-sm hidden-xs" style="font-size:13px;font-weight:300" href="{{ logout }}">{{ text_logout }}</a> &nbsp;<!--  /
         -->
         {% else %}
-            <a class="shortcut-wrapper wishlist" href="{{ login }}">  <div class="wishlist-hover"><img src="image/user.svg"> <span class="hidden-md hidden-sm hidden-xs">{{ basel_text_racun }}</span> </div></a>
+            <a class="shortcut-wrapper wishlist" href="{{ login }}" aria-label="{{ basel_text_racun }}">  <div class="wishlist-hover"><img src="image/user.svg" alt=""> <span class="hidden-md hidden-sm hidden-xs">{{ basel_text_racun }}</span> </div></a>
         {% endif %}
 
     </div>
@@ -134,7 +134,7 @@
         <div class="icon-element catalog_hide">
             <div id="cart" class="dropdown-wrapper from-top">
                 <a href="{{ shopping_cart }}" class="shortcut-wrapper cart">
-                    <img src="image/kosarica-white.svg" class="carticonm"/> <span id="cart-total" class="nowrap">
+                    <img src="image/kosarica-white.svg" class="carticonm" alt=""/> <span id="cart-total" class="nowrap">
                         <span class="counter cart-total-items">{{ cart_items }}</span>
                 </span>
                 </a>
@@ -145,15 +145,15 @@
         </div>
 
        <div class="icon-element mnu">
-           <a class="shortcut-wrapper menu-trigger hidden-md hidden-lg">
-               <i class="icon-line-menu icon"></i>
-           </a>
+           <button type="button" class="shortcut-wrapper menu-trigger hidden-md hidden-lg" aria-label="Otvori izbornik">
+               <i class="icon-line-menu icon" aria-hidden="true"></i>
+           </button>
        </div>
 
        <div class="icon-element srch dropdown-wrapper-click">
-           <a class="shortcut-wrapper search-trigger hidden-md hidden-lg clicker">
-               <i class="icon-magnifier icon"></i>
-           </a>
+           <button type="button" class="shortcut-wrapper search-trigger hidden-md hidden-lg clicker" aria-label="Pretraži">
+               <i class="icon-magnifier icon" aria-hidden="true"></i>
+           </button>
            <div class="dropdown-content dropdown-left mobl">
                <div class="search-dropdown-holder mob">
                    <div class="search-holder">

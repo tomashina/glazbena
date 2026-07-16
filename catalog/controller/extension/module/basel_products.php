@@ -57,6 +57,7 @@ class ControllerExtensionModuleBaselProducts extends Controller {
 		$data['use_margin'] = $setting['use_margin'];
 		$data['margin'] = $setting['margin'];
 		$data['img_width'] = $setting['image_width'];
+		$data['img_height'] = $setting['image_height'];
 		$data['use_button'] = $setting['use_button'];
 		$data['link_href'] = $setting['link_href'];
 		$data['countdown_status'] = $setting['countdown'];
@@ -109,10 +110,15 @@ class ControllerExtensionModuleBaselProducts extends Controller {
 				if (isset($results)) {
 				foreach ($results as $result) {
 					if ($result['image']) {
+					$image_source = $result['image'];
 					$image = $this->model_tool_image->resize($result['image'], $setting['image_width'], $setting['image_height']);
 					} else {
+					$image_source = 'placeholder.png';
 					$image = $this->model_tool_image->resize('placeholder.png', $setting['image_width'], $setting['image_height']);
 					}
+					$small_width = min(300, (int)$setting['image_width']);
+					$small_height = max(1, (int)round($setting['image_height'] * ($small_width / $setting['image_width'])));
+					$image_small = $this->model_tool_image->resize($image_source, $small_width, $small_height);
 
 					$images = $this->model_catalog_product->getProductImages($result['product_id']);
 					if(isset($images[0]['image']) && !empty($images[0]['image'])){
@@ -210,7 +216,9 @@ class ControllerExtensionModuleBaselProducts extends Controller {
 						'quantity'  => $result['quantity'],
 						'jan'  => $result['jan'],
 						'thumb'   	 => $image,
-						'thumb2' 	 => $this->model_tool_image->resize($image2, $setting['image_width'], $setting['image_height']),
+						'thumb_small' => $image_small,
+						'thumb2' 	 => $image2 ? $this->model_tool_image->resize($image2, $setting['image_width'], $setting['image_height']) : false,
+						'thumb2_small' => $image2 ? $this->model_tool_image->resize($image2, $small_width, $small_height) : false,
 							'sale_end_date'  => $date_end ? $date_end['date_end'] : '',
 						'name'    	 => $result['name'],
 						'price'   	 => $price,

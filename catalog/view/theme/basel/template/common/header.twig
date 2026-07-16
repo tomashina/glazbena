@@ -7,7 +7,7 @@
 <!--<![endif]-->
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>{{ title }}</title>
 <base href="{{ base }}" />
@@ -31,24 +31,36 @@
 <script type="application/ld+json">{{ seo_json_ld|raw }}</script>
 <link href="{{ seo.canonical }}" rel="canonical" />
 {% if seo.preload_image %}<link rel="preload" as="image" href="{{ seo.preload_image }}" fetchpriority="high" />{% endif %}
+{% if is_home %}
+<link rel="preload" as="image" href="catalog/view/theme/basel/image/front-11-2020-mobile.webp" media="(max-width: 767px)" fetchpriority="high" />
+<link rel="preload" as="image" href="catalog/view/theme/basel/image/front-11-2020-1600.webp" media="(min-width: 768px)" fetchpriority="high" />
+{% endif %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Load essential resources -->
     <script src="catalog/view/javascript/jquery/jquery-2.1.1.min.js"></script>
     <link href="catalog/view/javascript/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
-    <script src="catalog/view/javascript/bootstrap/js/bootstrap.min.js"></script>
-    <script src="catalog/view/theme/basel/js/slick.min.js"></script>
-    <script src="catalog/view/theme/basel/js/readmore.min.js"></script>
-    <script src="catalog/view/theme/basel/js/basel_common.min.js?v=3.26"></script>
-
-    
     <!-- Main stylesheet -->
     <link href="catalog/view/theme/basel/stylesheet/stylesheet.min.css?v=3.26" rel="stylesheet">
-    <link href="catalog/view/javascript/cookieconsent/cookieconsent.css?v=3.1" rel="stylesheet">
-    <link href="catalog/view/javascript/cookieconsent/glazbena-consent.css?v=1.1" rel="stylesheet">
+    <style>
+    {% if is_home %}.common-home .bckholder{background-image:url('catalog/view/theme/basel/image/front-11-2020-1600.webp')}@media(max-width:767px){.common-home .bckholder{background-image:url('catalog/view/theme/basel/image/front-11-2020-mobile.webp')}}{% endif %}
+    .widget.contrast-bg{background-image:url('catalog/view/theme/basel/image/brand_bck2020-1400.webp')}.header-main .main-menu>ul>li.red>a,.header-main .main-menu>ul>li.red>a:hover,.price-new{color:#b00000}.price-old,.single-product .price .price-old{color:#595959}.instock{color:#087a00}#footer .footer-heading{position:relative;color:inherit;font-size:14px;font-weight:600;line-height:1.4;margin:0 0 22px;text-transform:uppercase}#footer .footer-heading:after{content:"";display:block;width:30px;margin-top:10px;border-bottom:2px solid currentColor}button.arrow-left,button.arrow-right,button.scroll-to-top,button.newsletter-submit{border:0;padding:0;background-color:transparent;font:inherit}button.scroll-to-top{position:fixed;display:block;width:45px;height:45px;right:30px;bottom:-60px;z-index:99;color:#fff;border-radius:2px;transition:all .3s ease}.offset250 button.scroll-to-top{bottom:30px}button.scroll-to-top:hover{color:#fff}.newsletter-submit{min-width:44px;min-height:44px}.newsletter-terms{display:flex;align-items:flex-start;gap:8px;min-height:44px;margin:10px 0;cursor:pointer}.newsletter-terms input{width:22px;height:22px;flex:0 0 22px;margin:1px 0}.newsletter-terms a{display:inline-block;min-height:24px;padding:2px 0}.footer-copyright a{display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:48px}
+    button.shortcut-wrapper,button.body-cover,button.language-option,button.remove{border:0;background:transparent;font:inherit;color:inherit}.language-option{padding:4px 0}.body-cover{padding:0}
+    .price-new{color:#b00000!important}.price-old,.single-product .price .price-old{color:#595959!important}.instock{color:#087a00!important}
+    .lang-curr-trigger>button{display:inline-block;position:relative;border:0;background:transparent;padding:0 0 1px;font:inherit;font-size:12px;line-height:inherit;text-transform:uppercase;color:inherit;vertical-align:baseline}
+    </style>
+    <link href="catalog/view/javascript/cookieconsent/cookieconsent.css?v=3.1" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="catalog/view/javascript/cookieconsent/glazbena-consent.css?v=1.3" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="catalog/view/javascript/cookieconsent/cookieconsent.css?v=3.1" rel="stylesheet"><link href="catalog/view/javascript/cookieconsent/glazbena-consent.css?v=1.3" rel="stylesheet"></noscript>
 <!-- Mandatory Theme Settings CSS -->
 <style id="basel-mandatory-css">{{ basel_mandatory_css }}</style>
 <!-- Plugin Stylesheet(s) -->
 {% for style in styles %}
+{% if 'fonts.googleapis.com' in style.href %}
+<link href="{{ style.href }}{% if '?' in style.href %}&amp;{% else %}?{% endif %}display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+{% else %}
 <link href="{{ style.href }}" rel="{{ style.rel }}" media="{{ style.media }}" />
+{% endif %}
 {% endfor %}
 {% if direction == 'rtl' %}
 <link href="catalog/view/theme/basel/stylesheet/rtl.css" rel="stylesheet">
@@ -109,6 +121,8 @@ window.gkLoadMetaPixel=function(){
 {% endif %}
 
 
+<style id="gk-accessibility-overrides">.price-new{color:#b00000!important}.single-product .price .price-old{color:#595959!important}.instock{color:#087a00!important}button.menu-trigger,button.menu-closer{color:#fff!important}.gk-cookie-fab{bottom:22px!important}button.scroll-to-top{position:fixed;right:18px;bottom:18px;z-index:980;display:flex;width:60px;height:60px;align-items:center;justify-content:center;padding:0;border:0;border-radius:50%;background:#0966b3!important;color:#fff!important;font-size:18px;line-height:1;transform:rotate(-90deg);visibility:hidden;opacity:0;transition:opacity .3s,visibility .3s,background .2s}.offset250 button.scroll-to-top{bottom:18px;visibility:visible;opacity:1}button.scroll-to-top:hover,button.scroll-to-top:focus{background:#074f8b!important;color:#fff!important}.footer-copyright>.col-md-6:last-child{display:flex;flex-wrap:wrap;align-items:center;gap:4px}@media(max-width:1199px){.gk-cookie-fab{display:none!important}}</style>
+<style>.gk-cookie-fab{bottom:20px!important}</style>
 </head>
 <body class="{{ class }}{{ basel_body_class }}">
 
@@ -121,7 +135,7 @@ window.gkLoadMetaPixel=function(){
     <div class="table-cell w100"><div class="ellipsis-wrap">{{ top_promo_text }}</div></div>
     {% if top_promo_close %}
     <div class="table-cell text-right">
-    <a onClick="addCookie('basel_top_promo', 1, 30);$(this).closest('.top_notificaiton').slideUp();" class="top_promo_close">&times;</a>
+    <button type="button" onClick="addCookie('basel_top_promo', 1, 30);$(this).closest('.top_notificaiton').slideUp();" class="top_promo_close" aria-label="Zatvori">&times;</button>
     </div>
     {% endif %}
     </div>

@@ -40,6 +40,7 @@ class ControllerExtensionModuleBaselCategories extends Controller {
 		$data['use_margin'] = $setting['use_margin'];
 		$data['margin'] = $setting['margin'];
 		$data['img_width'] = $setting['image_width'];
+		$data['img_height'] = $setting['image_height'];
 		$data['view_subs'] = $setting['subs'];
 		$data['count'] = $setting['count'];
 	
@@ -69,13 +70,18 @@ class ControllerExtensionModuleBaselCategories extends Controller {
 			// Top Levels
 			$filter_data_top = array('filter_category_id' => $category_info['category_id'], 'filter_sub_category' => true);
 			if ($category_info['image']) {
+				$image_source = $category_info['image'];
 				$image = $this->model_tool_image->resize($category_info['image'], $setting['image_width'], $setting['image_height']);
 			} else {
+				$image_source = 'placeholder.png';
 				$image = $this->model_tool_image->resize('placeholder.png', $setting['image_width'], $setting['image_height']);
 			}
+			$small_width = min(300, (int)$setting['image_width']);
+			$small_height = max(1, (int)round($setting['image_height'] * ($small_width / $setting['image_width'])));
 			$data['categories'][] = array(
 				'category_id' => $category_info['category_id'],
 				'thumb'       => $image,
+				'thumb_small' => $this->model_tool_image->resize($image_source, $small_width, $small_height),
 				'name'        => $category_info['name'] . ($setting['count'] && $setting['subs'] ? ' (' . $this->model_catalog_product->getTotalProducts($filter_data_top) . ')' : ''),
 				'products'    => $this->model_catalog_product->getTotalProducts($filter_data_top) . $this->language->get('basel_text_products'),
 				'href'        => $this->url->link('product/category', 'path=' . $category_info['category_id']),

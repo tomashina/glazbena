@@ -18,8 +18,8 @@
                         <div class="col-sm-6">
                              {% if blog.image and thumb %}
                                 <div class="banner_wrap hover-zoom hover-darken"{% if columns == 'list' %} style="width:{{img_width}}px"{% endif %}>
-                                <img class="zoom_image" src="{{ blog.image }}" alt="{{ blog.title }}" title="{{ blog.title }}" />
-                                <a href="{{ blog.href }}" class="effect-holder"></a>
+                                <img class="zoom_image" src="{{ blog.image }}" srcset="{{ blog.image_small }} 300w, {{ blog.image }} {{ img_width }}w" sizes="(max-width:767px) 100vw, {{ img_width }}px" alt="{{ blog.title }}" title="{{ blog.title }}" width="{{ img_width }}" height="{{ img_height }}" loading="lazy" decoding="async" />
+                                <a href="{{ blog.href }}" class="effect-holder" aria-label="{{ blog.title }}"></a>
 
                                     {% if blog.tags %}
                                         <div class="tags-wrapper">
@@ -36,7 +36,7 @@
                         </div>
                     <div class="col-sm-6">
                         <div class="summary">
-                        <h3 class="blog-title"><a href="{{ blog.href }}">{{ blog.title }}</a></h3>
+                        <h2 class="blog-title"><a href="{{ blog.href }}">{{ blog.title }}</a></h2>
                       <!--  <div class="blog_stats">
                         {% if author_status %}<i>{{ text_posted_by }}: {{ blog.author }}</i>{% endif %}
                         {% if comments_count_status %}<i>{{ text_comments }}: {{ blog.comment_total }}</i>{% endif %}
@@ -61,10 +61,12 @@
 
 {% if carousel %}
 <script><!--
+$(function(){
 $('.grid-holder.blog.module{{ module }}').slick({
+accessibility:false,
 {% if carousel_a %}
-prevArrow: "<a class=\"arrow-left icon-arrow-left\"></a>",
-nextArrow: "<a class=\"arrow-right icon-arrow-right\"></a>",
+prevArrow: "<button type=\"button\" class=\"arrow-left icon-arrow-left\" aria-label=\"Prethodno\"></button>",
+nextArrow: "<button type=\"button\" class=\"arrow-right icon-arrow-right\" aria-label=\"Sljedeće\"></button>",
 {% else %}
 arrows: false,
 {% endif %}
@@ -88,7 +90,7 @@ adaptiveHeight:true,slidesToShow:1,slidesToScroll:1,responsive:[
 {breakpoint:420,settings:{slidesToShow:2,slidesToScroll:1}}
 ]
 });
-$("[data-toggle='tooltip").tooltip();
+$('[data-toggle="tooltip"]').tooltip();
 {% if carousel_a and rows > 1 %}
 $(document).ready(function() {
 var c_o = $('.module{{ module }}').offset().top;
@@ -104,5 +106,6 @@ $('.grid-holder.blog.module{{ module }} .slick-arrow').removeClass('visible');
 $(window).scroll(function() {sticky_arrows();});
 });
 {% endif %}
+});
 //--></script>
 {% endif %}

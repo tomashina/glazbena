@@ -4,7 +4,7 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
 		static $module = 0;
 
 		// Add required sources
-		$this->document->addScript('catalog/view/theme/basel/js/masterslider.min.js?v=3.26');
+		$this->load->model('tool/image');
 
 		if ($this->request->server['HTTPS']) {
 			$server = $this->config->get('config_ssl');
@@ -27,6 +27,7 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
 		// General Settings
 		$data['width'] = $setting['width'];
 		$data['height'] = $setting['height'];
+		$data['mobile_height'] = $setting['height'];
 		$data['minheight'] = $setting['minheight'];
 		$data['fullwidth'] = $setting['fullwidth'];
 		$data['margin_bottom'] = $setting['margin_bottom'];
@@ -43,6 +44,7 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
 
             //$section_row = 0;
             function sortslides($a, $b) {return strcmp($a['sort_order'], $b['sort_order']);} usort($setting['sections'], 'sortslides');
+            $priority_slide = true;
             foreach($setting['sections'] as $section) {
 
                 $groups = array();
@@ -141,6 +143,14 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
                 //$section_row++;
 
 				//$data['sections'][$section['sort_order']] = array(
+				$slide_image = !empty($section['thumb_image']) ? $this->model_tool_image->resize($section['thumb_image'], $setting['width'], $setting['height'], 'cover') : '';
+				$has_mobile_image = !empty($section['mobile_image']);
+				$mobile_source = $has_mobile_image ? $section['mobile_image'] : $section['thumb_image'];
+				$mobile_slide_image = $mobile_source ? $this->model_tool_image->resize($mobile_source, 640, $has_mobile_image ? 640 : 320, 'cover') : '';
+				if ($priority_slide && $section['sort_order'] > 0) {
+					$data['mobile_height'] = $has_mobile_image ? $setting['width'] : $setting['height'];
+				}
+
 				$data['sections'][] = array(
 					'link'   => $section['link'],
 					'link_new_window'   => $section['link_new_window'],
@@ -148,19 +158,23 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
 					'slide_kenburn'   => $section['slide_kenburn'],
 					'bg_color' => $section['bg_color'],
 					'is_bg' => $section['thumb_image'],
-					'thumb_image'   => $base_url . 'image/' . $section['thumb_image'],
-					'mobile_image'  => !empty($section['mobile_image']) ? $base_url . 'image/' . $section['mobile_image'] : '',
+					'thumb_image'   => $slide_image,
+					'mobile_image'  => $mobile_slide_image,
+					'image_width'   => $setting['width'],
+					'image_height'  => $setting['height'],
+					'priority'      => $priority_slide && $section['sort_order'] > 0,
 					'sort_order'   => $section['sort_order'],
 					'groups'  => $groups
 				);
+				if ($section['sort_order'] > 0) {
+					$priority_slide = false;
+				}
             }
 
 			usort($data['sections'], function ($a, $b) { return $a['sort_order'] - $b['sort_order']; });
 
 
             $this->load->model('design/banner');
-            $this->load->model('tool/image');
-
             $data['banners'] = array();
 
             $results = $this->model_design_banner->getBanner(12);
@@ -172,7 +186,7 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
                     $img = $this->model_tool_image->resize($result['image'], 385, 400);
                     // first
                 } else  {
-                    $img = $this->model_tool_image->resize($result['image'], 710, 354);
+					$img = $this->model_tool_image->resize($result['image'], 400, 200);
                 }
 
 
@@ -180,15 +194,14 @@ class ControllerExtensionModuleBaselLayerslider extends Controller {
                     $data['banners'][] = array(
                         'title' => $result['title'],
                         'link'  => $result['link'],
-                        'image' => $img
+						'image' => $img,
+						'width' => $i == 0 ? 385 : 400,
+						'height' => $i == 0 ? 400 : 200
                     );
                 }
 
                 $i++;
             }
-
-            $data['module'] = $module++;
-
 
             //ksort($data['sections']);
 

@@ -14,7 +14,7 @@
   <div class="footer-column col-xs-12 col-sm-4">
 <div class="footer-custom-wrapper">
 {% if footer_block_title is defined %}
-<h5>{{ footer_block_title }}</h5>
+<h2 class="footer-heading">{{ footer_block_title }}</h2>
 {% endif %}
 {% if footer_block_2 and footer_block_2 != '<p><br></p>' %}
 <div class="custom_block">{{ footer_block_2 }}</div>
@@ -35,7 +35,7 @@
 </div>
       {% if informations %}
       <div class="footer-column col-xs-12 col-sm-4 eq_height">
-        <h5>{{ text_information }}</h5>
+        <h2 class="footer-heading">{{ text_information }}</h2>
         <ul class="list-unstyled">
               <li><a href="{{ contact }}">{{ text_contact }}</a></li>
           {% for information in informations[:6] %}
@@ -51,7 +51,7 @@
       {% endif %}
       {% if informations %}
       <div class="footer-column col-xs-12 col-sm-4 eq_height">
-        <h5>{{ text_service }}</h5>
+        <h2 class="footer-heading">{{ text_service }}</h2>
         <ul class="list-unstyled" style="margin-bottom:20px">
           <li><a href="{{ contract_withdrawal }}">{{ text_contract_withdrawal }}</a></li>
           <li><a href="#cookie-settings" data-cookie-consent-trigger>{{ text_cookie_settings }}</a></li>
@@ -62,8 +62,8 @@
 
 
         </ul>
-      <a href="https://webretaileraward.com/hr/tekmovalci_2021/" target="_blank">  <img style="border:1px solid #fff;max-width:263px" src="image/WRA2021.svg" alt="Web Retailer Award"/></a>
-        <a href="https://www.e-commercejam.com/wra-competition/competitors/" target="_blank" >  <img style="border:1px solid #fff;margin-top:5px" src="image/hall-of-fame-2024.png" alt="Web Retailer Award"/></a>
+      <a href="https://webretaileraward.com/hr/tekmovalci_2021/" target="_blank" rel="noopener">  <img style="border:1px solid #fff;max-width:263px" src="image/WRA2021.svg" alt="Web Retailer Award" width="263" height="80" loading="lazy" decoding="async"/></a>
+        <a href="https://www.e-commercejam.com/wra-competition/competitors/" target="_blank" rel="noopener">  <img style="border:1px solid #fff;margin-top:5px" src="image/hall-of-fame-2024.png" alt="Web Retailer Award Hall of Fame" width="263" height="88" loading="lazy" decoding="async"/></a>
       </div>
       {% endif %}
 
@@ -74,6 +74,13 @@
 </div>
 </div>
 <link href="catalog/view/javascript/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+{% for style in styles %}<link href="{{ style.href }}" rel="{{ style.rel }}" media="{{ style.media }}" />{% endfor %}
+<script src="catalog/view/javascript/bootstrap/js/bootstrap.min.js"></script>
+<script src="catalog/view/theme/basel/js/slick.min.js"></script>
+<script src="catalog/view/theme/basel/js/readmore.min.js"></script>
+<script src="catalog/view/theme/basel/js/basel_common.min.js?v=3.26"></script>
+{% if is_home %}<script src="catalog/view/theme/basel/js/masterslider.min.js?v=3.26"></script>{% endif %}
+{% for script in scripts %}<script src="{{ script }}"></script>{% endfor %}
 <script src="catalog/view/theme/basel/js/countdown.min.js?v=3.26"></script>
 <script src="catalog/view/theme/basel/js/live_search.min.js?v=3.26"></script>
 <script src="catalog/view/theme/basel/js/featherlight.min.js?v=3.26"></script>
@@ -129,7 +136,7 @@ $('#column-left, #column-right').theiaStickySidebar({containerSelector:$(this).c
 
     </div>
 {% endif %}
-<a class="scroll-to-top primary-bg-color " onclick="$('html, body').animate({scrollTop:0});"><i class="icon-arrow-right"></i></a>
+<button type="button" class="scroll-to-top primary-bg-color" onclick="$('html, body').animate({scrollTop:0});" aria-label="Povratak na vrh"><i class="icon-arrow-right" aria-hidden="true"></i></button>
 <button type="button" class="gk-cookie-fab" data-cookie-consent-trigger aria-label="{{ text_cookie_settings }}" title="{{ text_cookie_settings }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z"/><path d="M8.5 8.5h.01M16 15.5h.01M12 12h.01M11 17h.01M7 14h.01"/></svg></button>
 <div id="featherlight-holder"></div>
 
@@ -138,6 +145,20 @@ $('#column-left, #column-right').theiaStickySidebar({containerSelector:$(this).c
 
 <script src="catalog/view/javascript/cookieconsent/cookieconsent.umd.js?v=3.1" defer></script>
 <script src="catalog/view/javascript/cookieconsent/glazbena-consent.js?v=1.1" defer></script>
+<script>
+(function(){
+  var frames=document.querySelectorAll('iframe.gk-deferred-iframe[data-src]');
+  if(!frames.length){return;}
+  var load=function(frame){if(frame.dataset.src){frame.src=frame.dataset.src;frame.removeAttribute('data-src');}};
+  if('IntersectionObserver' in window){
+    var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){load(entry.target);observer.unobserve(entry.target);}});},{rootMargin:'0px'});
+    Array.prototype.forEach.call(frames,function(frame){observer.observe(frame);});
+  }else{
+    var activate=function(){Array.prototype.forEach.call(frames,load);window.removeEventListener('scroll',activate);window.removeEventListener('touchstart',activate);};
+    window.addEventListener('scroll',activate,{once:true,passive:true});window.addEventListener('touchstart',activate,{once:true,passive:true});
+  }
+})();
+</script>
 
 
 

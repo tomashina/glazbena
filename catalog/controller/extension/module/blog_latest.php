@@ -44,6 +44,7 @@ class ControllerExtensionModuleBlogLatest extends Controller {
 		$data['use_margin'] = $setting['use_margin'];
 		$data['margin'] = $setting['margin'];
 		$data['img_width'] = $setting['width'];
+		$data['img_height'] = $setting['height'];
 
 
 		foreach ($this->model_extension_blog_blog->getLatestBlogs($data) as $result) {
@@ -88,6 +89,7 @@ class ControllerExtensionModuleBlogLatest extends Controller {
 			'count_read' => $result['count_read'],
 			'tags' 				=> $tags,
 			'image'   		=> $this->model_tool_image->resize($result['image'], $setting['width'], $setting['height']),
+			'image_small'   => $this->model_tool_image->resize($result['image'], min(300, (int)$setting['width']), max(1, (int)round($setting['height'] * (min(300, (int)$setting['width']) / $setting['width'])))),
 			'href'  => $this->url->link('extension/blog/blog', 'blog_id=' . $result['blog_id'])
       		);
     	}

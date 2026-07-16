@@ -21,7 +21,7 @@
 
                 <div class="item single-category has-subs">
                 <div class="table">
-                <div class="table-cell v-top img-cell"><img src="{{ category.thumb }}" loading="lazy" width="400" height="400" alt="{{ category.name }}" /></div>
+                <div class="table-cell v-top img-cell"><img src="{{ category.thumb }}" srcset="{{ category.thumb_small }} 300w, {{ category.thumb }} {{ img_width }}w" sizes="(max-width:600px) 46vw, {{ img_width }}px" loading="lazy" decoding="async" width="{{ img_width }}" height="{{ img_height }}" alt="{{ category.name }}" /></div>
 
                 <div class="table-cell w100 v-top">
                 <h5><b><a href="{{ category.href }}">{{ category.name }}</a></b></h5>
@@ -42,7 +42,7 @@
               {% for category in categories %}
                 <div class="item single-category no-subs">
                 <div class="banner_wrap hover-zoom">
-				<a href="{{ category.href }}"><img class="" src="{{ category.thumb }}" alt="{{ category.name }}" /></a>
+				<a href="{{ category.href }}"><img src="{{ category.thumb }}" srcset="{{ category.thumb_small }} 300w, {{ category.thumb }} {{ img_width }}w" sizes="(max-width:600px) 46vw, {{ img_width }}px" alt="{{ category.name }}" width="{{ img_width }}" height="{{ img_height }}" loading="lazy" decoding="async" /></a>
 					{% if count %}
 					<div class="overlay">
 					<a class="table w100 h100" href="{{ category.href }}">
@@ -66,10 +66,12 @@
 
 {% if carousel %}
 <script>
+$(function(){
 $('.grid-holder.category.module{{ module }}').slick({
+accessibility:false,
 {% if carousel_a %}
-prevArrow: "<a class=\"arrow-left icon-arrow-left\"></a>",
-nextArrow: "<a class=\"arrow-right icon-arrow-right\"></a>",
+prevArrow: "<button type=\"button\" class=\"arrow-left icon-arrow-left\" aria-label=\"Prethodno\"></button>",
+nextArrow: "<button type=\"button\" class=\"arrow-right icon-arrow-right\" aria-label=\"Sljedeće\"></button>",
 {% else %}
 arrows: false,
 {% endif %}
@@ -96,6 +98,7 @@ adaptiveHeight:true,slidesToShow:1,slidesToScroll:1,responsive:[
 {% endif %}
 {breakpoint:420,settings:{slidesToShow:2,slidesToScroll:2}}
 ]
+});
 });
 </script>
 {% endif %}

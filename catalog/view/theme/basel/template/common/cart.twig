@@ -22,14 +22,14 @@
             - <small>{{ text_recurring }} {{ product.recurring }}</small>
             {% endif %}
           </td>
-          <td class="remove"><a onclick="cart.remove('{{ product.cart_id }}');" title="{{ button_remove }}" class="remove">&times;</a></td>
+          <td class="remove"><button type="button" onclick="cart.remove('{{ product.cart_id }}');" title="{{ button_remove }}" class="remove" aria-label="{{ button_remove }}">&times;</button></td>
         </tr>
         {% endfor %}
         {% for voucher in vouchers %}
         <tr>
           <td colspan="2" class="text-left"><span class="product-name main-font">{{ voucher.description }}</span>
           1 x <span class="price">{{ voucher.amount }}</span></td>
-          <td class="text-right"><a onclick="voucher.remove('{{ voucher.key }}');" title="{{ button_remove }}" class="remove">&times;</a></td>
+          <td class="text-right"><button type="button" onclick="voucher.remove('{{ voucher.key }}');" title="{{ button_remove }}" class="remove" aria-label="{{ button_remove }}">&times;</button></td>
         </tr>
         {% endfor %}
       </table>
@@ -51,7 +51,7 @@
     {% else %}
     <li>
       <div class="table empty">
-      <div class="table-cell"><i ><img src="image/kosarica-black.svg" /></i></div>
+      <div class="table-cell"><i><img src="image/kosarica-black.svg" alt="" /></i></div>
       <div class="table-cell">{{ text_empty }}</div>
       </div>
     </li>

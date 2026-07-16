@@ -34,6 +34,8 @@ class ControllerExtensionModuleBaselCarousel extends Controller {
 		$data['rows'] = $setting['rows'];
 		$data['use_margin'] = $setting['use_margin'];
 		$data['margin'] = $setting['margin'];
+		$data['image_width'] = $setting['image_width'];
+		$data['image_height'] = $setting['image_height'];
 		
 		if (isset($setting['autoplay'])) {
 			$data['autoplay'] = $setting['autoplay'];

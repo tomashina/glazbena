@@ -1,6 +1,6 @@
 <?php
 class ModelToolImage extends Model {
-	public function resize($filename, $width, $height) {
+	public function resize($filename, $width, $height, $mode = 'contain') {
 		if (!is_file(DIR_IMAGE . $filename) || substr(str_replace('\\', '/', realpath(DIR_IMAGE . $filename)), 0, strlen(DIR_IMAGE)) != str_replace('\\', '/', DIR_IMAGE)) {
 			return;
 		}
@@ -10,7 +10,7 @@ class ModelToolImage extends Model {
 		$output_extension = $webp ? 'webp' : $extension;
 
 		$image_old = $filename;
-		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . ($webp ? '-q82' : '') . '.' . $output_extension;
+		$image_new = 'cache/' . utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . ($mode === 'cover' ? '-cover' : '') . ($webp ? '-q82' : '') . '.' . $output_extension;
 
 		if (!is_file(DIR_IMAGE . $image_new) || (filemtime(DIR_IMAGE . $image_old) > filemtime(DIR_IMAGE . $image_new))) {
 			list($width_orig, $height_orig, $image_type) = getimagesize(DIR_IMAGE . $image_old);
@@ -38,7 +38,13 @@ class ModelToolImage extends Model {
 			if ($width_orig != $width || $height_orig != $height || $output_extension !== $extension) {
 				$image = new Image(DIR_IMAGE . $image_old);
 				if ($width_orig != $width || $height_orig != $height) {
-					$image->resize($width, $height);
+					if ($mode === 'cover') {
+						$source_ratio = $width_orig / $height_orig;
+						$target_ratio = $width / $height;
+						$image->resize($width, $height, $source_ratio > $target_ratio ? 'h' : 'w');
+					} else {
+						$image->resize($width, $height);
+					}
 				}
 				$image->save(DIR_IMAGE . $image_new, $webp ? 82 : 88);
 			} else {

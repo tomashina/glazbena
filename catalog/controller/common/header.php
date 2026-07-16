@@ -35,6 +35,8 @@ class ControllerCommonHeader extends Controller {
 		$data['links'] = $this->document->getLinks();
 		$data['styles'] = $this->document->getStyles();
 		$data['scripts'] = $this->document->getScripts('header');
+		$seo_entity = $this->registry->get('seo_entity');
+		$data['is_home'] = is_array($seo_entity) && isset($seo_entity['type']) && $seo_entity['type'] === 'home';
 		$data['lang'] = $this->language->get('code');
 		$data['direction'] = $this->language->get('direction');
 
@@ -87,6 +89,10 @@ class ControllerCommonHeader extends Controller {
 		$data['search'] = $this->load->controller('common/search');
 		$data['cart'] = $this->load->controller('common/cart');
 		$data['menu'] = $this->load->controller('common/menu');
+
+		// The Basel theme already ships its own consent manager. Keep the legacy
+		// MPG banner disabled so it cannot duplicate UI or block first paint.
+		$data['mpgdpr_cbstatus'] = false;
 
 		return $this->load->view('common/header', $data);
 	}

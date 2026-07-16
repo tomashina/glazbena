@@ -8514,3 +8514,27 @@ ul.sitemap > li > ul > li > ul > li > a {margin-left:28px;opacity:0.8;}
 .icon-vynil:before {content: "\e92d";}
 .icon-truck:before {content: "\e92e";}
 .icon-world:before {content: "\e92f";}
+
+/* Performance and accessibility overrides */
+.common-home .bckholder{background-image:url('../image/front-11-2020-1600.webp')}
+.widget.contrast-bg{background-image:url('../image/brand_bck2020-1400.webp')}
+@media(max-width:767px){.common-home .bckholder{background-image:url('../image/front-11-2020-mobile.webp')}}
+.header-main .main-menu>ul>li.red>a,.header-main .main-menu>ul>li.red>a:hover,.price-new{color:#b00000}
+.price-old,.single-product .price .price-old{color:#595959}
+.instock{color:#087a00}
+#footer .footer-heading{position:relative;color:inherit;font-size:14px;font-weight:600;line-height:1.4;margin:0 0 22px;text-transform:uppercase}
+#footer .footer-heading:after{content:"";display:block;width:30px;margin-top:10px;border-bottom:2px solid currentColor}
+button.arrow-left,button.arrow-right,button.scroll-to-top,button.newsletter-submit{border:0;padding:0;background-color:transparent;font:inherit}
+button.scroll-to-top{position:fixed;display:block;width:45px;height:45px;right:30px;bottom:-60px;z-index:99;color:#fff;border-radius:2px;transition:all .3s ease}
+.offset250 button.scroll-to-top{bottom:30px}
+button.scroll-to-top:hover{color:#fff}
+.newsletter-submit{min-width:44px;min-height:44px}
+.newsletter-terms{display:flex;align-items:flex-start;gap:8px;min-height:44px;margin:10px 0;cursor:pointer}
+.newsletter-terms input{width:22px;height:22px;flex:0 0 22px;margin:1px 0}
+.newsletter-terms a{display:inline-block;min-height:24px;padding:2px 0}
+.footer-copyright a{display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:48px}
+button.menu-trigger,button.menu-closer{color:#fff!important}
+button.scroll-to-top{right:18px;bottom:18px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#0966b3!important;color:#fff!important;transform:rotate(-90deg);visibility:hidden;opacity:0}
+.offset250 button.scroll-to-top{bottom:18px;visibility:visible;opacity:1}
+.footer-copyright>.col-md-6:last-child{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+@media(max-width:1199px){.gk-cookie-fab{display:none!important}}

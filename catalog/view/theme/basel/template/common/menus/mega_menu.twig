@@ -44,7 +44,7 @@ background-position:{{ row.position }};
 
 <!-- Top level items -->
 <li class="{{ class }}">
-<a {% if row.link %} href="{{ row.link }}" {% endif %} class="{{ class_link }} {{ target }}">
+<a href="{{ row.link ? row.link : home }}" class="{{ class_link }} {{ target }}">
 {{ icon_font }}<span class="top">{{ row.name[lang_id] }}</span>{{ row.description }}{{ caret }}
 </a>
 {% if row.submenu is iterable and row.submenu %}
@@ -112,8 +112,8 @@ background-position:{{ row.position }};
 {% if submenu.product.new_label %}
 <span class="badge new_badge"><i>{{ basel_text_new }}</i></span>
 {% endif %}
-<a class="img-overlay" href="{{ submenu.product.link }}"></a>
-<div class="btn-center"><a class="btn btn-light-outline btn-thin btn-tiny" onclick="cart.add('{{ submenu.product.id }}', '{{ submenu.product.minimum }}');">{{ button_cart }}</a></div>
+<a class="img-overlay" href="{{ submenu.product.link }}" aria-label="{{ submenu.product.name }}"></a>
+<div class="btn-center"><button type="button" class="btn btn-light-outline btn-thin btn-tiny" onclick="cart.add('{{ submenu.product.id }}', '{{ submenu.product.minimum }}');">{{ button_cart }}</button></div>
 <div class="icons-wrapper">
 <a class="icon is-cart" data-toggle="tooltip" data-placement="left" data-title="{{ button_cart }}" onclick="cart.add('{{ submenu.product.id }}', '{{ submenu.product.minimum }}');"><span class="global-cart"></span></a>
 <a class="icon is_wishlist" data-toggle="tooltip" data-placement="left" data-title="{{ button_wishlist }}" onclick="wishlist.add('{{ submenu.product.id }}');"><span class="icon-heart"></span></a>

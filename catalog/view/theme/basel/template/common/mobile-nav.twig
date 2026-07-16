@@ -3,9 +3,9 @@
 <div class="closemenu">
     <div class="icon-element mnu">
 
-        <a class="shortcut-wrapper menu-closer hidden-md hidden-lg">
-            <i class="icon-line-cross icon"></i>
-        </a>
+        <button type="button" class="shortcut-wrapper menu-closer hidden-md hidden-lg" aria-label="Zatvori izbornik">
+            <i class="icon-line-cross icon" aria-hidden="true"></i>
+        </button>
 
     </div>
 </div>
@@ -50,4 +50,4 @@
     {% include 'basel/template/common/static_links.twig' %}
 </ul>
 </div>
-<span class="body-cover menu-closer"></span>
+<button type="button" class="body-cover menu-closer" aria-label="Zatvori izbornik"></button>

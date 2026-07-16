@@ -3,15 +3,16 @@
 {% endif %}
 <div class="widget" style="margin-bottom:{{ margin_bottom }};">
 	<div class="col-sm-8">
-<div id="masterslider{{ module }}" class="master-slider widget {{ nav_buttons }}" style="min-height:{{ height }}px">
+<div id="masterslider{{ module }}" class="master-slider widget gk-slider-pending {{ nav_buttons }}" style="aspect-ratio:{{ width }}/{{ height }};min-height:0">
 {% for section in sections %}
 {% if section.sort_order > 0 %}
 <div class="ms-slide {% if section.slide_kenburn is defined %} kenburn {{ section.slide_kenburn }}{% endif %}" data-delay="{{ section.duration }}" {% if section.bg_color|length %} style="background-color:{{ section.bg_color }}"{% endif %}>
 {% if section.is_bg %}
-<picture class="gk-slide-picture">
-{% if section.mobile_image %}<source media="(max-width: 767px)" srcset="{{ section.mobile_image }}">{% endif %}
-<img src="{{ section.thumb_image }}" data-src="{{ section.thumb_image }}" class="slide-bg" alt="">
-</picture>
+{% if section.priority %}
+<img src="{{ section.thumb_image }}" {% if section.mobile_image %}srcset="{{ section.mobile_image }} 640w, {{ section.thumb_image }} 800w" sizes="(max-width:767px) 100vw, {{ section.image_width }}px"{% endif %} data-src="{{ section.thumb_image }}" class="slide-bg" width="{{ section.image_width }}" height="{{ section.image_height }}" alt="" loading="eager" fetchpriority="high" decoding="async">
+{% else %}
+<img data-src="{{ section.thumb_image }}" class="slide-bg" width="{{ section.image_width }}" height="{{ section.image_height }}" alt="" loading="lazy" decoding="async">
+{% endif %}
 {% endif %}
 {% for key, group in section.groups %}
 {% if group.type == 'text' %}
@@ -34,7 +35,7 @@
 {% endif %}
 {% endfor %}<!-- foreach groups -->
 {% if section.link %}
-<a href="{{ section.link }}" class="ls-link {% if section.link_new_window %} external{% endif %}"></a>
+<a href="{{ section.link }}" class="ls-link {% if section.link_new_window %} external{% endif %}" aria-label="Otvori ponudu"></a>
 {% endif %}
 </div><!-- .ls-slide ends -->
 {% endif %}
@@ -45,20 +46,25 @@
 <div class="col-sm-4 xstop hidden-xs">
 
     {% for banner in banners|slice(0, 1) %}
-        {% if banner.link %}<a href="{{ banner.link }}"><img src="{{ banner.image }}" alt="{{ banner.title }}"  /></a>{% else %}<img src="{{ banner.image }}" alt="{{ banner.title }}"  />{% endif %}
+        {% if banner.link %}<a href="{{ banner.link }}"><img src="{{ banner.image }}" alt="{{ banner.title }}" width="{{ banner.width }}" height="{{ banner.height }}" loading="lazy" decoding="async" /></a>{% else %}<img src="{{ banner.image }}" alt="{{ banner.title }}" width="{{ banner.width }}" height="{{ banner.height }}" loading="lazy" decoding="async" />{% endif %}
     {% endfor %}
 </div>
     <div class="col-sm-4 xstop visible-xs">
 
         {% for banner in banners|slice(1, 2) %}
-            {% if banner.link %}<a href="{{ banner.link }}"><img src="{{ banner.image }}" alt="{{ banner.title }}"  /></a>{% else %}<img src="{{ banner.image }}" alt="{{ banner.title }}"  />{% endif %}
+            {% if banner.link %}<a href="{{ banner.link }}"><img src="{{ banner.image }}" alt="{{ banner.title }}" width="{{ banner.width }}" height="{{ banner.height }}" loading="lazy" decoding="async" /></a>{% else %}<img src="{{ banner.image }}" alt="{{ banner.title }}" width="{{ banner.width }}" height="{{ banner.height }}" loading="lazy" decoding="async" />{% endif %}
         {% endfor %}
     </div>
 <div class="clearfix"></div>
 </div><!-- .widget -->
 <style>
 @media(max-width:767px){
-#masterslider{{ module }} .gk-slide-picture img{width:100%;height:100%;object-fit:cover}
+#masterslider{{ module }}{aspect-ratio:{{ width }}/{{ mobile_height }}!important}
+#masterslider{{ module }}.gk-slider-pending{visibility:visible!important;position:relative!important;height:auto!important}
+#masterslider{{ module }}.gk-slider-pending>.ms-slide{display:none!important}
+#masterslider{{ module }}.gk-slider-pending>.ms-slide:first-child{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:1!important}
+#masterslider{{ module }}.gk-slider-pending>.ms-slide:first-child>.slide-bg{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}
+#masterslider{{ module }} .slide-bg{width:100%;height:100%;object-fit:cover}
 #masterslider{{ module }} .ms-caption{max-width:86vw!important;white-space:normal!important;line-height:1.2!important;text-align:center}
 #masterslider{{ module }}{overflow:visible!important;margin-bottom:34px!important}
 #masterslider{{ module }} .ms-bullets.ms-dir-h{bottom:-25px!important;height:12px!important}
@@ -68,11 +74,13 @@
 </style>
 <script>
 $(document).ready(function(){
-var slider = new MasterSlider();
 var gkMobileSlider = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+var gkInitSlider = function(){
+$('#masterslider{{ module }}').removeClass('gk-slider-pending');
+var slider = new MasterSlider();
 slider.setup('masterslider{{ module }}' , {
 	width:{{ width }},
-	height:gkMobileSlider ? {{ width }} : {{ height }},
+	height:gkMobileSlider ? {{ mobile_height }} : {{ height }},
 	minHeight:gkMobileSlider ? 0 : {{ minheight }},
 	layout:"fillwidth",
 	grabCursor:false,
@@ -89,6 +97,13 @@ slider.setup('masterslider{{ module }}' , {
 {% if nav_bullets %}slider.control('bullets' , {autohide:false});{% endif %}
 {% if nav_timer_bar %}slider.control('timebar' , {width:5});{% endif %}
 setTimeout("$('body').addClass('ms_ready');", 400);
+};
+if (gkMobileSlider) {
+	if (document.readyState === 'complete') { setTimeout(gkInitSlider, 1200); }
+	else { $(window).one('load', function(){ setTimeout(gkInitSlider, 1200); }); }
+} else {
+	gkInitSlider();
+}
 });
 </script>
 {% if fullwidth %}

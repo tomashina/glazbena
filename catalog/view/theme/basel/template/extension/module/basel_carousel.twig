@@ -17,9 +17,9 @@
   {% for banner in banners %}
     <div class="item text-center">
     {% if banner.link %}
-        <a href="{{ banner.link }}"><img src="{{ banner.image }}" alt="{{ banner.title }}" class="display-inline-block" loading="lazy" decoding="async" /></a>
+        <a href="{{ banner.link }}"><img src="{{ banner.image }}" alt="{{ banner.title }}" class="display-inline-block" width="{{ image_width }}" height="{{ image_height }}" loading="lazy" decoding="async" /></a>
     {% else %}
-        <img src="{{ banner.image }}" alt="{{ banner.title }}" class="display-inline-block" loading="lazy" decoding="async" />
+        <img src="{{ banner.image }}" alt="{{ banner.title }}" class="display-inline-block" width="{{ image_width }}" height="{{ image_height }}" loading="lazy" decoding="async" />
     {% endif %}
     </div>
   {% endfor %}
@@ -28,10 +28,12 @@
 <div class="clearfix"></div>
 </div>
 <script><!--
+$(function(){
 $('.grid-holder.carousel_module.module{{ module }}').slick({
+accessibility:false,
 {% if carousel_a %}
-prevArrow: "<a class=\"arrow-left icon-arrow-left\"></a>",
-nextArrow: "<a class=\"arrow-right icon-arrow-right\"></a>",
+prevArrow: "<button type=\"button\" class=\"arrow-left icon-arrow-left\" aria-label=\"Prethodno\"></button>",
+nextArrow: "<button type=\"button\" class=\"arrow-right icon-arrow-right\" aria-label=\"Sljedeće\"></button>",
 {% else %}
 arrows: false,
 {% endif %}
@@ -63,5 +65,6 @@ adaptiveHeight:true,slidesToShow:1,slidesToScroll:1,responsive:[
 {% endif %}
 {breakpoint:420,settings:{slidesToShow:2}}
 ]
+});
 });
 //--></script>

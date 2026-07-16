@@ -46,7 +46,7 @@
 	$data['sticky_columns'] = $this->config->get('basel_sticky_columns');
 	$data['basel_version'] = $this->config->get('basel_theme_version');
 	$data['sticky_columns_offset'] = $this->config->get('basel_sticky_columns_offset');
-	if ($this->config->get('basel_sticky_columns')) $this->document->addScript('catalog/view/theme/basel/js/theia-sticky-sidebar.min.js');
+	if ($this->config->get('basel_sticky_columns')) $this->document->addScript('catalog/view/theme/basel/js/theia-sticky-sidebar.min.js', 'footer');
 	
 	// Footer links
 	if ($this->config->get('basel_footer_columns')) {
@@ -124,4 +124,4 @@
 	if ( ($this->config->get('basel_cookie_bar_status')) && (!isset($_COOKIE['basel_cookie'])) ) {
 	$data['view_cookie_bar'] = true;
 	setcookie("basel_cookie", "1", time()+60*60*24*30);
-	}	
+	}
