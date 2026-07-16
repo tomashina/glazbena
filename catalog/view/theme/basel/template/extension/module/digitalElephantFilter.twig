@@ -189,7 +189,7 @@
     </div>
 </div>
 <style>
-  .filter_element_title.is-open + .filter_element_content {
+  .filter_element_title.gk-keep-open + .filter_element_content {
     display: block !important;
   }
 </style>
@@ -235,18 +235,13 @@ $(document).ready(function() {
     return last === 'change' && Date.now() <= dl;
   }
 
-  function forceCloseOverlay(){
-    $('html').removeClass('no-scroll side-filter-open');
-    $('.body-cover').removeClass('active');
-  }
-
   function reopenSection(){
     var sid = defGet('def_keep_open_section');
     if (!sid) return;
     var $title = $('.filter_element_title[data-section-id="' + sid + '"]');
     if ($title.length) {
-      $title.addClass('is-open');
-      $title.next('.filter_element_content').css('display', 'block');
+      $title.removeClass('is_closed').addClass('gk-keep-open');
+      $title.next('.filter_element_content').stop(true, true).show();
     }
   }
 
@@ -257,6 +252,7 @@ $(document).ready(function() {
       if (!shouldReopen()){
         defDel('def_last_action');
         defDel('def_reopen_deadline');
+        $('.filter_element_title').removeClass('gk-keep-open');
       }
     }, 600); // kratko pričekaj da DOM i CSS “sjednu”
   }
@@ -270,33 +266,46 @@ $(document).ready(function() {
     var sid = $wrap.find('.filter_element_title').data('section-id') || '';
 
     // prisilno otvori content sada
-    $wrap.find('.filter_element_content').css('display', 'block');
-    $wrap.find('.filter_element_title').addClass('is-open');
+    $wrap.find('.filter_element_content').stop(true, true).show();
+    $wrap.find('.filter_element_title').removeClass('is_closed').addClass('gk-keep-open');
 
     // zapamti koju sekciju treba ostaviti otvorenom nakon AJAX-a (+ TTL)
     markNeedReopen(sid); // NEW
 
-    // sigurnosno: ugasi overlay ako se kojim slučajem upalio
-    forceCloseOverlay();
   });
 
-  // ---------- NEW: ručno otvaranje/zatvaranje jedne sekcije ----------
-  // Ako korisnik klikne na naslov sekcije i time je ZATVARA, zapamti da NE otvaramo ponovo nakon AJAX-a
-  $(document).off('click', '.filter_element_title');
-  $(document).on('click', '.filter_element_title', function () {
+  // Jedan stabilan toggle handler; sprječava dvostruki slideToggle iz plugina.
+  $(document).off('click.gkFilterToggle', '.filter_element_title');
+  $(document).on('click.gkFilterToggle', '.filter_element_title', function (event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
     var $title = $(this);
     var $content = $title.next('.filter_element_content');
-    var willClose = $content.is(':visible'); // ako je vidljivo i klikneš, zatvara se
+    if (!$content.length) return;
+    var willClose = $content.is(':visible');
+
+    $title.removeClass('gk-keep-open');
 
     if (willClose) {
       defSet('def_last_action', 'close');
       defDel('def_keep_open_section');
       defDel('def_reopen_deadline');
-      $title.removeClass('is-open');
+      $title.addClass('is_closed');
+      $content.stop(true, true).slideUp(250);
     } else {
-      // ručno otvaranje – dopusti vizualno i zapamti kao manual-open (ne forsiramo reopen poslije)
       defSet('def_last_action', 'manual-open');
-      $title.addClass('is-open');
+      $title.removeClass('is_closed');
+      $content.stop(true, true).slideDown(250);
+    }
+
+    if (window.DEFConfig && DEFConfig.action && DEFConfig.action.ajaxSetStateSection) {
+      $.post(DEFConfig.action.ajaxSetStateSection, {
+        section: {
+          state: willClose ? 0 : 1,
+          name: $title.attr('data-section-name'),
+          id: $title.attr('data-section-id')
+        }
+      });
     }
   });
 
@@ -312,9 +321,6 @@ $(document).ready(function() {
         settings.url.indexOf(DEFConfig.action.ajaxRenderPagination) !== -1;
 
       if (!isDEF) return;
-
-      // nikad ne palimo overlay
-      forceCloseOverlay();
 
       // NEW: tijekom TTL-a, na SVAKI DEF ajaxComplete ponovno otvori sekciju
       if (shouldReopen()){

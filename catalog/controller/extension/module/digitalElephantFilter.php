@@ -85,7 +85,7 @@ class ControllerExtensionModuleDigitalElephantFilter extends Controller
         $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/helper.js', 'footer');
         $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/slider_price.js', 'footer');
         $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/url_private.js', 'footer');
-        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/url.js', 'footer');
+        $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/url.js?v=2', 'footer');
         $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/pagination.js', 'footer');
         $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/show_more.js', 'footer');
         $this->document->addScript($base . '/catalog/view/javascript/digitalElephantFilter/classes/quantity_products.js', 'footer');

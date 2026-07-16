@@ -1,4 +1,35 @@
-<script src="//www.google.com/recaptcha/api.js?hl={{ lang }}"></script>
+<script>
+(function() {
+  if (window.gkRecaptchaLazyBound) return;
+  window.gkRecaptchaLazyBound = true;
+  window.gkLoadRecaptcha = function() {
+    if (window.gkRecaptchaLoading || window.grecaptcha) return;
+    window.gkRecaptchaLoading = true;
+    var script = document.createElement('script');
+    script.async = true;
+    script.defer = true;
+    script.src = 'https://www.google.com/recaptcha/api.js?hl={{ lang }}';
+    document.head.appendChild(script);
+  };
+  function needsCaptcha(event) {
+    var form = event.target && event.target.closest ? event.target.closest('form') : null;
+    if (form && form.querySelector('.g-recaptcha')) window.gkLoadRecaptcha();
+  }
+  document.addEventListener('focusin', needsCaptcha, true);
+  document.addEventListener('pointerdown', needsCaptcha, true);
+  window.addEventListener('load', function() {
+    var captchas = document.querySelectorAll('.g-recaptcha');
+    if (!captchas.length || !('IntersectionObserver' in window)) return;
+    var observer = new IntersectionObserver(function(entries) {
+      if (entries.some(function(entry) { return entry.isIntersecting; })) {
+        observer.disconnect();
+        window.gkLoadRecaptcha();
+      }
+    }, {rootMargin:'300px'});
+    Array.prototype.forEach.call(captchas, function(captcha) { observer.observe(captcha); });
+  });
+})();
+</script>
 
 {% if route|slice(0, 9) == 'checkout/' %}
 

@@ -239,11 +239,6 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 
 
 			$this->document->addLink($this->url->link('product/product', 'product_id=' . $this->request->get['product_id']), 'canonical');
-			$this->document->addScript('catalog/view/javascript/jquery/magnific/jquery.magnific-popup.min.js');
-			$this->document->addStyle('catalog/view/javascript/jquery/magnific/magnific-popup.css');
-			$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/moment/moment-with-locales.min.js');
-			$this->document->addScript('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js');
-			$this->document->addStyle('catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css');
 
 			$data['heading_title'] = $product_info['name'];
 
@@ -384,8 +379,12 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 			}
 
 			$data['options'] = array();
+			$data['has_datetime_options'] = false;
 
 			foreach ($this->model_catalog_product->getProductOptions($this->request->get['product_id']) as $option) {
+				if (in_array($option['type'], array('date', 'datetime', 'time'), true)) {
+					$data['has_datetime_options'] = true;
+				}
 				$product_option_value_data = array();
 
 				foreach ($option['product_option_value'] as $option_value) {

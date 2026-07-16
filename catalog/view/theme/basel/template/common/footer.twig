@@ -143,8 +143,27 @@ $('#column-left, #column-right').theiaStickySidebar({containerSelector:$(this).c
 
 
 
-<script src="catalog/view/javascript/cookieconsent/cookieconsent.umd.js?v=3.1" defer></script>
-<script src="catalog/view/javascript/cookieconsent/glazbena-consent.js?v=1.1" defer></script>
+<script>
+(function() {
+  function loadCookieConsent() {
+    if (window.gkCookieConsentLoading) return;
+    window.gkCookieConsentLoading = true;
+    var core = document.createElement('script');
+    core.src = 'catalog/view/javascript/cookieconsent/cookieconsent.umd.js?v=3.1';
+    core.onload = function() {
+      var config = document.createElement('script');
+      config.src = 'catalog/view/javascript/cookieconsent/glazbena-consent.js?v=1.2';
+      document.head.appendChild(config);
+    };
+    document.head.appendChild(core);
+  }
+  if ('requestAnimationFrame' in window) {
+    requestAnimationFrame(function() { setTimeout(loadCookieConsent, 100); });
+  } else {
+    setTimeout(loadCookieConsent, 100);
+  }
+})();
+</script>
 <script>
 (function(){
   var frames=document.querySelectorAll('iframe.gk-deferred-iframe[data-src]');

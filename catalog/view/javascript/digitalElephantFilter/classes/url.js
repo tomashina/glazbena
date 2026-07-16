@@ -73,9 +73,8 @@ function DigitalElephantFilterUrl() {
         var manufacturers   = this.getGetParam(link, 'manufacturers');
         var option          = this.getGetParam(link, 'option');
         var attribute       = this.getGetParam(link, 'attribute');
-        var ajaxDEF         = this.getGetParam(link, 'ajax_digitalElephantFilter');
 
-        return price + category + manufacturers + option + attribute + ajaxDEF;
+        return price + category + manufacturers + option + attribute;
     };
 
     this.setGetParam = function(link, name, value) {
@@ -89,11 +88,23 @@ function DigitalElephantFilterUrl() {
 
     this.isFilterParamsInUrl = function() {
         var $_GET = window.location.href;
-        return (this.getGetParam($_GET, 'ajax_digitalElephantFilter') != '');
+        return this.getGetParam($_GET, 'price') !== '' ||
+            this.getGetParam($_GET, 'category') !== '' ||
+            this.getGetParam($_GET, 'manufacturers') !== '' ||
+            this.getGetParam($_GET, 'option') !== '' ||
+            this.getGetParam($_GET, 'attribute') !== '';
     };
 
     this.changeUrlAddress = function ($_GET_string) {
-        window.history.pushState('', '', this.config.action.category + $_GET_string);
+        var baseUrl = String(this.config.action.category || window.location.pathname).split(/[?#]/)[0];
+        var query = String($_GET_string || '').replace(/^[?&]+/, '');
+        var publicParams = query.split('&').filter(function(param) {
+            var key = param.split('=')[0];
+            return key && key !== 'ajax_digitalElephantFilter' && key !== 'path';
+        });
+        var publicUrl = baseUrl + (publicParams.length ? '?' + publicParams.join('&') : '');
+
+        window.history.pushState({digitalElephantFilter: true}, '', publicUrl);
     };
 }
 //Class digitalElephantFilter URL END
@@ -109,3 +120,8 @@ DigitalElephantFilterUrl.instance = function() {
 
     return this.selfObj;
 };
+
+// Back/forward must restore the server-rendered category and its filter state.
+window.addEventListener('popstate', function() {
+    window.location.reload();
+});

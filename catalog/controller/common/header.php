@@ -38,6 +38,7 @@ class ControllerCommonHeader extends Controller {
 		$seo_entity = $this->registry->get('seo_entity');
 		$data['is_home'] = is_array($seo_entity) && isset($seo_entity['type']) && $seo_entity['type'] === 'home';
 		$data['is_category'] = is_array($seo_entity) && isset($seo_entity['type']) && $seo_entity['type'] === 'category';
+		$data['is_product'] = is_array($seo_entity) && isset($seo_entity['type']) && $seo_entity['type'] === 'product';
 		$data['lang'] = $this->language->get('code');
 		$data['direction'] = $this->language->get('direction');
 

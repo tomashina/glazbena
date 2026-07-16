@@ -18,6 +18,12 @@
 
 {% if product_layout != "full-width" %}
     <style>
+        .main-image:not(.slick-initialized) > div:not(:first-child) { display:none; }
+        .gk-product-action { border:0; background:transparent; padding:0; color:inherit; font:inherit; }
+        @media (max-width:767px) {
+            .image-additional:not(.slick-initialized) { display:flex; gap:6px; opacity:1; overflow-x:auto; }
+            .image-additional:not(.slick-initialized) > div { flex:0 0 72px; }
+        }
         .product-page .image-area {
         {% if product_layout == "images-left" and images %}
             width: {{img_w + img_a_w + 20 }}px;
@@ -84,7 +90,7 @@ max-height:600px;
 
 <ul class="breadcrumb">
     {% for breadcrumb in breadcrumbs %}
-        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        <li>{% if loop.last %}<span aria-current="page">{{ breadcrumb.text }}</span>{% else %}<a href="{{ breadcrumb.href }}"{% if loop.first %} aria-label="Početna"{% endif %}>{{ breadcrumb.text }}</a>{% endif %}</li>
     {% endfor %}
 </ul>
 
@@ -94,7 +100,7 @@ max-height:600px;
     <div class="container">
         <span id="title-holder"></span>
         <div class="links-holder">
-            <a class="basel-back-btn" onClick="history.go(-1); return false;"><i></i></a><span>&nbsp;</span>
+            <button type="button" class="basel-back-btn" onClick="history.go(-1); return false;" aria-label="Natrag"><i aria-hidden="true"></i></button><span>&nbsp;</span>
         </div>
     </div>
 </div>
@@ -126,10 +132,10 @@ max-height:600px;
     <div id="gallery">
                         {% if thumb %}
                         
-                            <ul class="main-image" id="main-image">
+                            <div class="main-image" id="main-image">
 
                             
-  <li> 
+  <div>
      <a class=" linkk"  href="{{ popup }}" >
       {% if price and special and sale_badge %}
                                 <span class="badge sale_badge"><i>{{ sale_badge }}</i></span>
@@ -149,30 +155,30 @@ max-height:600px;
                                     <!--   <span class="badge out_of_stock_badge"><i>{{ basel_text_out_of_stock}}</i></span> -->
                                 {% endif %}
   
- <img src="{{ thumb }}" width="{{ img_w }}" height="{{ img_h }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail" alt="{{ custom_alt ? custom_alt : heading_title }}" fetchpriority="high" decoding="async" /></a></li>
+ <img src="{{ thumb }}" width="{{ img_w }}" height="{{ img_h }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail" alt="{{ custom_alt ? custom_alt : heading_title }}" fetchpriority="high" decoding="async" /></a></div>
   
   
 
 {% for image in images %}
-        <li>
+        <div>
         <a class="linkk"  href="{{ image.popup }}" ><img src="{{ image.large }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail" alt="{{ custom_alt ? custom_alt : heading_title }}" loading="lazy" decoding="async" /></a>
-        </li>
+        </div>
         {% endfor %}
-                            </ul>
+                            </div>
                         </div>
                           
                         {% endif %}
 
                                              {% if images %}
-                            <ul class="image-additional">
-                                  <li><img src="{{ thumb_sm }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail"  alt="{{ custom_alt ? custom_alt : heading_title }}" decoding="async" /></li>
+                            <div class="image-additional">
+                                  <div><img src="{{ thumb_sm }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail"  alt="{{ custom_alt ? custom_alt : heading_title }}" decoding="async" /></div>
                             {% for image in images %}
-                            <li>
+                            <div>
                      <img src="{{ image.thumb }}" title="{{ custom_imgtitle ? custom_imgtitle : heading_title }}" class="img-thumbnail"  alt="{{ custom_alt ? custom_alt : heading_title }}" loading="lazy" decoding="async" />
-                            </li>
+                            </div>
                             {% endfor %}
                                
-                            </ul>
+                            </div>
                             {% endif %}
 
                     </div> <!-- .table-cell.left ends -->
@@ -503,11 +509,11 @@ max-height:600px;
 
                                     <div class="input-group number-spinner col-xs-4" style="float:left;margin-bottom:15px">
                       <span class="input-group-btn">
-                    <button class="btn btn-default btn-h" data-dir="dwn"><i class="fa fa-minus"></i></button>
+                    <button type="button" class="btn btn-default btn-h" data-dir="dwn" aria-label="Smanji količinu"><i class="fa fa-minus" aria-hidden="true"></i></button>
                       </span>
-                                        <input type="text" name="quantity" value="{{ minimum }}" id="input-quantity" class="form-control text-center input-quantity" />
+                                        <input type="number" min="{{ minimum }}" name="quantity" value="{{ minimum }}" id="input-quantity" class="form-control text-center input-quantity" aria-label="Količina" />
                                         <span class="input-group-btn">
-                    <button class="btn btn-default btn-h" data-dir="up"><i class="fa fa-plus"></i></button>
+                    <button type="button" class="btn btn-default btn-h" data-dir="up" aria-label="Povećaj količinu"><i class="fa fa-plus" aria-hidden="true"></i></button>
                     </span>
                                     </div>
 
@@ -519,7 +525,7 @@ max-height:600px;
                                     {% if ((qty > 0) and (stock_badge_status)) %}
 
 
-                                        <button type="button" id="button-cart" data-loading-text="{{ text_loading }}" class="btn btn-primary col-xs-7" style="float:right"><span class="car"></span><img src="image/kosarica-white.svg" class="carticon"> {{ button_cart }}</button>
+                                        <button type="button" id="button-cart" data-loading-text="{{ text_loading }}" class="btn btn-primary col-xs-7" style="float:right"><span class="car"></span><img src="image/kosarica-white.svg" class="carticon" alt="" width="20" height="20"> {{ button_cart }}</button>
                                     {% else %}
                                         {% if formlinks %}
                                             {% for formlink in formlinks %}
@@ -532,7 +538,7 @@ max-height:600px;
 
                                                 {% if formlink.form_id > 1  %}
 
-                                                    <a data-toggle="modal" href="{{ formlink.formlink }}" style="margin-bottom:0px;float:right" data-target="#help-modal" class="btn btn-primary col-xs-7 outofstock tmdhelptopic"> <span class="ikona"></span><img src="image/upit-black.svg" class="carticon"> {{ popuplinkname }} </a>
+                                                    <a data-toggle="modal" href="{{ formlink.formlink }}" style="margin-bottom:0px;float:right" data-target="#help-modal" class="btn btn-primary col-xs-7 outofstock tmdhelptopic"> <span class="ikona"></span><img src="image/upit-black.svg" class="carticon" alt="" width="20" height="20"> {{ popuplinkname }} </a>
                                                     <div class="clearfix"></div>
                                                 {% endif %}
                                             {% endfor %}
@@ -671,8 +677,8 @@ max-height:600px;
                             </div> <!-- #product ends -->
 
 
-                            <p class="info is_wishlist"><a onclick="wishlist.add('{{ product_id }}');"><i class="icon-heart"></i> {{ button_wishlist }}</a></p>
-                            <p class="info is_compare"><a onclick="compare.add('{{ product_id }}');"><i class="icon-refresh"></i> {{ button_compare }}</a></p>
+                            <p class="info is_wishlist"><button type="button" class="gk-product-action" onclick="wishlist.add('{{ product_id }}');"><i class="icon-heart" aria-hidden="true"></i> {{ button_wishlist }}</button></p>
+                            <p class="info is_compare"><button type="button" class="gk-product-action" onclick="compare.add('{{ product_id }}');"><i class="icon-refresh" aria-hidden="true"></i> {{ button_compare }}</button></p>
                             {% if question_status %}
                                 <p class="info is_ask"><a class="to_tabs" onclick="$('a[href=\'#tab-questions\']').trigger('click'); return false;"><i class="icon-question"></i> {{ basel_button_ask }}</a></p>
                             {% endif %}
@@ -714,30 +720,29 @@ max-height:600px;
                                         </div>
                                     {% else %}
 
-                                        <script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=5f1aa4948aa12700134b0c47&product=inline-share-buttons' async='async'></script>
-                                        <!-- ShareThis BEGIN --><div class="sharethis-inline-share-buttons"></div><!-- ShareThis END -->
+                                        <div class="sharethis-inline-share-buttons" data-sharethis-lazy></div>
                                     {% endif %}
                                 {% endif %}
                                 <hr style="margin-bottom:15px">
 
                                 {% if custom_field_2 or cijena < 10 %}
 
-                                    <img src="image/test-01{{ lang }}.png" class="img-responsive" />
+                                    <img src="image/test-01{{ lang }}.png" class="img-responsive" alt="Prednosti kupnje" loading="lazy" decoding="async" />
 
 
                                 {% else %}
 
 
                                     {% if manufacturer_name=='Taylor' %}
-                                        <img src="image/ikonesvg10{{ lang }}.png" class="img-responsive" />
+                                        <img src="image/ikonesvg10{{ lang }}.png" class="img-responsive" alt="Prednosti kupnje" loading="lazy" decoding="async" />
                                     {% elseif manufacturer_name=='Alhambra' %}
-                                        <img src="image/ikonesvg1{{ lang }}.png" class="img-responsive" />
+                                        <img src="image/ikonesvg1{{ lang }}.png" class="img-responsive" alt="Prednosti kupnje" loading="lazy" decoding="async" />
                                     {% elseif manufacturer_name=='Lanikai' %}
-                                        <img src="image/ikonesvg1g{{ lang }}.png" class="img-responsive" />
+                                        <img src="image/ikonesvg1g{{ lang }}.png" class="img-responsive" alt="Prednosti kupnje" loading="lazy" decoding="async" />
                                     {% elseif manufacturer_name=='Konig & Meyer' %}
-                                        <img src="image/ikonesvg5g{{ lang }}.png" class="img-responsive" loading="lazy" decoding="async" />
+                                        <img src="image/ikonesvg5g{{ lang }}.png" class="img-responsive" alt="Prednosti kupnje" loading="lazy" decoding="async" />
                                     {% else %}
-                                        <img src="image/ikonesvg{{ lang }}.png" class="img-responsive" />
+                                        <img src="image/ikonesvg{{ lang }}.png" class="img-responsive" alt="Prednosti kupnje" loading="lazy" decoding="async" />
                                     {% endif %}
 
 
@@ -1002,8 +1007,13 @@ max-height:600px;
 
 <script src="dist/plugins/thumbnail/lg-thumbnail.umd.js"></script>
 <script src="dist/plugins/zoom/lg-zoom.umd.js"></script>
-<script src="dist/plugins/autoplay/lg-autoplay.umd.js"></script>
 <script src="dist/plugins/fullscreen/lg-fullscreen.umd.js"></script>
+
+{% if has_datetime_options %}
+<link rel="stylesheet" href="catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css" />
+<script src="catalog/view/javascript/jquery/datetimepicker/moment/moment-with-locales.min.js"></script>
+<script src="catalog/view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js"></script>
+{% endif %}
 
 {% if basel_price_update %}
     <script src="index.php?route=extension/basel/live_options/js&product_id={{ product_id }}"></script>
@@ -1011,9 +1021,11 @@ max-height:600px;
 
 {% if products %}
     <script><!--
+    $(function() {
       $('.grid-holder.related').slick({
-        prevArrow: "<a class=\"arrow-left icon-arrow-left\"></a>",
-        nextArrow: "<a class=\"arrow-right icon-arrow-right\"></a>",
+        prevArrow: "<button type=\"button\" class=\"arrow-left icon-arrow-left\" aria-label=\"Prethodni proizvodi\"></button>",
+        nextArrow: "<button type=\"button\" class=\"arrow-right icon-arrow-right\" aria-label=\"Sljedeći proizvodi\"></button>",
+        accessibility:false,
         dots:true,
           {% if direction == 'rtl' %}
         rtl: true,
@@ -1035,6 +1047,7 @@ max-height:600px;
       });
       $('.product-style2 .single-product .icon').attr('data-placement', 'top');
       $('[data-toggle=\'tooltip\']').tooltip({container: 'body'});
+    });
       //--></script>
 {% endif %}
 
@@ -1147,6 +1160,7 @@ max-height:600px;
   });
   //--></script>
 <script><!--
+{% if has_datetime_options %}
   $('.date').datetimepicker({
     pickTime: false
   });
@@ -1159,6 +1173,7 @@ max-height:600px;
   $('.time').datetimepicker({
     pickDate: false
   });
+{% endif %}
 
   $('button[id^=\'button-upload\']').on('click', function() {
     var node = this;
@@ -1281,12 +1296,22 @@ max-height:600px;
 
       $(document).ready(function() {
 
-
-        
+if (window.matchMedia('(max-width: 767px)').matches) {
+  var $mobileImages = $('.main-image').children();
+  $('.image-additional').css('opacity', 1).children().each(function(index) {
+    $(this).attr('role', 'button').attr('tabindex', '0').attr('aria-label', 'Prikaži sliku ' + (index + 1));
+  }).on('click keydown', function(event) {
+    if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    var index = $(this).index();
+    $mobileImages.hide().eq(index).show();
+  });
+} else {
        $('.image-additional').slick({
-prevArrow: "<a class=\"icon-arrow-left\"></a>",
-nextArrow: "<a class=\"icon-arrow-right\"></a>",
+prevArrow: "<button type=\"button\" class=\"icon-arrow-left\" aria-label=\"Prethodna slika\"></button>",
+nextArrow: "<button type=\"button\" class=\"icon-arrow-right\" aria-label=\"Sljedeća slika\"></button>",
 appendArrows: '.image-additional .slick-list',
+accessibility:false,
  
   asNavFor: '.main-image',
 
@@ -1316,12 +1341,14 @@ verticalSwiping:false
 $('.main-image').slick({
    slidesToShow: 1,
   slidesToScroll: 1,
+  accessibility:false,
   arrows: false,
   fade: true,
   dots: false,
    asNavFor: '.image-additional',
 
 });
+}
 
 });
       //--></script>
@@ -1343,12 +1370,40 @@ $('.main-image').slick({
   actualSize: false,
   steps:4
     });
+</script>
 
+<script>
+(function() {
+  $(function() {
+    $('img:not([alt])').each(function() {
+      var parent = this.closest ? this.closest('a[title]') : null;
+      this.alt = parent ? parent.getAttribute('title') : '';
+    });
+  });
 
-    
-
-
-
+  var holder = document.querySelector('[data-sharethis-lazy]');
+  if (!holder) return;
+  var loaded = false;
+  function loadShareThis() {
+    if (loaded) return;
+    loaded = true;
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://platform-api.sharethis.com/js/sharethis.js#property=5f1aa4948aa12700134b0c47&product=inline-share-buttons';
+    document.head.appendChild(script);
+  }
+  holder.addEventListener('pointerenter', loadShareThis, {once:true});
+  holder.addEventListener('focusin', loadShareThis, {once:true});
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function(entries) {
+      if (entries.some(function(entry) { return entry.isIntersecting; })) {
+        observer.disconnect();
+        loadShareThis();
+      }
+    }, {rootMargin:'150px'});
+    observer.observe(holder);
+  }
+})();
 </script>
 
 
