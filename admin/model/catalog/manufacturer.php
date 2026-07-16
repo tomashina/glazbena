@@ -27,6 +27,7 @@ class ModelCatalogManufacturer extends Model {
 		}
 		
 		$this->cache->delete('manufacturer');
+		$this->cache->delete('product');
 
 		return $manufacturer_id;
 	}
@@ -59,6 +60,7 @@ class ModelCatalogManufacturer extends Model {
 		}
 
 		$this->cache->delete('manufacturer');
+		$this->cache->delete('product');
 	}
 
 	public function deleteManufacturer($manufacturer_id) {
@@ -67,6 +69,7 @@ class ModelCatalogManufacturer extends Model {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE query = 'manufacturer_id=" . (int)$manufacturer_id . "'");
 
 		$this->cache->delete('manufacturer');
+		$this->cache->delete('product');
 	}
 
 	public function getManufacturer($manufacturer_id) {

@@ -508,8 +508,9 @@ $(document).ready(function () {
             var $title = $('.filter_element_title[data-section-id="' + pendingDesktopSection + '"]');
             if ($title.length) setSectionState($title, true, false);
             pendingDesktopSection = '';
-            updateClearButton();
           }
+
+		  updateClearButton();
         });
       }
     } catch (error) {}

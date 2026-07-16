@@ -29,6 +29,21 @@ Class ControllerExtensionModuleDigitalElephantFilterPanelAttribute extends Contr
                 'category_id' => $category_id,
                 'filter_sub_category' => true
             );
+
+			$has_active_filter = $this->helperUrl->isAjaxRequest()
+				|| isset($this->request->get['price'])
+				|| isset($this->request->get['category'])
+				|| isset($this->request->get['manufacturers'])
+				|| isset($this->request->get['option'])
+				|| isset($this->request->get['attribute']);
+
+			if ($has_active_filter) {
+				$url = $this->helperUrl->getUrlData();
+				$url['category_id'] = $category_id;
+				$filter_data = $this->getProduct->getFilterDataByUrl($url);
+				$args['product_ids'] = $this->model_extension_module_digitalElephantFilter->getProductIds($filter_data);
+			}
+
             $attributes_groups = $this->model_extension_module_digitalElephantFilter->getAttributes($setting['DEF_settings'], $args);
 			
 			$attributes_type_by_setting = '';

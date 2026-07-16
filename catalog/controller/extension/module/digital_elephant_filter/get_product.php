@@ -185,6 +185,7 @@ class ControllerExtensionModuleDigitalElephantFilterGetProduct extends Controlle
     private function getProducts($data_filter) {
 
         $results = $this->model_extension_module_digitalElephantFilter->getProducts($data_filter);
+		$this->model_catalog_product->primeConfiguredVariants($results);
 
 
 
@@ -334,12 +335,12 @@ class ControllerExtensionModuleDigitalElephantFilterGetProduct extends Controlle
                         $filters = array(
                             'filter_name' => $result[$variant_setting['type']]
                         );
-                        $produkts = $this->model_catalog_product->getProducts($filters);
+						$produkts = $this->model_catalog_product->getProductsByConfiguredVariant($filters['filter_name']);
                     }                       
                 }
                 
                 foreach($produkts as $produkt) {
-                    if($variant_setting['quantity'] == 0 && $product['quantity'] <= 0) {
+					if($variant_setting['quantity'] == 0 && $produkt['quantity'] <= 0) {
                         continue;
                     }
                                             
@@ -387,7 +388,7 @@ class ControllerExtensionModuleDigitalElephantFilterGetProduct extends Controlle
                 'jan'  => $result['jan'],
                 'thumb'       => $image,
 				'thumb2' 	 => $this->model_tool_image->resize($image2, $image_width, $image_height),
-				'sale_end_date'  => $date_end['date_end'],
+				'sale_end_date'  => is_array($date_end) && isset($date_end['date_end']) ? $date_end['date_end'] : '',
                 'name'        => $result['name'],
 				'quantity'  => $result['quantity'],
                 'description' => $description,

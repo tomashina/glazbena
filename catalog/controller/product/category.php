@@ -174,6 +174,7 @@ class ControllerProductCategory extends Controller {
 			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 
 			$results = $this->model_catalog_product->getProducts($filter_data);
+			$this->model_catalog_product->primeConfiguredVariants($results);
 			$product_ids = array_column($results, 'product_id');
 			$secondary_images = $this->config->get('basel_thumb_swap') ? $this->model_catalog_product->getPrimaryImagesByProductIds($product_ids) : array();
 			$special_end_dates = $this->model_extension_basel_basel->getSpecialEndDates($product_ids);

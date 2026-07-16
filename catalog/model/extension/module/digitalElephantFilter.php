@@ -8,6 +8,13 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
     public function getMinMaxPrice($category_id)
     {
+		$cache_key = $this->filterCacheKey('price', array('category_id' => (int)$category_id));
+		$cached_price = $this->cache->get($cache_key);
+
+		if ($cached_price !== false) {
+			return $cached_price;
+		}
+
         $customer_group_id = $this->config->get('config_customer_group_id');
         $shipping_country_id = isset($this->session->data['shipping_country_id']) ? $this->session->data['shipping_country_id'] : (($this->config->get('config_tax_default') == 'shipping') ? $this->config->get('config_country_id') : null);
         $shipping_zone_id = isset($this->session->data['shipping_zone_id']) ? $this->session->data['shipping_zone_id'] : (($this->config->get('config_tax_default') == 'shipping') ? $this->config->get('config_zone_id') : null);
@@ -98,13 +105,33 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
         $sql .= ") AS t GROUP BY t.tax_class_id) AS tr2 ON (tr2.tax_class_id = p.tax_class_id) WHERE p2s.store_id = '" . $this->config->get('config_store_id') . "' AND p.status = '1' AND p.date_available <= NOW() GROUP BY p.product_id) as min_max";
 
-        $query = $this->db->query($sql);
+		$query = $this->db->query($sql);
+		$this->cache->set($cache_key, $query->row);
 
-        return $query->row;
+		return $query->row;
     }
 
     public function getAttributes($DEF_settings, $data = array())
     {
+		$cache_key = $this->filterCacheKey('attributes', array(
+			'settings' => isset($DEF_settings['advance']['attributes']) ? $DEF_settings['advance']['attributes'] : array(),
+			'data'     => $data
+		));
+		$cached_attributes = $this->cache->get($cache_key);
+
+		if ($cached_attributes !== false) {
+			return $cached_attributes;
+		}
+
+		if (array_key_exists('product_ids', $data)) {
+			$data['product_ids'] = array_values(array_unique(array_filter(array_map('intval', (array)$data['product_ids']))));
+
+			if (!$data['product_ids']) {
+				$this->cache->set($cache_key, array());
+				return array();
+			}
+		}
+
         $customer_group_id = $this->getCustomerGroup();
 
         $has_category = !empty($data['category_id']);
@@ -155,6 +182,10 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
             $sql .= " AND p.manufacturer_id = '" . (int)$data['manufacturer_id'] . "'";
         }
 
+		if (!empty($data['product_ids'])) {
+			$sql .= " AND p.product_id IN (" . implode(',', $data['product_ids']) . ")";
+		}
+
         $sql .= " ORDER BY ";
 
         switch ($DEF_settings['advance']['attributes']['sort']) {
@@ -200,7 +231,9 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
                 sort($attributes[$attribute_group_id]['attribute_values'][$attribute_id]['values']);
             }
         }
-        return $attributes;
+		$this->cache->set($cache_key, $attributes);
+
+		return $attributes;
     }
 
     public function getManufacturers($DEF_settings, $data = array())
@@ -210,6 +243,17 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
         if (isset($data['manufacturer_id']) && $data['manufacturer_id']) {
             return array();
         }
+
+		$cache_key = $this->filterCacheKey('manufacturers', array(
+			'settings' => isset($DEF_settings['advance']['manufacturers']) ? $DEF_settings['advance']['manufacturers'] : array(),
+			'data'     => $data
+		));
+		$cached_manufacturers = $this->cache->get($cache_key);
+
+		if ($cached_manufacturers !== false) {
+			return $cached_manufacturers;
+		}
+
         $sql = "SELECT DISTINCT m.`manufacturer_id`, m.`name`, m.`image` FROM `" . DB_PREFIX . "manufacturer` m" .
             " LEFT JOIN " . DB_PREFIX . "product p ON(p.manufacturer_id=m.`manufacturer_id`) ";
         if (isset($data['category_id']) && $data['category_id']) {
@@ -243,13 +287,24 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
                 break;
         }
 
-        $query = $this->db->query($sql);
-        return $query->rows;
+		$query = $this->db->query($sql);
+		$this->cache->set($cache_key, $query->rows);
+
+		return $query->rows;
     }
 
 
     public function getSubCategories($category_id, $data = array())
     {
+		$cache_key = $this->filterCacheKey('subcategories', array(
+			'category_id' => (int)$category_id,
+			'settings'    => isset($data['advance']['categories']) ? $data['advance']['categories'] : array()
+		));
+		$cached_categories = $this->cache->get($cache_key);
+
+		if ($cached_categories !== false) {
+			return $cached_categories;
+		}
 
         $sql = "SELECT DISTINCT cd.category_id, cd.name, c.image FROM `" . DB_PREFIX . "category` c" .
             " LEFT JOIN " . DB_PREFIX . "category_description cd ON(cd.category_id=c.category_id) " .
@@ -273,12 +328,24 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
                 break;
         }
 
-        $query = $this->db->query($sql);
-        return $query->rows;
+		$query = $this->db->query($sql);
+		$this->cache->set($cache_key, $query->rows);
+
+		return $query->rows;
     }
 
     public function getOptions($DEF_settings, $data = array())
     {
+		$cache_key = $this->filterCacheKey('options', array(
+			'settings' => isset($DEF_settings['advance']['options']) ? $DEF_settings['advance']['options'] : array(),
+			'data'     => $data
+		));
+		$cached_options = $this->cache->get($cache_key);
+
+		if ($cached_options !== false) {
+			return $cached_options;
+		}
+
         $customer_group_id = $this->getCustomerGroup();
         $sql = "SELECT DISTINCT ovd.option_value_id, ovd.*, od.name as 'option_name', ov.image FROM `" . DB_PREFIX . "option_value_description` ovd
     LEFT JOIN " . DB_PREFIX . "option_value ov ON(ovd.option_value_id=ov.option_value_id)
@@ -332,12 +399,21 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
             $options[$row['option_id']]['option_values'][] = array('option_value_id' => $row['option_value_id'], 'name' => $row['name'], 'image' => $row['image']);
         }
-        return $options;
+		$this->cache->set($cache_key, $options);
+
+		return $options;
     }
 
 
     public function getTotalProducts($data)
     {
+		$cache_key = $this->filterCacheKey('total', $data);
+		$cached_total = $this->cache->get($cache_key);
+
+		if ($cached_total !== false) {
+			return (int)$cached_total;
+		}
+
         $sql = $this->generalizeProducts($data);
 
         $query = $this->db->query($sql);
@@ -348,8 +424,43 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
         $total = count($query->rows);
 
-        return $total;
+		$this->cache->set($cache_key, $total);
+
+		return $total;
     }
+
+	private function filterCacheKey($type, array $data) {
+		$context = array(
+			'store_id'            => (int)$this->config->get('config_store_id'),
+			'language_id'         => (int)$this->config->get('config_language_id'),
+			'customer_group_id'   => (int)$this->getCustomerGroup(),
+			'currency'            => isset($this->session->data['currency']) ? $this->session->data['currency'] : $this->config->get('config_currency'),
+			'shipping_country_id' => isset($this->session->data['shipping_country_id']) ? (int)$this->session->data['shipping_country_id'] : 0,
+			'shipping_zone_id'    => isset($this->session->data['shipping_zone_id']) ? (int)$this->session->data['shipping_zone_id'] : 0,
+			'payment_country_id'  => isset($this->session->data['payment_country_id']) ? (int)$this->session->data['payment_country_id'] : 0,
+			'payment_zone_id'     => isset($this->session->data['payment_zone_id']) ? (int)$this->session->data['payment_zone_id'] : 0,
+			'time_bucket'         => (int)floor(time() / 300),
+			'data'                => $this->normalizeFilterCacheData($data)
+		);
+
+		return 'product.filter.v1.' . $type . '.' . hash('sha256', serialize($context));
+	}
+
+	private function normalizeFilterCacheData($value) {
+		if (!is_array($value)) {
+			return $value;
+		}
+
+		foreach ($value as $key => $item) {
+			$value[$key] = $this->normalizeFilterCacheData($item);
+		}
+
+		if (array_keys($value) !== array_keys(array_keys($value))) {
+			ksort($value);
+		}
+
+		return $value;
+	}
 
     private function getCustomerGroup()
     {
@@ -364,6 +475,13 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
     public function getProducts($data = array())
     {
+		$cache_key = $this->filterCacheKey('products', $data);
+		$cached_products = $this->cache->get($cache_key);
+
+		if ($cached_products !== false) {
+			return $cached_products;
+		}
+
         $sql = $this->generalizeProducts($data);
 
         $product_data = array();
@@ -373,6 +491,13 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
         if ($generalizeAttribute = $this->generalizeAttribute($data, $query)) {
             $query = $generalizeAttribute;
         }
+
+		$product_id_data = $data;
+		unset($product_id_data['start'], $product_id_data['limit']);
+		$this->cache->set(
+			$this->filterCacheKey('product_ids', $product_id_data),
+			array_values(array_unique(array_map('intval', array_column($query->rows, 'product_id'))))
+		);
 
         //load model catalog_product
         $this->load->model('catalog/product');
@@ -391,12 +516,49 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
             $products = array_splice($products, $data['start'], $data['limit']);
         }
 
-        foreach ($products as $result) {
-            $product_data[$result['product_id']] = $this->model_catalog_product->getProduct($result['product_id']);
-        }
+		$product_ids = array_column($products, 'product_id');
 
-        return $product_data;
+		if ($this->config->get('module_boost_special_manager_include') == '1') {
+			foreach ($product_ids as $product_id) {
+				$product_data[$product_id] = $this->model_catalog_product->getProduct($product_id);
+			}
+		} else {
+			$loaded_products = $this->model_catalog_product->getProducts(array('filter_product_ids' => $product_ids));
+
+			foreach ($product_ids as $product_id) {
+				if (isset($loaded_products[$product_id])) {
+					$product_data[$product_id] = $loaded_products[$product_id];
+				}
+			}
+		}
+
+		$this->cache->set($cache_key, $product_data);
+
+		return $product_data;
     }
+
+	public function getProductIds($data = array())
+	{
+		unset($data['start'], $data['limit']);
+
+		$cache_key = $this->filterCacheKey('product_ids', $data);
+		$cached_product_ids = $this->cache->get($cache_key);
+
+		if ($cached_product_ids !== false) {
+			return array_values(array_map('intval', $cached_product_ids));
+		}
+
+		$query = $this->db->query($this->generalizeProducts($data));
+
+		if ($generalizeAttribute = $this->generalizeAttribute($data, $query)) {
+			$query = $generalizeAttribute;
+		}
+
+		$product_ids = array_values(array_unique(array_map('intval', array_column($query->rows, 'product_id'))));
+		$this->cache->set($cache_key, $product_ids);
+
+		return $product_ids;
+	}
 
     public function getOptionValueDescriptions($option_id)
     {
@@ -450,19 +612,27 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
                                    LIMIT 1) AS special
                         FROM " . DB_PREFIX . "product_attribute pa";
 
-                    $attribute_ids = array();
-                    foreach ($data['attributes'] as $key => $attribute_values) {
-                        foreach ($attribute_values as $attribute_value) {
-                            if ($attribute_value) {
-                                $attribute_ids[$key][] = "'" . $attribute_value . "'";
-                            }
-                        }
+					$attribute_ids = array();
+					foreach ($data['attributes'] as $key => $attribute_values) {
+						$attribute_id = (int)$key;
 
-                        if (!empty($attribute_ids[$key])) {
-                            $sql .= " LEFT JOIN " . DB_PREFIX . "product_attribute pa" . $key . " ON (pa.product_id = pa" . $key . ".product_id)";
-//                    $sql .= " AND text IN (" . implode(',', $attribute_value_ids) . ")";
-                        }
-                    }
+						if ($attribute_id < 1 || !is_array($attribute_values)) {
+							continue;
+						}
+
+						foreach ($attribute_values as $attribute_value) {
+							if ($attribute_value !== '') {
+								$attribute_ids[$attribute_id][] = "'" . $this->db->escape((string)$attribute_value) . "'";
+							}
+						}
+
+						if (!empty($attribute_ids[$attribute_id])) {
+							$sql .= " LEFT JOIN " . DB_PREFIX . "product_attribute pa" . $attribute_id
+								. " ON (pa.product_id = pa" . $attribute_id . ".product_id"
+								. " AND pa" . $attribute_id . ".attribute_id = '" . $attribute_id . "'"
+								. " AND pa" . $attribute_id . ".language_id = '" . (int)$this->config->get('config_language_id') . "')";
+						}
+					}
 
                     $sql .= " LEFT JOIN (SELECT price, product_id FROM " . DB_PREFIX . "product_discount) AS pd2 ON (pd2.product_id = pa.product_id)
                     LEFT JOIN (SELECT price, product_id FROM " . DB_PREFIX . "product_special) AS ps ON (ps.product_id = pa.product_id)
@@ -472,9 +642,9 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
                     $sql .= " WHERE pa.product_id IN (" . implode(',', $without_attr_product_ids) . ")";
 
                     if ($attribute_ids) {
-                        foreach ($attribute_ids as $key => $ids) {
-                            $sql .= " AND pa" . $key . ".text IN (" . implode(',', $ids) . ")";
-                        }
+						foreach ($attribute_ids as $attribute_id => $ids) {
+							$sql .= " AND pa" . $attribute_id . ".text IN (" . implode(',', $ids) . ")";
+						}
                     }
 
                     $sql .= $this->generalizeSort($data);

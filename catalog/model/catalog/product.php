@@ -153,15 +153,121 @@ class ModelCatalogProduct extends Model {
         ));
     }
 
+	/**
+	 * Preload all configured variants needed by one product-listing request.
+	 *
+	 * The product variant extension asks for variants once per displayed product.
+	 * Loading all group values in one query preserves those lookups while avoiding
+	 * an N+1 query for category and filtered result pages.
+	 */
+	public function primeConfiguredVariants(array $products) {
+		$registry_key = 'catalog_product_configured_variants';
+		$configured_variant_products = array();
+		$this->registry->set($registry_key, array('primed' => false, 'products' => array()));
+
+		$settings = $this->config->get('product_variant_setting');
+		$allowed_fields = array('model', 'sku', 'upc', 'ean', 'jan', 'isbn', 'mpn');
+
+		if (!$this->config->get('product_variant_setting_status') || !is_array($settings) || empty($settings['catalog']) || empty($settings['type']) || $settings['type'] === 'custom' || !in_array($settings['type'], $allowed_fields, true)) {
+			return false;
+		}
+
+		$field = $settings['type'];
+		$values = array();
+
+		foreach ($products as $product) {
+			if (!isset($product[$field]) || $product[$field] === '') {
+				continue;
+			}
+
+			$value = (string)$product[$field];
+			$key = $this->variantCacheKey($value);
+			$values[$key] = $value;
+			$configured_variant_products[$key] = array();
+		}
+
+		if (!$values) {
+			$this->registry->set($registry_key, array('primed' => true, 'products' => $configured_variant_products));
+			return true;
+		}
+
+		$variants = $this->getProducts(array(
+			'filter_variant_field'  => $field,
+			'filter_variant_values' => array_values($values)
+		));
+
+		foreach ($variants as $variant) {
+			if (!isset($variant[$field]) || $variant[$field] === '') {
+				continue;
+			}
+
+			$key = $this->variantCacheKey($variant[$field]);
+
+			if (array_key_exists($key, $configured_variant_products)) {
+				$configured_variant_products[$key][] = $variant;
+			}
+		}
+
+		$this->registry->set($registry_key, array('primed' => true, 'products' => $configured_variant_products));
+
+		return true;
+	}
+
     public function getProductsByConfiguredVariant($value) {
         $settings = $this->config->get('product_variant_setting');
         $field = is_array($settings) && !empty($settings['type']) ? $settings['type'] : '';
+		$key = $this->variantCacheKey($value);
+		$registry_key = 'catalog_product_configured_variants';
+		$variant_cache = $this->registry->has($registry_key) ? $this->registry->get($registry_key) : array();
+
+		if (!empty($variant_cache['primed']) && isset($variant_cache['products']) && array_key_exists($key, $variant_cache['products'])) {
+			return $variant_cache['products'][$key];
+		}
 
         return $this->getProductsByVariant($field, $value);
     }
 
+	private function variantCacheKey($value) {
+		return strtolower((string)$value);
+	}
+
+	private function productQueryCacheKey($type, array $data) {
+		$context = array(
+			'store_id'          => (int)$this->config->get('config_store_id'),
+			'language_id'       => (int)$this->config->get('config_language_id'),
+			'customer_group_id' => (int)$this->config->get('config_customer_group_id'),
+			'time_bucket'       => (int)floor(time() / 300),
+			'data'              => $this->normalizeProductQueryCacheData($data)
+		);
+
+		return 'product.query.v1.' . $type . '.' . hash('sha256', serialize($context));
+	}
+
+	private function normalizeProductQueryCacheData($value) {
+		if (!is_array($value)) {
+			return $value;
+		}
+
+		foreach ($value as $key => $item) {
+			$value[$key] = $this->normalizeProductQueryCacheData($item);
+		}
+
+		if (array_keys($value) !== array_keys(array_keys($value))) {
+			ksort($value);
+		}
+
+		return $value;
+	}
+
    // ======================= getProducts() =======================
 public function getProducts($data = array()) {
+	$cache_key = $this->productQueryCacheKey('list', $data);
+	$cached_products = $this->cache->get($cache_key);
+
+	if ($cached_products !== false) {
+		return $cached_products;
+	}
+
     $sql = "
         SELECT
             p.*,
@@ -266,13 +372,43 @@ public function getProducts($data = array()) {
         }
     }
 
-    if (!empty($data['filter_variant_field']) && isset($data['filter_variant_value'])) {
+    if (!empty($data['filter_variant_field'])) {
         $allowed_variant_fields = array('model', 'sku', 'upc', 'ean', 'jan', 'isbn', 'mpn');
 
         if (in_array($data['filter_variant_field'], $allowed_variant_fields, true)) {
-            $sql .= " AND p.`" . $data['filter_variant_field'] . "` = '" . $this->db->escape($data['filter_variant_value']) . "'";
+			if (array_key_exists('filter_variant_values', $data)) {
+				$variant_values = array();
+
+				if (is_array($data['filter_variant_values'])) {
+					foreach ($data['filter_variant_values'] as $variant_value) {
+						if ($variant_value !== '') {
+							$variant_values[] = "'" . $this->db->escape((string)$variant_value) . "'";
+						}
+					}
+				}
+
+				$variant_values = array_values(array_unique($variant_values));
+
+				if (!$variant_values) {
+					return array();
+				}
+
+				$sql .= " AND p.`" . $data['filter_variant_field'] . "` IN (" . implode(',', $variant_values) . ")";
+			} elseif (isset($data['filter_variant_value'])) {
+				$sql .= " AND p.`" . $data['filter_variant_field'] . "` = '" . $this->db->escape($data['filter_variant_value']) . "'";
+			}
         }
     }
+
+	if (array_key_exists('filter_product_ids', $data)) {
+		$product_ids = is_array($data['filter_product_ids']) ? array_values(array_unique(array_filter(array_map('intval', $data['filter_product_ids'])))) : array();
+
+		if (!$product_ids) {
+			return array();
+		}
+
+		$sql .= " AND p.product_id IN (" . implode(',', $product_ids) . ")";
+	}
 
     // === SEARCH BUILDER (tvrdo) ===
     $hasSearch = (!empty($data['filter_name']) || !empty($data['filter_tag']));
@@ -385,7 +521,9 @@ public function getProducts($data = array()) {
         $product_data[$result['product_id']] = $result;
     }
 
-    return $product_data;
+	$this->cache->set($cache_key, $product_data);
+
+	return $product_data;
 }
 
 
@@ -808,6 +946,13 @@ public function getProducts($data = array()) {
 
    // ======================= getTotalProducts() =======================
 public function getTotalProducts($data = array()) {
+	$cache_key = $this->productQueryCacheKey('total', $data);
+	$cached_total = $this->cache->get($cache_key);
+
+	if ($cached_total !== false) {
+		return (int)$cached_total;
+	}
+
     $sql = "SELECT COUNT(DISTINCT p.product_id) AS total";
 
     if (!empty($data['filter_category_id'])) {
@@ -920,8 +1065,11 @@ public function getTotalProducts($data = array()) {
         }
     }
 
-    $query = $this->db->query($sql);
-    return (int)$query->row['total'];
+	$query = $this->db->query($sql);
+	$total = (int)$query->row['total'];
+	$this->cache->set($cache_key, $total);
+
+	return $total;
 }
 
 

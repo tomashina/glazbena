@@ -56,6 +56,7 @@ class ModelCatalogCategory extends Model {
 		}
 
 		$this->cache->delete('category');
+		$this->cache->delete('product');
 
 		return $category_id;
 	}
@@ -162,6 +163,7 @@ class ModelCatalogCategory extends Model {
 		}
 
 		$this->cache->delete('category');
+		$this->cache->delete('product');
 	}
 
 	public function deleteCategory($category_id) {
@@ -183,6 +185,7 @@ class ModelCatalogCategory extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_category WHERE category_id = '" . (int)$category_id . "'");
 
 		$this->cache->delete('category');
+		$this->cache->delete('product');
 	}
 
 	public function repairCategories($parent_id = 0) {
