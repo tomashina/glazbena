@@ -36,19 +36,25 @@ $_['mail_verp']            = false;
 $_['mail_parameter']       = '';
 
 // Cache
-$_['cache_engine']   = getenv('CACHE_ENGINE') ?: 'file'; // redis, mem or file
-$_['cache_hostname'] = '127.0.0.1';
-$_['cache_port']     = 6379;
-$_['cache_password'] = '';
-$_['cache_prefix']   = 'oc_';
-$_['cache_expire']   = 3600;
+$cache_password = getenv('REDIS_PASSWORD');
+
+if ($cache_password === false || in_array(strtolower(trim($cache_password)), array('', 'null', '(null)'), true)) {
+	$cache_password = '';
+}
+
+$_['cache_engine']   = strtolower(getenv('CACHE_ENGINE') ?: (getenv('CACHE_DRIVER') ?: 'file')); // redis, mem or file
+$_['cache_hostname'] = getenv('REDIS_HOST') ?: '127.0.0.1';
+$_['cache_port']     = (int)(getenv('REDIS_PORT') ?: 6379);
+$_['cache_password'] = $cache_password;
+$_['cache_prefix']   = getenv('REDIS_PREFIX') ?: 'oc_';
+$_['cache_expire']   = (int)(getenv('CACHE_EXPIRE') ?: 3600);
 
 // (optional constants for your Redis driver)
 if (!defined('CACHE_HOSTNAME')) define('CACHE_HOSTNAME', $_['cache_hostname']);
 if (!defined('CACHE_PORT'))     define('CACHE_PORT',     $_['cache_port']);
 if (!defined('CACHE_PASSWORD')) define('CACHE_PASSWORD', $_['cache_password']);
 if (!defined('CACHE_PREFIX'))   define('CACHE_PREFIX',   $_['cache_prefix']);
-if (!defined('CACHE_TIMEOUT'))  define('CACHE_TIMEOUT',  1.0);
+if (!defined('CACHE_TIMEOUT'))  define('CACHE_TIMEOUT',  (float)(getenv('REDIS_TIMEOUT') ?: 1.0));
 
 // Session
 $_['session_engine']       = 'db';

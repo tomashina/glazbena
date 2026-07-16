@@ -3,6 +3,7 @@ namespace Cache;
 
 class Redis {
     private $expire = 3600;
+    private $prefix = 'oc_';
     /** @var \Redis */
     private $redis;
 
@@ -18,31 +19,55 @@ class Redis {
         $host     = defined('CACHE_HOSTNAME') ? CACHE_HOSTNAME : '127.0.0.1';
         $port     = defined('CACHE_PORT')     ? (int)CACHE_PORT : 6379;
         $password = defined('CACHE_PASSWORD') ? CACHE_PASSWORD  : '';
-        $prefix   = defined('CACHE_PREFIX')   ? CACHE_PREFIX    : 'oc_';
+        $this->prefix = defined('CACHE_PREFIX') ? (string)CACHE_PREFIX : 'oc_';
         $timeout  = defined('CACHE_TIMEOUT')  ? (float)CACHE_TIMEOUT : 1.0;
 
         // 2) Always reference the GLOBAL class \Redis (not namespaced)
         $this->redis = new \Redis();
-        $this->redis->pconnect($host, $port, $timeout);
-        if ($password !== '') {
-            $this->redis->auth($password);
+
+        if (!$this->redis->pconnect($host, $port, $timeout)) {
+            throw new \RuntimeException('Could not connect to Redis at ' . $host . ':' . $port);
         }
-        $this->redis->setOption(\Redis::OPT_PREFIX, $prefix);
+
+        if ($password !== '') {
+            if (!$this->redis->auth($password)) {
+                throw new \RuntimeException('Redis authentication failed');
+            }
+        }
     }
 
     public function get($key) {
-        $v = $this->redis->get($key);
-        return $v === false ? null : unserialize($v);
+        $value = $this->redis->get($this->prefix . $key);
+
+        return $value === false ? false : unserialize($value);
     }
 
     public function set($key, $value) {
         $payload = serialize($value);
+
         return $this->expire > 0
-            ? $this->redis->setEx($key, $this->expire, $payload)
-            : $this->redis->set($key, $payload);
+            ? $this->redis->setEx($this->prefix . $key, $this->expire, $payload)
+            : $this->redis->set($this->prefix . $key, $payload);
     }
 
     public function delete($key) {
-        $this->redis->del($key);
+        if ($key === '*') {
+            $pattern = $this->prefix . '*';
+        } else {
+            $this->redis->del($this->prefix . $key);
+            $pattern = $this->prefix . $key . '.*';
+        }
+
+        $iterator = null;
+
+        do {
+            $keys = $this->redis->scan($iterator, $pattern, 1000);
+
+            if ($keys) {
+                $this->redis->del($keys);
+            }
+        } while ($iterator > 0);
+
+        return true;
     }
 }
