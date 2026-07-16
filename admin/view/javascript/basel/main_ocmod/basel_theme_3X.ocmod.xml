@@ -84,7 +84,7 @@
 		</operation>
     </file>
 
-	<file path="catalog/controller/product/{category,product,manufacturer,search,special}.php">
+	<file path="catalog/controller/product/{product,search,special}.php">
 		<operation error="log">
 		<search><![CDATA[$data['column_left'] = $this->load->controller('common/column_left');]]></search>
 		<add position="before"><![CDATA[

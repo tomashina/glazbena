@@ -347,6 +347,11 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 
 			if (in_array('image', $displayed_columns)) {
 				$this->load->model('tool/image');
+				$image_width = (int)$this->config->get('module_product_quick_edit_list_view_image_width');
+				$image_height = (int)$this->config->get('module_product_quick_edit_list_view_image_height');
+			} else {
+				$image_width = 0;
+				$image_height = 0;
 			}
 
 			$results = $this->model_extension_module_product_quick_edit->getProducts($filter_data);
@@ -354,18 +359,22 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 			$iFilteredTotal = $this->model_extension_module_product_quick_edit->getFilteredTotalProducts();
 			$iTotal = $this->model_extension_module_product_quick_edit->getTotalProducts();
 
-			// For price with tax
-			$tax = new Cart\Tax($this->registry);
+			// Tax rates are only needed when the gross price column is displayed.
+			$tax = null;
 
-			if ($this->config->get('config_tax_default') == 'shipping') {
-				$tax->setShippingAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
+			if (in_array('gross_price', $displayed_columns)) {
+				$tax = new Cart\Tax($this->registry);
+
+				if ($this->config->get('config_tax_default') == 'shipping') {
+					$tax->setShippingAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
+				}
+
+				if ($this->config->get('config_tax_default') == 'payment') {
+					$tax->setPaymentAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
+				}
+
+				$tax->setStoreAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
 			}
-
-			if ($this->config->get('config_tax_default') == 'payment') {
-				$tax->setPaymentAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
-			}
-
-			$tax->setStoreAddress($this->config->get('config_country_id'), $this->config->get('config_zone_id'));
 
 			/*
 			 * Output
@@ -423,13 +432,10 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 							$value = $_ids;
 							break;
 						case 'image':
-							$w = (int)$this->config->get('module_product_quick_edit_list_view_image_width');
-							$h = (int)$this->config->get('module_product_quick_edit_list_view_image_height');
-
 							if (is_file(DIR_IMAGE . $result['image'])) {
-								$image = $this->model_tool_image->resize($result['image'], $w, $h);
+								$image = $this->model_tool_image->resize($result['image'], $image_width, $image_height);
 							} else {
-								$image = $this->model_tool_image->resize('no_image.png', $w, $h);
+								$image = $this->model_tool_image->resize('no_image.png', $image_width, $image_height);
 							}
 
 							$value = $result['image'];
@@ -490,7 +496,7 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 							$_stores = array();
 
 							foreach ($product_stores as $store) {
-								if (!in_array($store, array_keys($stores)))
+								if (!isset($stores[$store]))
 									continue;
 
 								$_stores[] = array(

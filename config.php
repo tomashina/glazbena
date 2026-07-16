@@ -33,5 +33,4 @@ define('DB_USERNAME', getenv('DB_USERNAME') ?: 'glazbena');
 define('DB_PASSWORD', getenv('DB_PASSWORD') ?: 'glazbena');
 define('DB_DATABASE', getenv('DB_DATABASE') ?: 'glazbena');
 define('DB_PORT', getenv('DB_PORT') ?: '3306');
-define('DB_PREFIX', getenv('DB_PREFIX') ?: 'oc_');
-
+define('DB_PREFIX', getenv('DB_PREFIX') ?: 'u3050_');

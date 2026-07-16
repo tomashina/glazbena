@@ -14,7 +14,6 @@ class ControllerExtensionModuleBoostSpecialManager extends Controller {
 		$this->document->setTitle($this->language->get('text_title'));
 		
 		$this->document->addStyle('https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css');
-		$this->document->addStyle('https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css');
 		$this->document->addStyle('view/stylesheet/boost_special_manager.css');
 		
 		$this->document->addScript('https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js');
@@ -101,6 +100,7 @@ class ControllerExtensionModuleBoostSpecialManager extends Controller {
 		$data['deleteurl'] = htmlspecialchars_decode($this->url->link('extension/module/boost_special_manager/delete', 'user_token=' . $this->session->data['user_token'], true));
 		$data['addcaturl'] = htmlspecialchars_decode($this->url->link('extension/module/boost_special_manager/addcat', 'user_token=' . $this->session->data['user_token'], true));
 		$data['deletecaturl'] = htmlspecialchars_decode($this->url->link('extension/module/boost_special_manager/deletecat', 'user_token=' . $this->session->data['user_token'], true));
+		$data['products_url'] = htmlspecialchars_decode($this->url->link('extension/module/boost_special_manager/products', 'user_token=' . $this->session->data['user_token'], true));
 		
 		$data['setting'] = $this->url->link('extension/module/boost_special_manager/setting', 'user_token=' . $this->session->data['user_token'], true);
 		
@@ -142,30 +142,9 @@ class ControllerExtensionModuleBoostSpecialManager extends Controller {
 		
 		$this->load->model('extension/module/boost_special_manager');
 		
-		$this->load->model('catalog/product');
-		$this->load->model('tool/image');
-		
-		$special_products = $this->model_extension_module_boost_special_manager->getSpecialProducts();
-		
 		$special_categories = $this->model_extension_module_boost_special_manager->getSpecialCategories();
 		
-		$customer_groups = $this->model_extension_module_boost_special_manager->getCustomerGroups();
-		
-		$data['categories_list'] = [];
-		
-		$this->load->model('catalog/category');
-		
-		$categories = $this->model_catalog_category->getCategories(0);
-
-		foreach ($categories as $category) {
-            $data['categories_list'][] = [
-				'category_id' => $category['category_id'],
-                'name'        => $category['name'],
-			];
-		}
-		
 		$data['categories'] = [];
-		$data['products'] = [];
 		$data['customer_groups'] = [];
 		$data['json_customer_group'] = [];
 				
@@ -179,54 +158,7 @@ class ControllerExtensionModuleBoostSpecialManager extends Controller {
 			$data['json_customer_group'][$id] =  'Svi';
 		//}
 		
-		foreach ($special_products as $result) {
-			if ($result['image'] && file_exists(DIR_IMAGE . $result['image'])) {
-				$image = $this->model_tool_image->resize($result['image'], 40, 40);
-			} else {
-				$image = $this->model_tool_image->resize('no_image.jpg', 40, 40);
-			}
-
-			$categories =  $this->model_catalog_product->getProductCategories($result['product_id']);
-			
-			$manufacturer = $this->model_extension_module_boost_special_manager->getManufacturer($result['manufacturer_id']);
-			
-			$man_name = ($manufacturer) ? $manufacturer['name'] : '';
-			
-			$customer_group = $this->model_extension_module_boost_special_manager->getCustomerGroup($result['customer_group_id']);
-			
-			$customer_group_name = ($customer_group) ? $customer_group['name'] : '';
-			
-			$date_start = ($result['date_start'] != '0000-00-00') ? $result['date_start'] : '';
-			$date_end = ($result['date_end'] != '0000-00-00') ? $result['date_end'] : '';
-			
-			$data['products'][] = [
-				'product_special_id' 	=> $result['product_special_id'],
-				'product_id' 			=> $result['product_id'],
-				'name'       			=> $result['name'],
-				'categories' 			=> $categories,
-				'price'      			=> $this->currency->format($result['price'], $this->config->get('config_currency')),
-				'special'    			=> number_format($result['special_price'], 2),
-				'special_formatted'		=> $this->currency->format($result['special_price'], $this->config->get('config_currency')),
-				'date_start' 			=> $date_start,
-				'date_end' 	 			=> $date_end,
-				'image'      			=> $image,
-				'quantity'   			=> $result['quantity'],
-				//'customer_group_id'   	=> $result['customer_group_id'],
-				//'customer_group_name'	=> $customer_group_name,
-				'customer_group_id'   	=> 0,
-				'customer_group_name'	=> 'Svi',
-				'manufacturer'   		=> $man_name,
-				'priority'   			=> $result['priority'],
-				'status'     			=> ($result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled')),
-				'selected'   			=> isset($this->request->post['selected']) && in_array($result['product_id'], $this->request->post['selected'])
-			];
-    	}
-
 		foreach ($special_categories as $result2) {
-			$customer_group = $this->model_extension_module_boost_special_manager->getCustomerGroup($result2['customer_group_id']);
-			
-			$customer_group_name = ($customer_group) ? $customer_group['name'] : '';
-			
 			$date_start = ($result2['date_start'] != '0000-00-00') ? $result2['date_start'] : '';
 			$date_end = ($result2['date_end'] != '0000-00-00') ? $result2['date_end'] : '';
 
@@ -287,6 +219,86 @@ class ControllerExtensionModuleBoostSpecialManager extends Controller {
 		
 		$this->response->setOutput($this->load->view('extension/module/boost_special_manager/index', $data));
    }
+
+	public function products() {
+		$this->load->language('extension/module/boost_special_manager');
+
+		$json = [
+			'total' => 0,
+			'rows'  => [],
+		];
+
+		if (!$this->user->hasPermission('access', 'extension/module/boost_special_manager')) {
+			$this->response->addHeader($this->request->server['SERVER_PROTOCOL'] . ' 403 Forbidden');
+			$json['error'] = $this->language->get('error_permission');
+		} else {
+			$filter_data = [
+				'filter_search' => isset($this->request->get['search']) ? $this->request->get['search'] : '',
+				'sort'          => isset($this->request->get['sort']) ? $this->request->get['sort'] : '',
+				'order'         => isset($this->request->get['order']) ? $this->request->get['order'] : 'DESC',
+				'start'         => isset($this->request->get['offset']) ? max(0, (int)$this->request->get['offset']) : 0,
+				'limit'         => isset($this->request->get['limit']) ? max(1, min(200, (int)$this->request->get['limit'])) : 20,
+			];
+
+			$this->load->model('extension/module/boost_special_manager');
+			$this->load->model('catalog/category');
+			$this->load->model('tool/image');
+
+			$json['total'] = $this->model_extension_module_boost_special_manager->getTotalSpecialProducts($filter_data);
+			$special_products = $this->model_extension_module_boost_special_manager->getSpecialProducts($filter_data);
+			$categories = $this->model_catalog_category->getCategories();
+			$category_names = [];
+
+			foreach ($categories as $category) {
+				$category_names[(int)$category['category_id']] = $category['name'];
+			}
+
+			foreach ($special_products as $result) {
+				if ($result['image'] && file_exists(DIR_IMAGE . $result['image'])) {
+					$image = $this->model_tool_image->resize($result['image'], 40, 40);
+				} else {
+					$image = $this->model_tool_image->resize('no_image.jpg', 40, 40);
+				}
+
+				$product_categories = [];
+
+				if (!empty($result['category_ids'])) {
+					foreach (explode(',', $result['category_ids']) as $category_id) {
+						$category_id = (int)$category_id;
+
+						if (isset($category_names[$category_id])) {
+							$category_name = html_entity_decode($category_names[$category_id], ENT_QUOTES, 'UTF-8');
+							$product_categories[] = htmlspecialchars($category_name, ENT_QUOTES, 'UTF-8');
+						}
+					}
+				}
+
+				$name = htmlspecialchars((string)$result['name'], ENT_QUOTES, 'UTF-8');
+				$date_start = ($result['date_start'] && $result['date_start'] != '0000-00-00') ? $result['date_start'] : '';
+				$date_end = ($result['date_end'] && $result['date_end'] != '0000-00-00') ? $result['date_end'] : '';
+				$image_html = '<img src="' . htmlspecialchars((string)$image, ENT_QUOTES, 'UTF-8') . '" alt="' . $name . '" class="img-thumbnail" width="40" height="40" loading="lazy" decoding="async" />';
+
+				$json['rows'][] = [
+					'id'                => (int)$result['product_special_id'],
+					'image'             => $image_html,
+					'name'              => $name,
+					'price'             => htmlspecialchars($this->currency->format($result['price'], $this->config->get('config_currency')), ENT_QUOTES, 'UTF-8'),
+					'special'           => htmlspecialchars($this->currency->format($result['special_price'], $this->config->get('config_currency')), ENT_QUOTES, 'UTF-8'),
+					'_special_data'     => ['value' => number_format($result['special_price'], 2, '.', '')],
+					'categories'        => implode('<br>', $product_categories),
+					'manufacturer'      => htmlspecialchars((string)$result['manufacturer'], ENT_QUOTES, 'UTF-8'),
+					'status'            => $result['status'] ? $this->language->get('text_enabled') : $this->language->get('text_disabled'),
+					'date_start'        => $date_start,
+					'date_end'          => $date_end,
+					'customer_group_id' => 'Svi',
+					'priority'          => (int)$result['priority'],
+				];
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json, JSON_UNESCAPED_UNICODE));
+	}
 	
 	public function setting() {
 		$isError = false;

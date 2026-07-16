@@ -181,8 +181,8 @@
         </operation>
     </file>
 	<file path="admin/model/catalog/manufacturer.php">
-        <operation>
-            <search><![CDATA[foreach ($data['manufacturer_description'] as $language_id => $value)]]></search>
+		<operation>
+            <search index="0,1"><![CDATA[$this->cache->delete('manufacturer');]]></search>
             <add position="before"><![CDATA[
 			//custom_fields
 			$this->db->query("DELETE FROM " . DB_PREFIX . "custom_fields WHERE entity='manufacturer_id=" . (int)$manufacturer_id . "'");
@@ -193,7 +193,7 @@
 			]]></add>
         </operation>
 		<operation>
-            <search><![CDATA[$this->db->query("DELETE FROM " . DB_PREFIX . "manufacturer WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");]]></search>
+            <search><![CDATA[$this->db->query("DELETE FROM `" . DB_PREFIX . "manufacturer` WHERE manufacturer_id = '" . (int)$manufacturer_id . "'");]]></search>
             <add position="after"><![CDATA[
 			//custom_fields
 			$this->db->query("DELETE FROM " . DB_PREFIX . "custom_fields WHERE entity = 'manufacturer_id=" . (int)$manufacturer_id . "'");
@@ -389,7 +389,7 @@
 			]]></add>
         </operation>
 		<operation>
-            <search><![CDATA[$this->db->query("DELETE FROM " . DB_PREFIX . "information WHERE information_id = '" . (int)$information_id . "'");]]></search>
+            <search><![CDATA[$this->db->query("DELETE FROM `" . DB_PREFIX . "information` WHERE information_id = '" . (int)$information_id . "'");]]></search>
             <add position="after"><![CDATA[
 			//custom_fields
 			$this->db->query("DELETE FROM " . DB_PREFIX . "custom_fields WHERE entity = 'information_id=" . (int)$information_id . "'");

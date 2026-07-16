@@ -47,18 +47,84 @@ class ModelExtensionModuleBoostSpecialManager extends Model {
     }
 	
 	/* products special */
-	public function getSpecialProducts() {
-		$sql = "SELECT ps.product_special_id, ps.product_id, pd.name, p.status, p.image, p.quantity, ps.customer_group_id, p.manufacturer_id, ps.priority, ps.price AS special_price, ps.date_start, ps.date_end, p.price
-		FROM " . DB_PREFIX . "product_special ps 
-		LEFT JOIN " . DB_PREFIX . "product p
-         ON (ps.product_id = p.product_id)
-		LEFT JOIN " . DB_PREFIX . "product_description pd
-         ON (ps.product_id = pd.product_id) 
-		WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+	public function getSpecialProducts($data = array()) {
+		$sql = "SELECT ps.product_special_id, ps.product_id, pd.name, p.status, p.image, p.quantity, ps.customer_group_id, p.manufacturer_id, COALESCE(m.name, '') AS manufacturer, ps.priority, ps.price AS special_price, ps.date_start, ps.date_end, p.price, (SELECT GROUP_CONCAT(p2c.category_id ORDER BY p2c.category_id SEPARATOR ',') FROM " . DB_PREFIX . "product_to_category p2c WHERE p2c.product_id = ps.product_id) AS category_ids
+		FROM " . DB_PREFIX . "product_special ps
+		INNER JOIN " . DB_PREFIX . "product p
+			ON (ps.product_id = p.product_id)
+		INNER JOIN " . DB_PREFIX . "product_description pd
+			ON (ps.product_id = pd.product_id AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "')
+		LEFT JOIN " . DB_PREFIX . "manufacturer m
+			ON (p.manufacturer_id = m.manufacturer_id)";
+
+		$sql .= $this->getSpecialProductFilterSql($data);
+
+		$sort_data = array(
+			'id'                => 'ps.product_special_id',
+			'name'              => 'pd.name',
+			'price'             => 'p.price',
+			'special'           => 'ps.price',
+			'manufacturer'      => 'm.name',
+			'status'            => 'p.status',
+			'date_start'        => 'ps.date_start',
+			'date_end'          => 'ps.date_end',
+			'customer_group_id' => 'ps.customer_group_id',
+			'priority'          => 'ps.priority',
+		);
+
+		if (isset($data['sort']) && isset($sort_data[$data['sort']])) {
+			$sql .= " ORDER BY " . $sort_data[$data['sort']];
+
+			if (isset($data['order']) && strtoupper($data['order']) === 'DESC') {
+				$sql .= " DESC";
+			} else {
+				$sql .= " ASC";
+			}
+		} else {
+			$sql .= " ORDER BY ps.product_special_id DESC";
+		}
+
+		if (isset($data['start']) || isset($data['limit'])) {
+			$start = isset($data['start']) ? max(0, (int)$data['start']) : 0;
+			$limit = isset($data['limit']) ? (int)$data['limit'] : 20;
+
+			if ($limit < 1) {
+				$limit = 20;
+			}
+
+			$sql .= " LIMIT " . $start . "," . $limit;
+		}
 				
 		$query = $this->db->query($sql);
 	
 		return $query->rows;
+	}
+
+	public function getTotalSpecialProducts($data = array()) {
+		$sql = "SELECT COUNT(*) AS total
+		FROM " . DB_PREFIX . "product_special ps
+		INNER JOIN " . DB_PREFIX . "product p
+			ON (ps.product_id = p.product_id)
+		INNER JOIN " . DB_PREFIX . "product_description pd
+			ON (ps.product_id = pd.product_id AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "')
+		LEFT JOIN " . DB_PREFIX . "manufacturer m
+			ON (p.manufacturer_id = m.manufacturer_id)";
+
+		$sql .= $this->getSpecialProductFilterSql($data);
+
+		$query = $this->db->query($sql);
+
+		return (int)$query->row['total'];
+	}
+
+	private function getSpecialProductFilterSql($data) {
+		if (!isset($data['filter_search']) || trim($data['filter_search']) === '') {
+			return '';
+		}
+
+		$search = $this->db->escape(trim($data['filter_search']));
+
+		return " WHERE (CAST(ps.product_special_id AS CHAR) LIKE '%" . $search . "%' OR pd.name LIKE '%" . $search . "%' OR CAST(p.price AS CHAR) LIKE '%" . $search . "%' OR CAST(ps.price AS CHAR) LIKE '%" . $search . "%' OR m.name LIKE '%" . $search . "%' OR ps.date_start LIKE '%" . $search . "%' OR ps.date_end LIKE '%" . $search . "%' OR EXISTS (SELECT 1 FROM " . DB_PREFIX . "product_to_category p2c_search INNER JOIN " . DB_PREFIX . "category_description cd_search ON (p2c_search.category_id = cd_search.category_id AND cd_search.language_id = '" . (int)$this->config->get('config_language_id') . "') WHERE p2c_search.product_id = ps.product_id AND cd_search.name LIKE '%" . $search . "%'))";
 	}
 	
 	public function addSpecialProducts($data) {

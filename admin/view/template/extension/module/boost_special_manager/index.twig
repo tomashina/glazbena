@@ -61,16 +61,17 @@ Website : http://www.opencartboost.com
 			  <table class="table special-manager-product table-bordered table-hover"
 				data-toolbar="#toolbar" data-search="true" data-show-refresh="false"
 				data-show-fullscreen="true" data-show-columns="true" data-toggle="table"
-				data-pagination="true" data-id-field="id" data-page-size="20" data-page-list="[20, 50, 100, 200, all]">
+				data-url="{{ products_url }}" data-side-pagination="server"
+				data-pagination="true" data-id-field="id" data-page-size="20" data-page-list="[20, 50, 100, 200]">
 			    <thead>
 				  <tr>
-				    <th style="width: 1px;" class="text-center" {% if products %} data-checkbox="true" {% endif %} ></th>
+				    <th style="width: 1px;" class="text-center" data-checkbox="true"></th>
 				    <th class="text-center" data-sortable="true" data-field="id">ID</th>
 				    <th class="text-center" data-field="image">{{ column_image }}</th>
 				    <th class="text-left" data-sortable="true" data-field="name">{{ column_product_name }}</th>
 				    <th class="text-left" data-sortable="true" data-field="price">{{ column_price }}</th>
 				    <th class="text-left" data-sortable="true" data-field="special">{{ column_special }}</th>
-				    <th class="text-left" data-sortable="true" data-field="categories" data-visible="false">{{ column_categories }}</th>
+				    <th class="text-left" data-field="categories" data-visible="false">{{ column_categories }}</th>
 				    <th class="text-left" data-sortable="true" data-field="manufacturer" data-visible="false">{{ column_manufacturer }}</th>
 				    <th class="text-left" data-sortable="true" data-field="status" data-visible="false">{{ column_status }}</th>
 				    <th class="text-left" data-sortable="true" data-field="date_start">{{ column_date_start }}</th>
@@ -79,33 +80,7 @@ Website : http://www.opencartboost.com
 				    <th class="text-left" data-sortable="true" data-field="priority">{{ column_priority }}</th>
 				  </tr>
 			    </thead>
-			    <tbody>
-				  {% if products %}
-				    {% for product in products %}
-					  <tr>
-					    <td class="text-center" ></td>
-					    <td class="text-center">{{ product.product_special_id }}</td>
-					    <td class="text-center">{% if product.image %} <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</td>
-					    <td class="text-left">{{ product.name }}</td>
-					    <td class="text-left">{{ product.price }}</td>
-					    <td class="text-left" data-value="{{product.special}}" >{{ product.special_formatted }}</td>
-					    <td class="text-left">
-						  {% for category in categories_list %}
-							{% if category.category_id in product.categories %}
-							  {{ category.name }}<br>
-                            {% endif %}
-						  {% endfor %}
-						</td>
-					    <td class="text-left">{{ product.manufacturer }}</td>
-					    <td class="text-left">{{ product.status }}</td>
-					    <td class="text-left date">{{ product.date_start }}</td>
-					    <td class="text-left date">{{ product.date_end }}</td>
-					    <td class="text-left">{{ product.customer_group_name }}</td>
-					    <td class="text-left">{{ product.priority }}</td>
-					  </tr>
-				    {% endfor %}
-				  {% endif %}
-			    </tbody>
+			    <tbody></tbody>
 			  </table>
 		    </div>
 		  </div><!--/div tab-product -->
@@ -258,8 +233,7 @@ Website : http://www.opencartboost.com
 			return
 		}
 		
-		{% if products %}
-			$($tableProduct).Tabledit({
+		$($tableProduct).Tabledit({
 				url: 'index.php?route=extension/module/boost_special_manager/update&user_token={{ user_token }}',
 				columns: {
 					identifier: [1, 'product_special_id'],
@@ -342,8 +316,7 @@ Website : http://www.opencartboost.com
 						$('#hidden-alert-danger').show()
 					}
 				}
-			});
-		{% endif %}
+		});
 	}
 
 	var $tableCategory = $('table.special-manager-category')
@@ -487,10 +460,7 @@ Website : http://www.opencartboost.com
 						$('#hidden-alert-success span').html(response.message)
 						$('#hidden-alert-success').show()
 						
-						$tableProduct.bootstrapTable('remove', {
-							field: 'id',
-							values: ids
-						})
+						$tableProduct.bootstrapTable('refresh')
 						
 					} else {					
 						$('#hidden-alert-danger span').html(response.message)
@@ -571,4 +541,3 @@ $('.btn-toggle').click(function() {
 </script>
 </div>
 {{ footer }}
-
