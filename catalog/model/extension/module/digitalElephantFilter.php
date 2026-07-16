@@ -107,26 +107,45 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
     {
         $customer_group_id = $this->getCustomerGroup();
 
-        $sql = "SELECT DISTINCT pa.text, a.`attribute_id`, ad.`name`, ag.attribute_group_id, agd.name as attribute_group_name FROM `" . DB_PREFIX . "product_attribute` pa" .
-            " LEFT JOIN " . DB_PREFIX . "attribute a ON(pa.attribute_id=a.`attribute_id`) " .
-            " LEFT JOIN " . DB_PREFIX . "attribute_description ad ON(a.attribute_id=ad.`attribute_id`) " .
-            " LEFT JOIN " . DB_PREFIX . "attribute_group ag ON(ag.attribute_group_id=a.`attribute_group_id`) " .
-            " LEFT JOIN " . DB_PREFIX . "attribute_group_description agd ON(agd.attribute_group_id=ag.`attribute_group_id`) " .
-            " LEFT JOIN " . DB_PREFIX . "product p ON(p.product_id=pa.`product_id`) ";
-        if (isset($data['category_id']) && $data['category_id']) {
-            $sql .= " LEFT JOIN " . DB_PREFIX . "product_to_category p2c ON(p.product_id=p2c.product_id) ";
+        $has_category = !empty($data['category_id']);
+
+        if ($has_category) {
+            // Start with the small set of products in the requested category.
+            // STRAIGHT_JOIN prevents MySQL from expanding all attribute/group
+            // combinations before it applies the category condition.
+            $sql = "SELECT STRAIGHT_JOIN DISTINCT pa.text, a.`attribute_id`, ad.`name`, ag.attribute_group_id, agd.name as attribute_group_name" .
+                " FROM `" . DB_PREFIX . "category_path` cp" .
+                " INNER JOIN " . DB_PREFIX . "product_to_category p2c ON(p2c.category_id=cp.category_id)" .
+                " INNER JOIN " . DB_PREFIX . "product p ON(p.product_id=p2c.product_id AND p.status='1' AND p.date_available<=NOW())" .
+                " INNER JOIN " . DB_PREFIX . "product_to_store p2s ON(p2s.product_id=p.product_id AND p2s.store_id='" . (int)$this->config->get('config_store_id') . "')" .
+                " INNER JOIN " . DB_PREFIX . "product_attribute pa ON(pa.product_id=p.product_id AND pa.language_id='" . (int)$this->config->get('config_language_id') . "')" .
+                " INNER JOIN " . DB_PREFIX . "attribute a ON(a.attribute_id=pa.attribute_id)" .
+                " INNER JOIN " . DB_PREFIX . "attribute_description ad ON(ad.attribute_id=a.attribute_id AND ad.language_id='" . (int)$this->config->get('config_language_id') . "')" .
+                " INNER JOIN " . DB_PREFIX . "attribute_group ag ON(ag.attribute_group_id=a.attribute_group_id)" .
+                " INNER JOIN " . DB_PREFIX . "attribute_group_description agd ON(agd.attribute_group_id=ag.attribute_group_id AND agd.language_id='" . (int)$this->config->get('config_language_id') . "')";
+        } else {
+            $sql = "SELECT DISTINCT pa.text, a.`attribute_id`, ad.`name`, ag.attribute_group_id, agd.name as attribute_group_name FROM `" . DB_PREFIX . "product_attribute` pa" .
+                " LEFT JOIN " . DB_PREFIX . "attribute a ON(pa.attribute_id=a.`attribute_id`) " .
+                " LEFT JOIN " . DB_PREFIX . "attribute_description ad ON(a.attribute_id=ad.`attribute_id`) " .
+                " LEFT JOIN " . DB_PREFIX . "attribute_group ag ON(ag.attribute_group_id=a.`attribute_group_id`) " .
+                " LEFT JOIN " . DB_PREFIX . "attribute_group_description agd ON(agd.attribute_group_id=ag.`attribute_group_id`) " .
+                " LEFT JOIN " . DB_PREFIX . "product p ON(p.product_id=pa.`product_id`) " .
+                " LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON(p.product_id=p2s.product_id) ";
         }
+
         if (isset($data['special']) && $data['special']) {
-            $sql .= " LEFT JOIN " . DB_PREFIX . "product_special ps ON ( ps.product_id = p.product_id )";
+            $sql .= " INNER JOIN " . DB_PREFIX . "product_special ps ON (ps.product_id=p.product_id)";
         }
 
-        $sql .= " LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON(p.product_id=p2s.product_id) ";
-        $sql .= " WHERE  p.status = '1' AND p.date_available <= NOW() AND p2s.store_id =" . (int)$this->config->get('config_store_id');
-
-        if (isset($data['category_id']) && $data['category_id']) {
-            $sql .= " AND p2c.category_id IN
-                    (SELECT category_id FROM " . DB_PREFIX . "category_path WHERE path_id = " . $data['category_id'] . ")";
+        if ($has_category) {
+            $sql .= " WHERE cp.path_id='" . (int)$data['category_id'] . "'";
+        } else {
+            $sql .= " WHERE p.status='1' AND p.date_available<=NOW() AND p2s.store_id='" . (int)$this->config->get('config_store_id') . "'" .
+                " AND pa.language_id='" . (int)$this->config->get('config_language_id') . "'" .
+                " AND ad.language_id='" . (int)$this->config->get('config_language_id') . "'" .
+                " AND agd.language_id='" . (int)$this->config->get('config_language_id') . "'";
         }
+
         if (isset($data['special']) && $data['special']) {
             $sql .= " AND ps.customer_group_id = '" . (int)$customer_group_id . "'" .
                 " AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW( )) AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW( )))";
@@ -136,10 +155,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
             $sql .= " AND p.manufacturer_id = '" . (int)$data['manufacturer_id'] . "'";
         }
 
-        $sql .= " AND pa.language_id = '" . (int)$this->config->get('config_language_id') . "'" .
-            " AND ad.language_id = '" . (int)$this->config->get('config_language_id') . "'" .
-            " AND agd.language_id = '" . (int)$this->config->get('config_language_id') . "'" .
-            " ORDER BY ";
+        $sql .= " ORDER BY ";
 
         switch ($DEF_settings['advance']['attributes']['sort']) {
             case 'sort':

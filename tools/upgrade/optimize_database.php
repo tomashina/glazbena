@@ -46,7 +46,8 @@ if ($default_group_id > 0 && (!$legacy_group || !$legacy_group->num_rows)) {
 $indexes = array(
 	'product' => array(
 		'idx_catalog_status_date_sort' => array('status', 'date_available', 'sort_order', 'product_id'),
-		'idx_catalog_manufacturer' => array('manufacturer_id', 'status', 'date_available', 'product_id')
+		'idx_catalog_manufacturer' => array('manufacturer_id', 'status', 'date_available', 'product_id'),
+		'idx_catalog_variant_mpn' => array('mpn', 'status', 'date_available', 'product_id')
 	),
 	'category_path' => array(
 		'idx_path_category' => array('path_id', 'category_id')

@@ -1,5 +1,9 @@
 <?php
 class ControllerStartupSeoUrl extends Controller {
+	private $rewrite_cache = array();
+	private $keyword_cache = array();
+	private $keyword_groups_loaded = array();
+
 	public function index() {
 		// Add rewrite to url class
 		if ($this->config->get('config_seo_url')) {
@@ -80,6 +84,10 @@ class ControllerStartupSeoUrl extends Controller {
 	}
 
 	public function rewrite($link) {
+		if (isset($this->rewrite_cache[$link])) {
+			return $this->rewrite_cache[$link];
+		}
+
 		$url_info = parse_url(str_replace('&amp;', '&', $link));
 
 		$url = '';
@@ -103,10 +111,10 @@ class ControllerStartupSeoUrl extends Controller {
 		foreach ($data as $key => $value) {
 			if (isset($data['route'])) {
 				if (($data['route'] == 'product/product' && $key == 'product_id') || (($data['route'] == 'product/manufacturer/info' || $data['route'] == 'product/product') && $key == 'manufacturer_id') || ($data['route'] == 'information/information' && $key == 'information_id')) {
-					$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($key . '=' . (int)$value) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
+					$keyword = $this->getKeyword($key . '=' . (int)$value);
 
-					if ($query->num_rows && $query->row['keyword']) {
-						$url .= '/' . $query->row['keyword'];
+					if ($keyword) {
+						$url .= '/' . $keyword;
 
 						unset($data[$key]);
 					}
@@ -114,10 +122,10 @@ class ControllerStartupSeoUrl extends Controller {
 					$categories = explode('_', $value);
 
 					foreach ($categories as $category) {
-						$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE `query` = 'category_id=" . (int)$category . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
+						$keyword = $this->getKeyword('category_id=' . (int)$category);
 
-						if ($query->num_rows && $query->row['keyword']) {
-							$url .= '/' . $query->row['keyword'];
+						if ($keyword) {
+							$url .= '/' . $keyword;
 						} else {
 							$url = '';
 
@@ -145,9 +153,50 @@ class ControllerStartupSeoUrl extends Controller {
 				}
 			}
 
-			return $url_info['scheme'] . '://' . $url_info['host'] . (isset($url_info['port']) ? ':' . $url_info['port'] : '') . str_replace('/index.php', '', $url_info['path']) . $url . $query;
+			$this->rewrite_cache[$link] = $url_info['scheme'] . '://' . $url_info['host'] . (isset($url_info['port']) ? ':' . $url_info['port'] : '') . str_replace('/index.php', '', $url_info['path']) . $url . $query;
 		} else {
-			return $link;
+			$this->rewrite_cache[$link] = $link;
 		}
+
+		return $this->rewrite_cache[$link];
+	}
+
+	private function getKeyword($query) {
+		$separator = strpos($query, '=');
+		$type = $separator === false ? '' : substr($query, 0, $separator);
+		$namespaces = array(
+			'product_id'      => 'product',
+			'category_id'     => 'category',
+			'manufacturer_id' => 'manufacturer',
+			'information_id'  => 'information'
+		);
+
+		if (isset($namespaces[$type])) {
+			if (empty($this->keyword_groups_loaded[$type])) {
+				$cache_key = $namespaces[$type] . '.seo_url.' . (int)$this->config->get('config_store_id') . '.' . (int)$this->config->get('config_language_id');
+				$keywords = $this->cache->get($cache_key);
+
+				if (!is_array($keywords)) {
+					$keywords = array();
+					$result = $this->db->query("SELECT `query`, keyword FROM " . DB_PREFIX . "seo_url WHERE store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "' AND `query` LIKE '" . $this->db->escape($type) . "=%'");
+
+					foreach ($result->rows as $row) {
+						if (!array_key_exists($row['query'], $keywords)) {
+							$keywords[$row['query']] = $row['keyword'];
+						}
+					}
+
+					$this->cache->set($cache_key, $keywords);
+				}
+
+				$this->keyword_cache += $keywords;
+				$this->keyword_groups_loaded[$type] = true;
+			}
+		} elseif (!array_key_exists($query, $this->keyword_cache)) {
+			$result = $this->db->query("SELECT keyword FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($query) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "' LIMIT 1");
+			$this->keyword_cache[$query] = ($result->num_rows && $result->row['keyword']) ? $result->row['keyword'] : '';
+		}
+
+		return isset($this->keyword_cache[$query]) ? $this->keyword_cache[$query] : '';
 	}
 }

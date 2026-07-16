@@ -119,7 +119,10 @@ function DigitalElephantFilterController() {
         this.sliderPrice.changeMinSlideOnKeyword();
         this.sliderPrice.changeMaxSlideOnKeyword();
 
-        var $_GET_string = this.$_GET_string();
+        // Reset means no filter parameters. Keeping the peak min/max values
+        // in the public URL made the next page load run an unnecessary AJAX
+        // filter cycle even though no filter was active.
+        var $_GET_string = this.url.getNativeParams();
         $_GET_string = this.url.cutGetParam($_GET_string, 'page');
 
         this.containerProducts.ajaxGetProducts($_GET_string);

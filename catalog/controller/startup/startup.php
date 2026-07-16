@@ -59,7 +59,10 @@ class ControllerStartupStartup extends Controller {
 		$this->registry->set('url', new Url($this->config->get('config_url'), $this->config->get('config_ssl')));
 
 
-		if (empty($this->session->data['language'])) {
+		// Anonymous catalogue GET requests intentionally do not start a session,
+		// so GeoPlugin results could not be persisted and only delayed the first
+		// category/product response. Run autodetection only for an active session.
+		if ($this->session->getId() && empty($this->session->data['language']) && empty($this->request->cookie['language'])) {
 		$ip_address = $this->request->server['REMOTE_ADDR'];
 		//	$ip_address='103.60.102.82';
 		$geopluginURL='http://www.geoplugin.net/php.gp?ip='.$ip_address;

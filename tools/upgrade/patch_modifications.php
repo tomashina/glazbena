@@ -79,6 +79,17 @@ try {
 		)
 	));
 
+	// Product variants are grouped by an exact identifier (MPN, SKU, EAN,
+	// etc.). Do not send that identifier through the full catalogue search,
+	// which uses multiple leading-wildcard LIKE conditions.
+	$patchModification('advanced_product_variants', 'Advanced Product Variants', array(
+		array(
+			'search' => "\$products = \$this->model_catalog_product->getProducts(\$filters);",
+			'replace' => "\$products = \$this->model_catalog_product->getProductsByConfiguredVariant(\$filters['filter_name']);",
+			'expected' => 3
+		)
+	));
+
 	// The legacy Meta Pixel OCMOD printed tracking code directly in <head>.
 	// Keep its e-commerce events, but expose the markup inertly until the
 	// visitor grants marketing consent through the custom cookie manager.

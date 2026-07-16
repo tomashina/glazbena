@@ -3,7 +3,8 @@
 
 <div class="filter-container">
 
-<div class="closemenu mobm" >
+<div class="closemenu mobm filter-mobile-header">
+                <strong class="filter-mobile-heading">{{ heading_title }}</strong>
                 <div class="icon-element mnu">
 
                     <button type="button" class="shortcut-wrapper filter-closer hidden-md hidden-lg" aria-label="Zatvori filtre">
@@ -107,7 +108,7 @@
                     {% endfor %}
 
                 {% endfor %}
-                <div>
+                <div class="digitalElephantFilter_actions">
                     <table width="100%" class="digitalElephantFilter_btn">
                         <tr>
                             {% if is_button_apply and is_button_clear %}
@@ -189,119 +190,276 @@
     </div>
 </div>
 <style>
-  .filter_element_title.gk-keep-open + .filter_element_content {
-    display: block !important;
+@media (max-width: 767px) {
+  .filter-container {
+    padding-bottom: 0 !important;
+    overscroll-behavior: contain;
   }
+  iframe[title*="chat"],
+  iframe[title*="Chat"],
+  iframe[src*="tawk.to"] {
+    left: 16px !important;
+    right: auto !important;
+  }
+  html.side-filter-open button.scroll-to-top,
+  html.side-filter-open iframe[title*="chat"],
+  html.side-filter-open iframe[src*="tawk.to"],
+  html.side-filter-open .tawk-min-container,
+  html.side-filter-open .cnj-trust-mark-vertical,
+  html.side-filter-open .cnj-floating-bar,
+  html.side-filter-open .smdWrapperTag {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  .filter-mobile-header.closemenu.mobm {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    width: 100% !important;
+    height: 62px !important;
+    padding-left: 18px;
+    color: #ffffff;
+    background: #0054a6;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .12);
+  }
+  .filter-mobile-heading {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .filter-mobile-header .icon-element.mnu {
+    position: static !important;
+    flex: 0 0 62px;
+    width: 62px !important;
+    height: 62px !important;
+    margin-left: auto;
+  }
+  .filter-mobile-header .filter-closer,
+  .filter-mobile-header .filter-closer:hover,
+  .filter-mobile-header .filter-closer:focus {
+    width: 62px !important;
+    height: 62px !important;
+    padding: 0 !important;
+    border: 0;
+    color: #ffffff !important;
+    background: transparent !important;
+    outline: 0;
+  }
+  .filter-mobile-header .filter-closer .icon,
+  .filter-mobile-header .filter-closer .icon:before {
+    color: #ffffff !important;
+    font-size: 24px;
+    line-height: 62px;
+  }
+  #digitalElephantFilter_box {
+    padding: 6px 18px 0;
+  }
+  #digitalElephantFilter_box .filter_element_wrap {
+    margin: 0;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  #digitalElephantFilter_box .filter_element_title {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 14px 34px 14px 0;
+    font-size: 17px;
+    line-height: 1.25;
+  }
+  #digitalElephantFilter_box .filter_element_title:before {
+    top: 50%;
+    right: 3px;
+    transform: translateY(-50%);
+  }
+  #digitalElephantFilter_box .filter_element_title.is_closed:before {
+    transform: translateY(-50%) rotate(-90deg);
+  }
+  #digitalElephantFilter_box .filter_element_title:after {
+    display: none;
+  }
+  #digitalElephantFilter_box .filter_element_content {
+    margin: 0;
+    padding: 0 0 14px;
+  }
+  #digitalElephantFilter_box .filter_element_content:not(.price_slider) {
+    max-height: 45vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  #digitalElephantFilter_box .checkbox-inline,
+  #digitalElephantFilter_box .radio-inline,
+  #digitalElephantFilter_box .digitalElephantFilter_type_checkbox label {
+    min-height: 44px;
+    padding: 10px 0;
+  }
+  #digitalElephantFilter_box input[type="checkbox"] + span:before,
+  #digitalElephantFilter_box input[type="radio"] + span:before {
+    width: 24px;
+    height: 24px;
+    line-height: 21px;
+    margin-right: 10px;
+  }
+  #digitalElephantFilter_box input[type="checkbox"]:checked + span:before,
+  #digitalElephantFilter_box input[type="radio"]:checked + span:before {
+    color: #ffffff;
+    border-color: #0054a6;
+    background: #0054a6;
+  }
+  #digitalElephantFilter_box .price_slider {
+    padding: 10px 4px 20px;
+  }
+  #digitalElephantFilter_box .digitalElephantFilter_actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    margin: 18px -18px 0;
+    padding: 12px 18px max(12px, env(safe-area-inset-bottom));
+    background: #ffffff;
+    box-shadow: 0 -6px 16px rgba(0, 0, 0, .08);
+  }
+  #digitalElephantFilter_box .digitalElephantFilter_actions input.btn {
+    min-height: 48px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  #digitalElephantFilter_box .digitalElephantFilter_actions input.btn:disabled {
+    color: #888888;
+    border-color: #d5d5d5;
+    background: #f4f4f4;
+    opacity: 1;
+  }
+}
 </style>
 
 <script type="text/javascript">
-// Basel
-$(document).ready(function() {
-  $('.filter-trigger-btn').addClass('active').html('<i class="icon-line-menu icon"></i> <b>{{ heading_title }}</b>');
-  // Basel
-  $(".filter-trigger-btn").click(function(){
-    $('html').addClass('no-scroll side-filter-open');
-    $('.body-cover').addClass('active'); 
-  });
+$(document).ready(function () {
+  var pendingDesktopSection = '';
+  var lastFilterTrigger = null;
 
-  $(".filter-closer").click(function(){
-    $('html').removeClass('no-scroll side-filter-open');
-    $('.body-cover').removeClass('active');
-  });
-
-  $("#digitalElephantFilter_button_clear").click(function(){
-    $('html').removeClass('no-scroll side-filter-open');
-    $('.body-cover').removeClass('active');
-  });
-
-  // ---------- NEW: helperi za state ----------
-  function defSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
-  function defGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
-  function defDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
-
-  // ---------- NEW: reopen helpers ----------
-  var DEF_REOPEN_TTL_MS = 5000; // koliko dugo nakon "change" smijemo ponovno otvarati
-  var ajaxQuietTimer = null;
-
-  function markNeedReopen(sid){
-    defSet('def_keep_open_section', sid || '');
-    defSet('def_last_action', 'change');
-    defSet('def_reopen_deadline', String(Date.now() + DEF_REOPEN_TTL_MS));
+  function isMobileFilter() {
+    return window.matchMedia ? window.matchMedia('(max-width: 767px)').matches : $(window).width() < 768;
   }
 
-  function shouldReopen(){
-    var last = defGet('def_last_action');
-    var dl = parseInt(defGet('def_reopen_deadline') || '0', 10);
-    return last === 'change' && Date.now() <= dl;
-  }
+  function setSectionState($title, open, animate) {
+    var $content = $title.next('.filter_element_content');
+    if (!$content.length) return;
 
-  function reopenSection(){
-    var sid = defGet('def_keep_open_section');
-    if (!sid) return;
-    var $title = $('.filter_element_title[data-section-id="' + sid + '"]');
-    if ($title.length) {
-      $title.removeClass('is_closed').addClass('gk-keep-open');
-      $title.next('.filter_element_content').stop(true, true).show();
+    $title.toggleClass('is_closed', !open).attr('aria-expanded', open ? 'true' : 'false');
+    $content.stop(true, true);
+
+    if (animate) {
+      open ? $content.slideDown(180) : $content.slideUp(180);
+    } else {
+      $content.toggle(open);
     }
   }
 
-  function finishReopenCycleSoon(){
-    clearTimeout(ajaxQuietTimer);
-    ajaxQuietTimer = setTimeout(function(){
-      // ako smo još u TTL-u, pusti da ostane otvoreno; inače očisti state
-      if (!shouldReopen()){
-        defDel('def_last_action');
-        defDel('def_reopen_deadline');
-        $('.filter_element_title').removeClass('gk-keep-open');
-      }
-    }, 600); // kratko pričekaj da DOM i CSS “sjednu”
+  function updateClearButton() {
+    var $button = $('#digitalElephantFilter_button_clear');
+    if (!$button.length) return;
+
+    var activeCount = $('#digitalElephantFilter_box input[type="checkbox"]:checked, #digitalElephantFilter_box input[type="radio"]:checked').length;
+    var currentMin = String((window.DEFConfig && DEFConfig.currentPrice.min) || '');
+    var currentMax = String((window.DEFConfig && DEFConfig.currentPrice.max) || '');
+    var peakMin = String((window.DEFConfig && DEFConfig.peakPrice.min) || '');
+    var peakMax = String((window.DEFConfig && DEFConfig.peakPrice.max) || '');
+    var hasPriceFilter = (currentMin && currentMin !== peakMin) || (currentMax && currentMax !== peakMax);
+    if (hasPriceFilter) activeCount++;
+
+    $button.val(activeCount ? '{{ text_clear }} (' + activeCount + ')' : '{{ text_clear }}');
+    $button.prop('disabled', activeCount === 0);
   }
 
-  // Ostavlja dropdown otvoren nakon promjene filtera
-  // 1) Na promjenu filtera zapamti sekciju i odmah je ostavi otvorenom,
-  //    ali NEMOJ paliti overlay niti side panel.
-  $(document).off('change', '#digitalElephantFilter_box :checkbox, #digitalElephantFilter_box input[type=radio]');
-  $(document).on('change', '#digitalElephantFilter_box :checkbox, #digitalElephantFilter_box input[type=radio]', function () {
-    var $wrap = $(this).closest('.filter_element_wrap');
-    var sid = $wrap.find('.filter_element_title').data('section-id') || '';
+  function prepareMobileFilter() {
+    var $titles = $('#digitalElephantFilter_box .filter_element_title').filter(function () {
+      return $(this).next('.filter_element_content').length > 0;
+    });
 
-    // prisilno otvori content sada
-    $wrap.find('.filter_element_content').stop(true, true).show();
-    $wrap.find('.filter_element_title').removeClass('is_closed').addClass('gk-keep-open');
+    $titles.attr({ role: 'button', tabindex: '0' });
 
-    // zapamti koju sekciju treba ostaviti otvorenom nakon AJAX-a (+ TTL)
-    markNeedReopen(sid); // NEW
+    if (isMobileFilter()) {
+      $titles.each(function () {
+        setSectionState($(this), true, false);
+      });
+    }
 
+    updateClearButton();
+  }
+
+  function closeMobileFilter(restoreFocus) {
+    $('html').removeClass('no-scroll side-filter-open');
+    $('.body-cover').removeClass('active');
+
+    if (window.Tawk_API && typeof window.Tawk_API.showWidget === 'function') {
+      window.Tawk_API.showWidget();
+    }
+
+    if (restoreFocus && lastFilterTrigger) {
+      $(lastFilterTrigger).trigger('focus');
+    }
+  }
+
+  $('.filter-trigger-btn')
+    .addClass('active')
+    .attr('aria-label', '{{ heading_title }} – otvori')
+    .html('<i class="icon-line-menu icon"></i> <b>{{ heading_title }}</b>');
+
+  $('.filter-trigger-btn').off('click.gkFilterUX').on('click.gkFilterUX', function () {
+    lastFilterTrigger = this;
+    prepareMobileFilter();
+    $('html').addClass('no-scroll side-filter-open');
+    $('.body-cover').addClass('active');
+
+    if (window.Tawk_API && typeof window.Tawk_API.hideWidget === 'function') {
+      window.Tawk_API.hideWidget();
+    }
   });
 
-  // Jedan stabilan toggle handler; sprječava dvostruki slideToggle iz plugina.
-  $(document).off('click.gkFilterToggle', '.filter_element_title');
-  $(document).on('click.gkFilterToggle', '.filter_element_title', function (event) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
+  $(document)
+    .off('click.gkFilterUX', '.filter-closer, .body-cover')
+    .on('click.gkFilterUX', '.filter-closer, .body-cover', function (event) {
+      event.preventDefault();
+      closeMobileFilter(true);
+    });
+
+  $(document)
+    .off('click.gkFilterUX', '#digitalElephantFilter_button_clear')
+    .on('click.gkFilterUX', '#digitalElephantFilter_button_clear', function () {
+      closeMobileFilter(false);
+    });
+
+  // Replace the extension's generic toggle with one deterministic handler.
+  $(document).off('click', '.filter_element_title');
+  $(document).on('click.gkFilterUX', '.filter_element_title', function (event) {
     var $title = $(this);
     var $content = $title.next('.filter_element_content');
     if (!$content.length) return;
-    var willClose = $content.is(':visible');
 
-    $title.removeClass('gk-keep-open');
+    event.preventDefault();
+    event.stopImmediatePropagation();
 
-    if (willClose) {
-      defSet('def_last_action', 'close');
-      defDel('def_keep_open_section');
-      defDel('def_reopen_deadline');
-      $title.addClass('is_closed');
-      $content.stop(true, true).slideUp(250);
-    } else {
-      defSet('def_last_action', 'manual-open');
-      $title.removeClass('is_closed');
-      $content.stop(true, true).slideDown(250);
+    var willOpen = !$content.is(':visible');
+
+    if (isMobileFilter() && willOpen) {
+      $('#digitalElephantFilter_box .filter_element_title').not($title).each(function () {
+        setSectionState($(this), false, true);
+      });
     }
 
-    if (window.DEFConfig && DEFConfig.action && DEFConfig.action.ajaxSetStateSection) {
+    setSectionState($title, willOpen, true);
+
+    if (!isMobileFilter() && window.DEFConfig && DEFConfig.action && DEFConfig.action.ajaxSetStateSection) {
       $.post(DEFConfig.action.ajaxSetStateSection, {
         section: {
-          state: willClose ? 0 : 1,
+          state: willOpen ? 1 : 0,
           name: $title.attr('data-section-name'),
           id: $title.attr('data-section-id')
         }
@@ -309,67 +467,55 @@ $(document).ready(function() {
     }
   });
 
-  // 2) Nakon što plugin završi AJAX re-render, samo ponovno otvori TU sekciju.
-  //    NE dodajemo overlay, NE dodajemo side-filter-open.
-  $(document).ajaxComplete(function (e, xhr, settings) {
+  $(document)
+    .off('keydown.gkFilterUX', '.filter_element_title')
+    .on('keydown.gkFilterUX', '.filter_element_title', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        $(this).trigger('click');
+      }
+    });
+
+  $(document)
+    .off('change.gkFilterUX', '#digitalElephantFilter_box input[type="checkbox"], #digitalElephantFilter_box input[type="radio"]')
+    .on('change.gkFilterUX', '#digitalElephantFilter_box input[type="checkbox"], #digitalElephantFilter_box input[type="radio"]', function () {
+      pendingDesktopSection = $(this).closest('.filter_element_wrap').find('.filter_element_title').attr('data-section-id') || '';
+      updateClearButton();
+    });
+
+  $(document).off('keydown.gkFilterEscape').on('keydown.gkFilterEscape', function (event) {
+    if (event.key === 'Escape' && $('html').hasClass('side-filter-open')) {
+      closeMobileFilter(true);
+    }
+  });
+
+  $(document).off('ajaxComplete.gkFilterUX').on('ajaxComplete.gkFilterUX', function (event, xhr, settings) {
     try {
-      var isDEF =
-        settings.url.indexOf(DEFConfig.action.getProduct) !== -1 ||
-        settings.url.indexOf(DEFConfig.action.ajaxRenderPanel) !== -1 ||
-        settings.url.indexOf(DEFConfig.action.ajaxCheckToRenderShowMore) !== -1 ||
-        settings.url.indexOf(DEFConfig.action.ajaxRenderQuantityProducts) !== -1 ||
-        settings.url.indexOf(DEFConfig.action.ajaxRenderPagination) !== -1;
+      var url = String(settings.url || '');
+      var success = xhr.status >= 200 && xhr.status < 300;
+      var isProductRefresh = url.indexOf(DEFConfig.action.getProduct) !== -1;
+      var isPanelRefresh = url.indexOf(DEFConfig.action.ajaxRenderPanel) !== -1;
 
-      if (!isDEF) return;
-
-      // NEW: tijekom TTL-a, na SVAKI DEF ajaxComplete ponovno otvori sekciju
-      if (shouldReopen()){
-        // pričekaj da se DOM nacrta
-        requestAnimationFrame(function () {
-          reopenSection();
-        });
+      if (success && isMobileFilter() && isProductRefresh && $('html').hasClass('side-filter-open')) {
+        closeMobileFilter(false);
       }
 
-      finishReopenCycleSoon(); // NEW
-    } catch (err) {}
+      if (success && isPanelRefresh) {
+        requestAnimationFrame(function () {
+          if (isMobileFilter()) {
+            prepareMobileFilter();
+          } else if (pendingDesktopSection) {
+            var $title = $('.filter_element_title[data-section-id="' + pendingDesktopSection + '"]');
+            if ($title.length) setSectionState($title, true, false);
+            pendingDesktopSection = '';
+            updateClearButton();
+          }
+        });
+      }
+    } catch (error) {}
   });
 
-  // ---------- NEW: kad svi AJAX-i stanu, još jednom otvori pa počisti state ----------
-  $(document).ajaxStop(function(){
-    if (shouldReopen()){
-      requestAnimationFrame(function(){
-        reopenSection();
-        finishReopenCycleSoon();
-      });
-    } else {
-      finishReopenCycleSoon();
-    }
-  });
-
-  // ---------- NEW: kao sigurnosna mreža, promatraj promjene u #digitalElephantFilter_box ----------
-  try {
-    var box = document.getElementById('digitalElephantFilter_box');
-    if (box && window.MutationObserver){
-      var mo = new MutationObserver(function(){
-        if (shouldReopen()){
-          reopenSection();
-        }
-      });
-      mo.observe(box, {childList:true, subtree:true});
-    }
-  } catch(e){}
-
-  // 3) Ako korisnik ručno zatvori panel/overlay, očisti memoriju
-  $(document).on('click', '.filter-closer, .body-cover', function(){
-    localStorage.removeItem('def_keep_open_section');
-    $('html').removeClass('no-scroll side-filter-open');
-    $('.body-cover').removeClass('active');
-
-    defSet('def_last_action', 'close-all');
-    defDel('def_reopen_deadline'); // NEW
-  });
-
-  // (ostalo ostaje kako je bilo)
+  prepareMobileFilter();
 });
 </script>
 

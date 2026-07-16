@@ -19,7 +19,14 @@ function DigitalElephantFilterPanel() {
             url: $this.config.action.ajaxRenderPanel + $_GET_string + '&path=' + this.config.categoryPath,
             dataType: 'HTML',
             success: function(html) {
-                $($this.selector).replaceWith(html);
+                // The endpoint returns the complete filter wrapper. Replacing
+                // only #digitalElephantFilter_box avoids nesting a second
+                // mobile drawer (and duplicating its header/close button)
+                // after every AJAX filter refresh.
+                var $response = $('<div></div>').append($.parseHTML(html, document, true));
+                var $panel = $response.find($this.selector).first();
+
+                $($this.selector).replaceWith($panel.length ? $panel : html);
                 $this.sync.addLoadedElements($this.selector);
             }
         });

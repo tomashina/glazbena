@@ -2,14 +2,34 @@
 class ModelDesignSeoUrl extends Model {
 	public function addSeoUrl($data) {
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$data['store_id'] . "', language_id = '" . (int)$data['language_id'] . "', query = '" . $this->db->escape($data['query']) . "', keyword = '" . $this->db->escape($data['keyword']) . "'");
+		$this->clearSeoUrlCache($data['query']);
 	}
 
 	public function editSeoUrl($seo_url_id, $data) {
+		$current = $this->getSeoUrl($seo_url_id);
 		$this->db->query("UPDATE `" . DB_PREFIX . "seo_url` SET store_id = '" . (int)$data['store_id'] . "', language_id = '" . (int)$data['language_id'] . "', query = '" . $this->db->escape($data['query']) . "', keyword = '" . $this->db->escape($data['keyword']) . "' WHERE seo_url_id = '" . (int)$seo_url_id . "'");
+		$this->clearSeoUrlCache(isset($current['query']) ? $current['query'] : '');
+		$this->clearSeoUrlCache($data['query']);
 	}
 
 	public function deleteSeoUrl($seo_url_id) {
+		$current = $this->getSeoUrl($seo_url_id);
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE seo_url_id = '" . (int)$seo_url_id . "'");
+		$this->clearSeoUrlCache(isset($current['query']) ? $current['query'] : '');
+	}
+
+	private function clearSeoUrlCache($query) {
+		$type = strstr((string)$query, '=', true);
+		$namespaces = array(
+			'product_id'      => 'product',
+			'category_id'     => 'category',
+			'manufacturer_id' => 'manufacturer',
+			'information_id'  => 'information'
+		);
+
+		if ($type !== false && isset($namespaces[$type])) {
+			$this->cache->delete($namespaces[$type]);
+		}
 	}
 	
 	public function getSeoUrl($seo_url_id) {

@@ -133,6 +133,33 @@ class ModelCatalogProduct extends Model {
         }
     }
 
+    /**
+     * Return products that belong to the same configured variant group.
+     *
+     * The variants extension used to pass the identifier through the normal
+     * catalogue name search, which performs several leading-wildcard LIKE
+     * checks. Keep the same result shape, but use the exact product field.
+     */
+    public function getProductsByVariant($field, $value) {
+        $allowed_fields = array('model', 'sku', 'upc', 'ean', 'jan', 'isbn', 'mpn');
+
+        if (!in_array($field, $allowed_fields, true) || $value === '') {
+            return array();
+        }
+
+        return $this->getProducts(array(
+            'filter_variant_field' => $field,
+            'filter_variant_value' => $value
+        ));
+    }
+
+    public function getProductsByConfiguredVariant($value) {
+        $settings = $this->config->get('product_variant_setting');
+        $field = is_array($settings) && !empty($settings['type']) ? $settings['type'] : '';
+
+        return $this->getProductsByVariant($field, $value);
+    }
+
    // ======================= getProducts() =======================
 public function getProducts($data = array()) {
     $sql = "
@@ -236,6 +263,14 @@ public function getProducts($data = array()) {
             if ($implode) {
                 $sql .= " AND pf.filter_id IN (" . implode(',', $implode) . ")";
             }
+        }
+    }
+
+    if (!empty($data['filter_variant_field']) && isset($data['filter_variant_value'])) {
+        $allowed_variant_fields = array('model', 'sku', 'upc', 'ean', 'jan', 'isbn', 'mpn');
+
+        if (in_array($data['filter_variant_field'], $allowed_variant_fields, true)) {
+            $sql .= " AND p.`" . $data['filter_variant_field'] . "` = '" . $this->db->escape($data['filter_variant_value']) . "'";
         }
     }
 
