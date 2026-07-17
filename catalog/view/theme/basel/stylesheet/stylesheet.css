@@ -1708,7 +1708,7 @@ div.required .control-label:after {
 
     margin-left: 52px;
     margin-top: -50px;
-    width:unset;
+    width: calc(100vw - 52px);
 }
 
 
@@ -1779,42 +1779,34 @@ div.required .control-label:after {
 
 .mobl .search-field input.main-search-input {
     border: none;
+    box-sizing: border-box;
     height: 50px;
     min-height: 50px;
     font-size: 16px;
     padding-right: 0px;
     background-color: #ddd;
-    width: 100vw;
-    max-width:100%;
+    width: 100%;
+    max-width: 100%;
     overflow: hidden;
 }
 
 .mobl .search-field input.main-search-input:focus {
     border: none;
+    box-sizing: border-box;
     height: 50px;
     min-height: 50px;
+    font-size: 16px;
     padding-right: 0px;
     background-color: #ddd;
-    width: calc(100vw - 52px);
-    max-width:calc(100vw - 52px);
+    width: 100%;
+    max-width: 100%;
     overflow: hidden;
 }
 
-@media only screen and (min-device-width: 320px) and (max-device-width: 812px) and (-webkit-min-device-pixel-ratio: 3)  {
-
-    .mobl .search-field input.main-search-input:focus {
-        border: none;
-        height: 50px;
-        min-height: 50px;
-        padding-right: 0px;
-        background-color: #ddd;
-        width: 100vw!important;
-        max-width:85.5%!important;
-        overflow: hidden;
+@media (max-width: 991px) {
+    .srch.opened {
+        left: 0;
     }
-
-
-
 }
 
 

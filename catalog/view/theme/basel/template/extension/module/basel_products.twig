@@ -104,9 +104,9 @@
                 {% endif %}
             <p class="description">{% if product.description %}{{ product.description }}{% endif %}</p>
                 {% if ((product.quantity < 1) and (stock_badge_status)) %}
-                    <a href="{{ product.href }}" class="btn catalog_hide {% if basel_list_style == '6' %}btn-contrast outofstock {% else %}btn-outline{% endif %}" ><span class="ikona"></span><img src="image/upit-black.svg" class="carticon" alt="" width="20" height="20">{{ basel_text_upit }}</a>
+                    <a href="{{ product.href }}" class="btn btn-block catalog_hide {% if basel_list_style == '6' %}btn-contrast outofstock {% else %}btn-outline{% endif %}" ><span class="ikona"></span><img src="image/upit-black.svg" class="carticon" alt="" width="20" height="20">{{ basel_text_upit }}</a>
                 {% else %}
-                    <button type="button" class="btn catalog_hide {% if basel_list_style == '6' %}btn-contrast {% else %}btn-outline{% endif %}" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}');"><span class="car"></span><img src="image/kosarica-white.svg" class="carticon" alt="" width="20" height="20">{{ button_cart }}</button>
+                    <button type="button" class="btn btn-block catalog_hide {% if basel_list_style == '6' %}btn-contrast {% else %}btn-outline{% endif %}" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}');"><span class="car"></span><img src="image/kosarica-white.svg" class="carticon" alt="" width="20" height="20">{{ button_cart }}</button>
                 {% endif %}
             </div>
             </div><!-- .caption-->
