@@ -580,7 +580,8 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 				'data'        => $product_info,
 				'breadcrumbs' => $data['breadcrumbs'],
 				'category'    => !empty($data['categories'][0]['name']) ? $data['categories'][0]['name'] : '',
-				'preview_image' => $data['thumb']
+				'preview_image' => $data['thumb'],
+				'images'      => array_merge(!empty($data['popup']) ? array($data['popup']) : array(), !empty($data['images']) ? array_column($data['images'], 'popup') : array())
 			));
 
 			$data['column_left'] = $this->load->controller('common/column_left');

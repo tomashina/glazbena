@@ -381,6 +381,16 @@ class ControllerProductManufacturer extends Controller {
 
 			$data['continue'] = $this->url->link('common/home');
 
+			$this->registry->set('seo_entity', array(
+				'type'        => 'manufacturer',
+				'data'        => $manufacturer_info,
+				'breadcrumbs' => $data['breadcrumbs'],
+				'products'    => $results,
+				'total'       => $product_total,
+				'page'        => $page,
+				'limit'       => $limit
+			));
+
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');

@@ -33,6 +33,7 @@ class ModelCatalogInformation extends Model {
 		}
 
 		$this->cache->delete('information');
+		$this->queueIndexNow('information', $information_id, 'updated');
 
 		return $information_id;
 	}
@@ -75,9 +76,11 @@ class ModelCatalogInformation extends Model {
 		}
 
 		$this->cache->delete('information');
+		$this->queueIndexNow('information', $information_id, 'updated');
 	}
 
 	public function deleteInformation($information_id) {
+		$this->queueIndexNow('information', $information_id, 'deleted');
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "information` WHERE information_id = '" . (int)$information_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "information_description` WHERE information_id = '" . (int)$information_id . "'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "information_to_store` WHERE information_id = '" . (int)$information_id . "'");
@@ -208,5 +211,14 @@ class ModelCatalogInformation extends Model {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "information_to_layout WHERE layout_id = '" . (int)$layout_id . "'");
 
 		return $query->row['total'];
+	}
+
+	private function queueIndexNow($entity_type, $entity_id, $action = 'updated') {
+		try {
+			$this->load->library('indexnow');
+			$this->indexnow->queueEntity($entity_type, $entity_id, $action);
+		} catch (Exception $e) {
+			$this->log->write('IndexNow queue error: ' . $e->getMessage());
+		}
 	}
 }

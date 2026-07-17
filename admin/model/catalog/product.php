@@ -135,6 +135,7 @@ class ModelCatalogProduct extends Model {
 
 
 		$this->cache->delete('product');
+		$this->queueIndexNow('product', $product_id, 'updated');
 
 		return $product_id;
 	}
@@ -327,6 +328,7 @@ class ModelCatalogProduct extends Model {
 		}
 
 		$this->cache->delete('product');
+		$this->queueIndexNow('product', $product_id, 'updated');
 	}
 
 	public function copyProduct($product_id) {
@@ -361,6 +363,7 @@ class ModelCatalogProduct extends Model {
 	}
 
 	public function deleteProduct($product_id) {
+		$this->queueIndexNow('product', $product_id, 'deleted');
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_description WHERE product_id = '" . (int)$product_id . "'");
@@ -755,5 +758,14 @@ class ModelCatalogProduct extends Model {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "product_to_layout WHERE layout_id = '" . (int)$layout_id . "'");
 
 		return $query->row['total'];
+	}
+
+	private function queueIndexNow($entity_type, $entity_id, $action = 'updated') {
+		try {
+			$this->load->library('indexnow');
+			$this->indexnow->queueEntity($entity_type, $entity_id, $action);
+		} catch (Exception $e) {
+			$this->log->write('IndexNow queue error: ' . $e->getMessage());
+		}
 	}
 }

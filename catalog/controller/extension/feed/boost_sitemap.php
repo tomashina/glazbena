@@ -67,6 +67,7 @@ class ControllerExtensionFeedBoostSitemap extends Controller {
 			$output .= $this->urlEntry($this->url->link('information/information', 'information_id=' . (int)$information['information_id'], true));
 		}
 		$output .= $this->urlEntry($this->url->link('information/contact', '', true));
+		$output .= $this->urlEntry($this->url->link('information/ai_context', '', true));
 		$output .= $this->urlEntry($this->url->link('product/manufacturer', '', true));
 		$output .= $this->urlEntry($this->url->link('product/special', '', true));
 		$output .= '</urlset>';

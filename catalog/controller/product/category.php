@@ -421,7 +421,11 @@ class ControllerProductCategory extends Controller {
 			$this->registry->set('seo_entity', array(
 				'type'        => 'category',
 				'data'        => $category_info,
-				'breadcrumbs' => $data['breadcrumbs']
+				'breadcrumbs' => $data['breadcrumbs'],
+				'products'    => $results,
+				'total'       => $product_total,
+				'page'        => $page,
+				'limit'       => $limit
 			));
 
 			$data['column_left'] = $this->load->controller('common/column_left');

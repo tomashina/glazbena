@@ -47,6 +47,15 @@ PAYPAL_SANDBOX_CLIENT_SECRET
 
 Produkcijske tajne ne smiju se spremati u Git.
 
+## AI discovery i product feed
+
+Implementacija za AI search, strukturirane podatke, OpenAI product feed, IndexNow i monitoring dokumentirana je u:
+
+- `docs/ai-discovery.md`
+- `docs/openai-commerce-feed.md`
+- `docs/indexnow.md`
+- `docs/ai-monitoring.md`
+
 ## Baza i slike
 
 SQL dump, generirane slike iz `image/cache` i biblioteka proizvoda iz `image/catalog` namjerno nisu u Gitu. Trenutna biblioteka medija ima oko 3 GB i treba se prenijeti zasebno (backup, objektni storage ili rsync). Nakon kloniranja kopiraj `image/catalog` iz sigurnog backupa; OpenCart će po potrebi ponovno napraviti `image/cache`.

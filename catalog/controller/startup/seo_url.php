@@ -17,7 +17,10 @@ class ControllerStartupSeoUrl extends Controller {
 				'contact' => 'information/contact',
 				'raskid-ugovora' => 'extension/account/contract_withdrawal',
 				'special' => 'product/special',
-				'sitemap-index.xml' => 'extension/feed/boost_sitemap'
+				'sitemap-index.xml' => 'extension/feed/boost_sitemap',
+				'openai-products.jsonl' => 'extension/feed/openai_product_feed',
+				'llms.txt' => 'information/ai_context/llms',
+				'ai-context' => 'information/ai_context'
 			);
 
 			$route_key = trim($this->request->get['_route_'], '/');
@@ -100,7 +103,10 @@ class ControllerStartupSeoUrl extends Controller {
 			'common/home' => '',
 			'information/contact' => 'kontakt',
 			'extension/account/contract_withdrawal' => 'raskid-ugovora',
-			'product/special' => 'special'
+			'product/special' => 'special',
+			'extension/feed/openai_product_feed' => 'openai-products.jsonl',
+			'information/ai_context/llms' => 'llms.txt',
+			'information/ai_context' => 'ai-context'
 		);
 
 		if (!empty($data['route']) && isset($static_routes[$data['route']])) {
