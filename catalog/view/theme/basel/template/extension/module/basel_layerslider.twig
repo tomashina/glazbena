@@ -78,6 +78,9 @@ var gkMobileSlider = window.matchMedia && window.matchMedia('(max-width: 767px)'
 var gkInitSlider = function(){
 $('#masterslider{{ module }}').removeClass('gk-slider-pending');
 var slider = new MasterSlider();
+{% if nav_buttons %}slider.control('arrows' , {autohide:false});{% endif %}
+{% if nav_bullets %}slider.control('bullets' , {autohide:false});{% endif %}
+{% if nav_timer_bar %}slider.control('timebar' , {width:5});{% endif %}
 slider.setup('masterslider{{ module }}' , {
 	width:{{ width }},
 	height:gkMobileSlider ? {{ mobile_height }} : {{ height }},
@@ -93,9 +96,6 @@ slider.setup('masterslider{{ module }}' , {
 	speed:{{ speed }},
 	view:"{{ slide_transition }}"
 });
-{% if nav_buttons %}slider.control('arrows' , {autohide:false});{% endif %}
-{% if nav_bullets %}slider.control('bullets' , {autohide:false});{% endif %}
-{% if nav_timer_bar %}slider.control('timebar' , {width:5});{% endif %}
 setTimeout("$('body').addClass('ms_ready');", 400);
 };
 if (gkMobileSlider) {
