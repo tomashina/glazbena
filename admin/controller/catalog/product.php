@@ -1180,6 +1180,11 @@ class ControllerCatalogProduct extends Controller {
 	}
 
 	protected function validateForm() {
+		if (!empty($this->request->post['product_description']) && is_array($this->request->post['product_description'])) {
+			require_once(DIR_SYSTEM . 'library/product_meta.php');
+			$this->request->post['product_description'] = ProductMeta::autofillDescriptions($this->request->post['product_description'], 5);
+		}
+
 		if (!$this->user->hasPermission('modify', 'catalog/product')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
