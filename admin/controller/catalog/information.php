@@ -408,6 +408,28 @@ class ControllerCatalogInformation extends Controller {
 	}
 
 	protected function validateForm() {
+		$information_titles = array();
+
+		if (!empty($this->request->post['information_description']) && is_array($this->request->post['information_description'])) {
+			foreach ($this->request->post['information_description'] as $language_id => $description) {
+				$information_titles[$language_id] = isset($description['title']) ? $description['title'] : '';
+			}
+		}
+
+		require_once(DIR_SYSTEM . 'library/seo_keyword.php');
+		$information_seo_url = isset($this->request->post['information_seo_url']) && is_array($this->request->post['information_seo_url'])
+			? $this->request->post['information_seo_url']
+			: array();
+		$information_query = isset($this->request->get['information_id'])
+			? 'information_id=' . (int)$this->request->get['information_id']
+			: '';
+		$this->request->post['information_seo_url'] = SeoKeyword::autofill(
+			$this->db,
+			$information_seo_url,
+			$information_titles,
+			$information_query
+		);
+
 		if (!$this->user->hasPermission('modify', 'catalog/information')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}

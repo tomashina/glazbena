@@ -62,6 +62,45 @@ $removeDuplicateFileModification = function ($code) use ($database, $table) {
 };
 
 try {
+	// The pre-upgrade shop already used language-specific manufacturer
+	// descriptions. Keep the migration idempotent for installations where
+	// the legacy table is missing or only partially present.
+	$manufacturer_description_table = DB_PREFIX . 'manufacturer_description';
+	$database->query(
+		"CREATE TABLE IF NOT EXISTS `" . $manufacturer_description_table . "` (" .
+		"`manufacturer_id` int NOT NULL, " .
+		"`language_id` int NOT NULL, " .
+		"`description` text NOT NULL, " .
+		"`meta_description` varchar(255) NOT NULL DEFAULT '', " .
+		"`meta_keyword` varchar(255) NOT NULL DEFAULT '', " .
+		"`custom_title` varchar(255) NOT NULL DEFAULT '', " .
+		"PRIMARY KEY (`manufacturer_id`, `language_id`)" .
+		") ENGINE=MyISAM DEFAULT CHARSET=utf8"
+	);
+
+	$manufacturer_description_columns = array();
+	$column_query = $database->query("SHOW COLUMNS FROM `" . $manufacturer_description_table . "`");
+
+	while ($column = $column_query->fetch_assoc()) {
+		$manufacturer_description_columns[$column['Field']] = true;
+	}
+
+	$missing_manufacturer_columns = array(
+		'description'      => "text NOT NULL",
+		'meta_description' => "varchar(255) NOT NULL DEFAULT ''",
+		'meta_keyword'     => "varchar(255) NOT NULL DEFAULT ''",
+		'custom_title'     => "varchar(255) NOT NULL DEFAULT ''"
+	);
+
+	foreach ($missing_manufacturer_columns as $column_name => $definition) {
+		if (!isset($manufacturer_description_columns[$column_name])) {
+			$database->query(
+				"ALTER TABLE `" . $manufacturer_description_table . "` " .
+				"ADD `" . $column_name . "` " . $definition
+			);
+		}
+	}
+
 	// OpenCart automatically loads system/*.ocmod.xml files. A database copy
 	// would apply the same operations twice on every OCMOD refresh.
 	$removeDuplicateFileModification('custom_fields');

@@ -34,7 +34,13 @@ class ProductMeta {
 
 	public static function generateTags($name, $html, $limit = 5) {
 		$limit = max(1, (int)$limit);
-		$title_tokens = self::tokenize($name);
+		$title_text = (string)$name;
+
+		for ($decode = 0; $decode < 2; $decode++) {
+			$title_text = html_entity_decode($title_text, ENT_QUOTES, 'UTF-8');
+		}
+
+		$title_tokens = self::tokenize($title_text);
 		$description_text = strip_tags(
 			str_replace(array('</p>', '</li>', '<br>', '<br/>', '<br />'), ' ', (string)$html)
 		);

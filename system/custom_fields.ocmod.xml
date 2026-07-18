@@ -88,8 +88,10 @@
             <add position="before"><![CDATA[
 			//custom_fields
 			$this->db->query("DELETE FROM " . DB_PREFIX . "custom_fields WHERE entity='category_id=" . (int)$category_id . "'");
-			foreach ($data['custom_field'] as $key=>$val) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "custom_fields SET custom_fields_id = '" . (int)$key . "', entity='category_id=" . (int)$category_id . "', data='".$this->db->escape(serialize($val))."'");
+			if (!empty($data['custom_field']) && is_array($data['custom_field'])) {
+				foreach ($data['custom_field'] as $key=>$val) {
+					$this->db->query("INSERT INTO " . DB_PREFIX . "custom_fields SET custom_fields_id = '" . (int)$key . "', entity='category_id=" . (int)$category_id . "', data='".$this->db->escape(serialize($val))."'");
+				}
 			}
 			//
 			]]></add>
@@ -186,8 +188,10 @@
             <add position="before"><![CDATA[
 			//custom_fields
 			$this->db->query("DELETE FROM " . DB_PREFIX . "custom_fields WHERE entity='manufacturer_id=" . (int)$manufacturer_id . "'");
-			foreach ($data['custom_field'] as $key=>$val) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "custom_fields SET custom_fields_id = '" . (int)$key . "', entity='manufacturer_id=" . (int)$manufacturer_id . "', data='".$this->db->escape(serialize($val))."'");
+			if (!empty($data['custom_field']) && is_array($data['custom_field'])) {
+				foreach ($data['custom_field'] as $key=>$val) {
+					$this->db->query("INSERT INTO " . DB_PREFIX . "custom_fields SET custom_fields_id = '" . (int)$key . "', entity='manufacturer_id=" . (int)$manufacturer_id . "', data='".$this->db->escape(serialize($val))."'");
+				}
 			}
 			//
 			]]></add>
@@ -394,8 +398,10 @@
             <add position="before"><![CDATA[
 			//custom_fields
 			$this->db->query("DELETE FROM " . DB_PREFIX . "custom_fields WHERE entity='information_id=" . (int)$information_id . "'");
-			foreach ($data['custom_field'] as $key=>$val) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "custom_fields SET custom_fields_id = '" . (int)$key . "', entity='information_id=" . (int)$information_id . "', data='".$this->db->escape(serialize($val))."'");
+			if (!empty($data['custom_field']) && is_array($data['custom_field'])) {
+				foreach ($data['custom_field'] as $key=>$val) {
+					$this->db->query("INSERT INTO " . DB_PREFIX . "custom_fields SET custom_fields_id = '" . (int)$key . "', entity='information_id=" . (int)$information_id . "', data='".$this->db->escape(serialize($val))."'");
+				}
 			}
 			//
 			]]></add>

@@ -11,6 +11,7 @@ $_['text_edit']          = 'Izmjeni proizvođača';
 $_['text_default']       = 'Glavna web trgovina (zadana)';
 $_['text_percent']       = 'Postotak';
 $_['text_amount']        = 'Fiksni iznos';
+$_['text_keyword']       = 'SEO URL se automatski generira iz naziva kada je polje prazno.';
 
 // Column
 $_['column_name']        = 'Naziv proizvođača';
@@ -19,6 +20,10 @@ $_['column_action']      = 'Akcija';
 
 // Entry
 $_['entry_name']         = 'Naziv proizvođača';
+$_['entry_description']  = 'Opis';
+$_['entry_meta_title']   = 'Meta Tag (oznaka) - naziv';
+$_['entry_meta_description'] = 'Meta Tag (oznaka) - opis';
+$_['entry_meta_keyword'] = 'Meta Tag (oznaka) - ključne riječi';
 $_['entry_store']        = 'Web trgovina';
 $_['entry_keyword']      = 'SEO URL';
 $_['entry_image']        = 'Slika';
@@ -32,4 +37,5 @@ $_['help_keyword']       = 'Nemojte koristiti razmak. Umjesto razmaka koristite 
 $_['error_permission']   = 'Upozorenje: Nemate ovlasti za izmjenu modula Proizvođači!';
 $_['error_name']         = 'Naziv proizvođača može sadržavati između 3 i 64 znaka!';
 $_['error_keyword']      = 'SEO URL već se koristi!';
+$_['error_unique']       = 'SEO URL mora biti jedinstven!';
 $_['error_product']      = 'Upozorenje: Ovaj proizvođač ne može biti obrisan jer je trenutno dodijeljen na %s artikla!';

@@ -372,6 +372,14 @@ class ControllerCatalogManufacturer extends Controller {
 
 		$data['languages'] = $this->model_localisation_language->getLanguages();
 
+		if (isset($this->request->post['manufacturer_description'])) {
+			$data['manufacturer_description'] = $this->request->post['manufacturer_description'];
+		} elseif (isset($this->request->get['manufacturer_id'])) {
+			$data['manufacturer_description'] = $this->model_catalog_manufacturer->getManufacturerDescriptions($this->request->get['manufacturer_id']);
+		} else {
+			$data['manufacturer_description'] = array();
+		}
+
 		if (isset($this->request->post['manufacturer_seo_url'])) {
 			$data['manufacturer_seo_url'] = $this->request->post['manufacturer_seo_url'];
 		} elseif (isset($this->request->get['manufacturer_id'])) {
@@ -388,6 +396,67 @@ class ControllerCatalogManufacturer extends Controller {
 	}
 
 	protected function validateForm() {
+		$this->load->model('localisation/language');
+		$languages = $this->model_localisation_language->getLanguages();
+		$manufacturer_descriptions =
+			isset($this->request->post['manufacturer_description']) &&
+			is_array($this->request->post['manufacturer_description'])
+				? $this->request->post['manufacturer_description']
+				: array();
+		$manufacturer_name = isset($this->request->post['name'])
+			? trim((string)$this->request->post['name'])
+			: '';
+
+		require_once(DIR_SYSTEM . 'library/product_meta.php');
+
+		foreach ($languages as $language) {
+			$language_id = (int)$language['language_id'];
+			$description = isset($manufacturer_descriptions[$language_id]) && is_array($manufacturer_descriptions[$language_id])
+				? $manufacturer_descriptions[$language_id]
+				: array();
+
+			if (empty(trim(isset($description['custom_title']) ? (string)$description['custom_title'] : ''))) {
+				$description['custom_title'] = $manufacturer_name;
+			}
+
+			if (empty(trim(isset($description['meta_keyword']) ? (string)$description['meta_keyword'] : ''))) {
+				$description_html = isset($description['description']) ? $description['description'] : '';
+				$description['meta_keyword'] = implode(', ', ProductMeta::generateTags($manufacturer_name, $description_html, 5));
+			}
+
+			$description += array(
+				'description'      => '',
+				'meta_description' => '',
+				'meta_keyword'     => '',
+				'custom_title'     => ''
+			);
+			$manufacturer_descriptions[$language_id] = $description;
+		}
+
+		$this->request->post['manufacturer_description'] = $manufacturer_descriptions;
+
+		require_once(DIR_SYSTEM . 'library/seo_keyword.php');
+		$manufacturer_seo_url =
+			isset($this->request->post['manufacturer_seo_url']) &&
+			is_array($this->request->post['manufacturer_seo_url'])
+				? $this->request->post['manufacturer_seo_url']
+				: array();
+		$manufacturer_titles = array();
+
+		foreach ($languages as $language) {
+			$manufacturer_titles[(int)$language['language_id']] = $manufacturer_name;
+		}
+
+		$manufacturer_query = isset($this->request->get['manufacturer_id'])
+			? 'manufacturer_id=' . (int)$this->request->get['manufacturer_id']
+			: '';
+		$this->request->post['manufacturer_seo_url'] = SeoKeyword::autofill(
+			$this->db,
+			$manufacturer_seo_url,
+			$manufacturer_titles,
+			$manufacturer_query
+		);
+
 		if (!$this->user->hasPermission('modify', 'catalog/manufacturer')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}

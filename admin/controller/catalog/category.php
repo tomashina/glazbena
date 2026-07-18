@@ -509,6 +509,28 @@ class ControllerCatalogCategory extends Controller {
 	}
 
 	protected function validateForm() {
+		$category_titles = array();
+
+		if (!empty($this->request->post['category_description']) && is_array($this->request->post['category_description'])) {
+			foreach ($this->request->post['category_description'] as $language_id => $description) {
+				$category_titles[$language_id] = isset($description['name']) ? $description['name'] : '';
+			}
+		}
+
+		require_once(DIR_SYSTEM . 'library/seo_keyword.php');
+		$category_seo_url = isset($this->request->post['category_seo_url']) && is_array($this->request->post['category_seo_url'])
+			? $this->request->post['category_seo_url']
+			: array();
+		$category_query = isset($this->request->get['category_id'])
+			? 'category_id=' . (int)$this->request->get['category_id']
+			: '';
+		$this->request->post['category_seo_url'] = SeoKeyword::autofill(
+			$this->db,
+			$category_seo_url,
+			$category_titles,
+			$category_query
+		);
+
 		if (!$this->user->hasPermission('modify', 'catalog/category')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}

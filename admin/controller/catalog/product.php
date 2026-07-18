@@ -1183,6 +1183,26 @@ class ControllerCatalogProduct extends Controller {
 		if (!empty($this->request->post['product_description']) && is_array($this->request->post['product_description'])) {
 			require_once(DIR_SYSTEM . 'library/product_meta.php');
 			$this->request->post['product_description'] = ProductMeta::autofillDescriptions($this->request->post['product_description'], 5);
+
+			$product_titles = array();
+
+			foreach ($this->request->post['product_description'] as $language_id => $description) {
+				$product_titles[$language_id] = isset($description['name']) ? $description['name'] : '';
+			}
+
+			require_once(DIR_SYSTEM . 'library/seo_keyword.php');
+			$product_seo_url = isset($this->request->post['product_seo_url']) && is_array($this->request->post['product_seo_url'])
+				? $this->request->post['product_seo_url']
+				: array();
+			$product_query = isset($this->request->get['product_id'])
+				? 'product_id=' . (int)$this->request->get['product_id']
+				: '';
+			$this->request->post['product_seo_url'] = SeoKeyword::autofill(
+				$this->db,
+				$product_seo_url,
+				$product_titles,
+				$product_query
+			);
 		}
 
 		if (!$this->user->hasPermission('modify', 'catalog/product')) {
