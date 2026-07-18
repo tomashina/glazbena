@@ -691,6 +691,7 @@ class ControllerExtensionModuleCustomFields extends Controller {
 		
 		$this->load->model('localisation/language');
 		$languages = $this->model_localisation_language->getLanguages();
+		$data['ckeditor'] = $this->config->get('config_editor_default');
 		
 		foreach($results as $result){
 			if(file_exists(DIR_SYSTEM . 'library/custom_fields/'.$result['type'].'/index.php')){

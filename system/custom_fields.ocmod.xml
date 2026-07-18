@@ -284,10 +284,22 @@
             <add position="before"><![CDATA[
 			//custom_fields
 			$this->db->query("DELETE FROM " . DB_PREFIX . "custom_fields WHERE entity='product_id=" . (int)$product_id . "'");
-			foreach ($data['custom_field'] as $key=>$val) {
-				$this->db->query("INSERT INTO " . DB_PREFIX . "custom_fields SET custom_fields_id = '" . (int)$key . "', entity='product_id=" . (int)$product_id . "', data='".$this->db->escape(serialize($val))."'");
+			if (!empty($data['custom_field']) && is_array($data['custom_field'])) {
+				foreach ($data['custom_field'] as $key=>$val) {
+					$this->db->query("INSERT INTO " . DB_PREFIX . "custom_fields SET custom_fields_id = '" . (int)$key . "', entity='product_id=" . (int)$product_id . "', data='".$this->db->escape(serialize($val))."'");
+				}
 			}
 			//
+			]]></add>
+        </operation>
+		<operation>
+            <search><![CDATA[$data['product_attribute'] = $this->getProductAttributes($product_id);]]></search>
+            <add position="before"><![CDATA[
+			if ($this->config->get('module_custom_fields_status')) {
+				$this->load->model('extension/module/custom_fields');
+				$data['custom_field'] = $this->model_extension_module_custom_fields->getCustomFieldsByEntity('product', $product_id);
+			}
+
 			]]></add>
         </operation>
 		<operation>
