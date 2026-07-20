@@ -2,6 +2,7 @@
 
 class ModelExtensionModuleDigitalElephantFilter extends Model
 {
+	const DISCONTINUED_STOCK_STATUS_ID = 9;
 //    private $DEF_settings;
     private $storageSort = null;
     private $storageAttribute = null;
@@ -462,6 +463,12 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 		return $value;
 	}
 
+	private function shouldExcludeDiscontinuedProducts(array $data) {
+		return !empty($data['filter_category_id'])
+			&& empty($data['filter_name'])
+			&& empty($data['filter_tag']);
+	}
+
     private function getCustomerGroup()
     {
         if ($this->customer->isLogged()) {
@@ -763,8 +770,8 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
 		// Category filtering uses this separate AJAX query. Match the core category
 		// listing while allowing discontinued products to remain searchable.
-		if (!empty($data['filter_category_id']) && empty($data['filter_name']) && empty($data['filter_tag'])) {
-			$sql .= " AND p.stock_status_id <> '9'";
+		if ($this->shouldExcludeDiscontinuedProducts($data)) {
+			$sql .= " AND p.stock_status_id <> '" . self::DISCONTINUED_STOCK_STATUS_ID . "'";
 		}
 
         //OPTIONS WHERE BEGIN

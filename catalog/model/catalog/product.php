@@ -1,5 +1,6 @@
 <?php
 class ModelCatalogProduct extends Model {
+	const DISCONTINUED_STOCK_STATUS_ID = 9;
 
     public function updateViewed($product_id) {
         // Umjesto updatea na oc_product, piši u pomoćnu tablicu (brže, bez locka)
@@ -259,6 +260,12 @@ class ModelCatalogProduct extends Model {
 		return $value;
 	}
 
+	private function shouldExcludeDiscontinuedProducts(array $data) {
+		return !empty($data['filter_category_id'])
+			&& empty($data['filter_name'])
+			&& empty($data['filter_tag']);
+	}
+
    // ======================= getProducts() =======================
 public function getProducts($data = array()) {
 	$cache_key = $this->productQueryCacheKey('list', $data);
@@ -349,8 +356,8 @@ public function getProducts($data = array()) {
 
 	// Discontinued products remain searchable and directly accessible, but are
 	// omitted from normal category listings.
-	if (!empty($data['filter_category_id']) && empty($data['filter_name']) && empty($data['filter_tag'])) {
-		$sql .= " AND p.stock_status_id <> '9'";
+	if ($this->shouldExcludeDiscontinuedProducts($data)) {
+		$sql .= " AND p.stock_status_id <> '" . self::DISCONTINUED_STOCK_STATUS_ID . "'";
 	}
 
     // proizvođač
@@ -988,8 +995,8 @@ public function getTotalProducts($data = array()) {
 
 	// Keep category totals in sync with the products shown on the page. Search
 	// results may still include discontinued products.
-	if (!empty($data['filter_category_id']) && empty($data['filter_name']) && empty($data['filter_tag'])) {
-		$sql .= " AND p.stock_status_id <> '9'";
+	if ($this->shouldExcludeDiscontinuedProducts($data)) {
+		$sql .= " AND p.stock_status_id <> '" . self::DISCONTINUED_STOCK_STATUS_ID . "'";
 	}
 
     // proizvođač
