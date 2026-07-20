@@ -443,7 +443,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			'data'                => $this->normalizeFilterCacheData($data)
 		);
 
-		return 'product.filter.v1.' . $type . '.' . hash('sha256', serialize($context));
+		return 'product.filter.v2.' . $type . '.' . hash('sha256', serialize($context));
 	}
 
 	private function normalizeFilterCacheData($value) {
@@ -760,6 +760,12 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
         }
 
         $sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$store_id . "'";
+
+		// Category filtering uses this separate AJAX query. Match the core category
+		// listing while allowing discontinued products to remain searchable.
+		if (!empty($data['filter_category_id']) && empty($data['filter_name']) && empty($data['filter_tag'])) {
+			$sql .= " AND p.stock_status_id <> '9'";
+		}
 
         //OPTIONS WHERE BEGIN
         if ($data['options']) {

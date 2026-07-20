@@ -240,7 +240,7 @@ class ModelCatalogProduct extends Model {
 			'data'              => $this->normalizeProductQueryCacheData($data)
 		);
 
-		return 'product.query.v1.' . $type . '.' . hash('sha256', serialize($context));
+		return 'product.query.v2.' . $type . '.' . hash('sha256', serialize($context));
 	}
 
 	private function normalizeProductQueryCacheData($value) {
@@ -346,6 +346,12 @@ public function getProducts($data = array()) {
           AND p.date_available <= NOW()
           AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
     ";
+
+	// Discontinued products remain searchable and directly accessible, but are
+	// omitted from normal category listings.
+	if (!empty($data['filter_category_id']) && empty($data['filter_name']) && empty($data['filter_tag'])) {
+		$sql .= " AND p.stock_status_id <> '9'";
+	}
 
     // proizvođač
     if (!empty($data['filter_manufacturer_id'])) {
@@ -979,6 +985,12 @@ public function getTotalProducts($data = array()) {
           AND p.date_available <= NOW()
           AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
     ";
+
+	// Keep category totals in sync with the products shown on the page. Search
+	// results may still include discontinued products.
+	if (!empty($data['filter_category_id']) && empty($data['filter_name']) && empty($data['filter_tag'])) {
+		$sql .= " AND p.stock_status_id <> '9'";
+	}
 
     // proizvođač
     if (!empty($data['filter_manufacturer_id'])) {
