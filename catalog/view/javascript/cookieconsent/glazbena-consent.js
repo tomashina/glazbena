@@ -3,6 +3,16 @@
 
   var openTawkWhenReady = false;
 
+  function isIPhoneDevice() {
+    var userAgent = window.navigator.userAgent || '';
+    var isIPhoneUserAgent = /iPhone|iPod/i.test(userAgent);
+    var isIPhoneDesktopMode = window.navigator.platform === 'MacIntel'
+      && window.navigator.maxTouchPoints > 1
+      && Math.min(window.screen.width, window.screen.height) < 500;
+
+    return isIPhoneUserAgent || isIPhoneDesktopMode;
+  }
+
   function isMobileTawkViewport() {
     return window.matchMedia && window.matchMedia('(max-width: 991px)').matches;
   }
@@ -46,7 +56,7 @@
   }
 
   function ensureMobileTawkLauncher() {
-    if (!isMobileTawkViewport()) return;
+    if (isIPhoneDevice() || !isMobileTawkViewport()) return;
 
     var launcher = document.getElementById('gk-tawk-mobile-launcher');
     if (!launcher) {
@@ -69,6 +79,7 @@
 
     if (typeof window.gkLoadMetaPixel === 'function') window.gkLoadMetaPixel();
 
+    if (!isIPhoneDevice()) {
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_API.customStyle = window.Tawk_API.customStyle || {};
     window.Tawk_API.customStyle.visibility = window.Tawk_API.customStyle.visibility || {};
@@ -122,6 +133,7 @@
     tawk.charset = 'UTF-8';
     tawk.setAttribute('crossorigin', '*');
     document.head.appendChild(tawk);
+    }
 
     var badge = document.createElement('script');
     badge.async = true;
