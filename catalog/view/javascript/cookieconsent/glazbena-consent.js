@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  var openTawkWhenReady = false;
+
   function isMobileTawkViewport() {
     return window.matchMedia && window.matchMedia('(max-width: 991px)').matches;
   }
@@ -12,17 +14,49 @@
     launcher.setAttribute('aria-hidden', visible ? 'false' : 'true');
   }
 
+  function hideNativeMobileTawkLauncher() {
+    var bubble = document.getElementById('chat-bubble');
+    if (!bubble || !bubble.parentElement) return;
+
+    Array.prototype.forEach.call(bubble.parentElement.querySelectorAll('iframe'), function (frame) {
+      var rect = frame.getBoundingClientRect();
+      var computed = window.getComputedStyle(frame);
+      if (computed.display !== 'none' && rect.width > 0 && rect.height > 0 && rect.width < 120 && rect.height < 120) {
+        frame.style.setProperty('visibility', 'hidden', 'important');
+        frame.style.setProperty('pointer-events', 'none', 'important');
+      }
+    });
+  }
+
+  function scheduleNativeTawkLauncherHide() {
+    [0, 250, 1000].forEach(function (delay) {
+      window.setTimeout(hideNativeMobileTawkLauncher, delay);
+    });
+  }
+
+  function openMobileTawkChat(event) {
+    event.preventDefault();
+
+    if (window.Tawk_API && typeof window.Tawk_API.toggle === 'function') {
+      window.Tawk_API.toggle();
+      return;
+    }
+
+    openTawkWhenReady = true;
+  }
+
   function ensureMobileTawkLauncher() {
     if (!isMobileTawkViewport()) return;
 
     var launcher = document.getElementById('gk-tawk-mobile-launcher');
     if (!launcher) {
-      launcher = document.createElement('a');
+      launcher = document.createElement('button');
+      launcher.type = 'button';
       launcher.id = 'gk-tawk-mobile-launcher';
-      launcher.href = 'https://tawk.to/chat/66f6b827e5982d6c7bb5a510/1i8ps10ve';
       launcher.setAttribute('aria-label', 'Otvori chat');
       launcher.setAttribute('title', 'Otvori chat');
       launcher.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4.8 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"/><path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01"/></svg>';
+      launcher.addEventListener('click', openMobileTawkChat);
       document.body.appendChild(launcher);
     }
 
@@ -50,8 +84,13 @@
       if (document.documentElement.classList.contains('side-filter-open') && typeof window.Tawk_API.hideWidget === 'function') {
         window.Tawk_API.hideWidget();
       } else if (isMobileTawkViewport()) {
-        if (typeof window.Tawk_API.hideWidget === 'function') window.Tawk_API.hideWidget();
+        if (typeof window.Tawk_API.showWidget === 'function') window.Tawk_API.showWidget();
         ensureMobileTawkLauncher();
+        scheduleNativeTawkLauncherHide();
+        if (openTawkWhenReady && typeof window.Tawk_API.toggle === 'function') {
+          openTawkWhenReady = false;
+          window.Tawk_API.toggle();
+        }
       } else {
         if (typeof window.Tawk_API.showWidget === 'function') window.Tawk_API.showWidget();
       }
@@ -60,15 +99,17 @@
     var previousTawkOnMaximized = window.Tawk_API.onChatMaximized;
     window.Tawk_API.onChatMaximized = function () {
       if (typeof previousTawkOnMaximized === 'function') previousTawkOnMaximized();
+      document.documentElement.classList.add('tawk-chat-open');
       setMobileTawkLauncherVisible(false);
     };
 
     var previousTawkOnMinimized = window.Tawk_API.onChatMinimized;
     window.Tawk_API.onChatMinimized = function () {
       if (typeof previousTawkOnMinimized === 'function') previousTawkOnMinimized();
+      document.documentElement.classList.remove('tawk-chat-open');
       if (isMobileTawkViewport()) {
-        if (typeof window.Tawk_API.hideWidget === 'function') window.Tawk_API.hideWidget();
         ensureMobileTawkLauncher();
+        scheduleNativeTawkLauncherHide();
       }
     };
 
