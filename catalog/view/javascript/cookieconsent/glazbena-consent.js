@@ -1,67 +1,59 @@
 (function () {
   'use strict';
 
-  var tawkLauncherObserver = null;
-  var tawkLauncherFixQueued = false;
-
-  function watchMobileTawkLauncher(container) {
-    if (tawkLauncherObserver || !window.MutationObserver) return;
-
-    tawkLauncherObserver = new MutationObserver(function () {
-      if (tawkLauncherFixQueued) return;
-      tawkLauncherFixQueued = true;
-
-      (window.requestAnimationFrame || window.setTimeout)(function () {
-        tawkLauncherFixQueued = false;
-        fixMobileTawkLauncher();
-      });
-    });
-    tawkLauncherObserver.observe(container, {
-      attributes: true,
-      attributeFilter: ['style'],
-      childList: true,
-      subtree: true
-    });
+  function isMobileTawkViewport() {
+    return window.matchMedia && window.matchMedia('(max-width: 991px)').matches;
   }
 
-  function fixMobileTawkLauncher() {
-    if (!window.matchMedia || !window.matchMedia('(max-width: 767px)').matches) return;
+  function setMobileTawkLauncherVisible(visible) {
+    var launcher = document.getElementById('gk-tawk-mobile-launcher');
+    if (!launcher) return;
+    launcher.classList.toggle('is-hidden', !visible);
+    launcher.setAttribute('aria-hidden', visible ? 'false' : 'true');
+  }
 
-    var bubble = document.getElementById('chat-bubble');
-    if (!bubble || !bubble.parentElement) return;
+  function openMobileTawkChat() {
+    var launcher = document.getElementById('gk-tawk-mobile-launcher');
+    if (launcher) launcher.setAttribute('aria-busy', 'true');
 
-    watchMobileTawkLauncher(bubble.parentElement);
+    var attempts = 0;
+    var open = function () {
+      attempts++;
 
-    Array.prototype.forEach.call(bubble.parentElement.querySelectorAll('iframe'), function (frame) {
-      var computed = window.getComputedStyle(frame);
-      var rect = frame.getBoundingClientRect();
-      if (computed.display === 'none' || rect.width <= 0 || rect.height <= 0 || rect.width >= 120 || rect.height >= 120) return;
-
-      var isTooSmall = rect.width < 44 || rect.height < 44;
-      var isTooCloseToEdge = rect.left < 8 || window.innerHeight - rect.bottom < 8;
-      var isOnRight = rect.left > window.innerWidth / 2;
-      if (!isTooSmall && !isTooCloseToEdge && !isOnRight) return;
-
-      if (isTooSmall) {
-        frame.style.setProperty('width', '60px', 'important');
-        frame.style.setProperty('min-width', '60px', 'important');
-        frame.style.setProperty('max-width', '60px', 'important');
-        frame.style.setProperty('height', '60px', 'important');
-        frame.style.setProperty('min-height', '60px', 'important');
-        frame.style.setProperty('max-height', '60px', 'important');
+      if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
+        if (typeof window.Tawk_API.showWidget === 'function') window.Tawk_API.showWidget();
+        window.Tawk_API.maximize();
+        setMobileTawkLauncherVisible(false);
+        if (launcher) launcher.setAttribute('aria-busy', 'false');
+        return;
       }
 
-      frame.style.setProperty('left', 'calc(16px + env(safe-area-inset-left))', 'important');
-      frame.style.setProperty('right', 'auto', 'important');
-      frame.style.setProperty('top', 'auto', 'important');
-      frame.style.setProperty('bottom', 'calc(16px + env(safe-area-inset-bottom))', 'important');
-    });
+      if (attempts < 40) {
+        window.setTimeout(open, 250);
+      } else if (launcher) {
+        launcher.setAttribute('aria-busy', 'false');
+      }
+    };
+
+    open();
   }
 
-  function scheduleMobileTawkFix() {
-    [0, 250, 1000, 2500, 5000].forEach(function (delay) {
-      window.setTimeout(fixMobileTawkLauncher, delay);
-    });
+  function ensureMobileTawkLauncher() {
+    if (!isMobileTawkViewport()) return;
+
+    var launcher = document.getElementById('gk-tawk-mobile-launcher');
+    if (!launcher) {
+      launcher = document.createElement('button');
+      launcher.type = 'button';
+      launcher.id = 'gk-tawk-mobile-launcher';
+      launcher.setAttribute('aria-label', 'Otvori chat');
+      launcher.setAttribute('title', 'Otvori chat');
+      launcher.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4.8 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"/><path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01"/></svg>';
+      launcher.addEventListener('click', openMobileTawkChat);
+      document.body.appendChild(launcher);
+    }
+
+    setMobileTawkLauncherVisible(true);
   }
 
   function loadMarketingServices() {
@@ -84,11 +76,30 @@
       if (typeof previousTawkOnLoad === 'function') previousTawkOnLoad();
       if (document.documentElement.classList.contains('side-filter-open') && typeof window.Tawk_API.hideWidget === 'function') {
         window.Tawk_API.hideWidget();
+      } else if (isMobileTawkViewport()) {
+        if (typeof window.Tawk_API.hideWidget === 'function') window.Tawk_API.hideWidget();
+        ensureMobileTawkLauncher();
       } else {
         if (typeof window.Tawk_API.showWidget === 'function') window.Tawk_API.showWidget();
-        scheduleMobileTawkFix();
       }
     };
+
+    var previousTawkOnMaximized = window.Tawk_API.onChatMaximized;
+    window.Tawk_API.onChatMaximized = function () {
+      if (typeof previousTawkOnMaximized === 'function') previousTawkOnMaximized();
+      setMobileTawkLauncherVisible(false);
+    };
+
+    var previousTawkOnMinimized = window.Tawk_API.onChatMinimized;
+    window.Tawk_API.onChatMinimized = function () {
+      if (typeof previousTawkOnMinimized === 'function') previousTawkOnMinimized();
+      if (isMobileTawkViewport()) {
+        if (typeof window.Tawk_API.hideWidget === 'function') window.Tawk_API.hideWidget();
+        ensureMobileTawkLauncher();
+      }
+    };
+
+    ensureMobileTawkLauncher();
 
     window.Tawk_LoadStart = new Date();
     var tawk = document.createElement('script');
@@ -97,7 +108,6 @@
     tawk.charset = 'UTF-8';
     tawk.setAttribute('crossorigin', '*');
     document.head.appendChild(tawk);
-    scheduleMobileTawkFix();
 
     var badge = document.createElement('script');
     badge.async = true;
