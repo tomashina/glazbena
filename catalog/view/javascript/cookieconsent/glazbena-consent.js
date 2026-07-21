@@ -8,75 +8,21 @@
     if (typeof window.gkLoadMetaPixel === 'function') window.gkLoadMetaPixel();
 
     window.Tawk_API = window.Tawk_API || {};
-
-    function positionTawkWidget() {
-      var isMobile = window.matchMedia ? window.matchMedia('(max-width: 767px)').matches : window.innerWidth < 768;
-      var frames = document.querySelectorAll('iframe[title*="chat"], iframe[title*="Chat"], iframe[src*="tawk.to"]');
-
-      Array.prototype.forEach.call(frames, function (frame) {
-        if (!frame.hasAttribute('data-gk-chat-positioned')) {
-          frame.setAttribute('data-gk-chat-positioned', '1');
-          frame.setAttribute('data-gk-chat-left', frame.style.getPropertyValue('left'));
-          frame.setAttribute('data-gk-chat-left-priority', frame.style.getPropertyPriority('left'));
-          frame.setAttribute('data-gk-chat-right', frame.style.getPropertyValue('right'));
-          frame.setAttribute('data-gk-chat-right-priority', frame.style.getPropertyPriority('right'));
-        }
-
-        if (isMobile) {
-          if (
-            frame.style.getPropertyValue('left') !== '16px' ||
-            frame.style.getPropertyPriority('left') !== 'important' ||
-            frame.style.getPropertyValue('right') !== 'auto' ||
-            frame.style.getPropertyPriority('right') !== 'important'
-          ) {
-            frame.style.setProperty('left', '16px', 'important');
-            frame.style.setProperty('right', 'auto', 'important');
-          }
-        } else {
-          var left = frame.getAttribute('data-gk-chat-left');
-          var right = frame.getAttribute('data-gk-chat-right');
-
-          left ? frame.style.setProperty('left', left, frame.getAttribute('data-gk-chat-left-priority')) : frame.style.removeProperty('left');
-          right ? frame.style.setProperty('right', right, frame.getAttribute('data-gk-chat-right-priority')) : frame.style.removeProperty('right');
-        }
-      });
-
-      if (document.documentElement.classList.contains('side-filter-open') && typeof window.Tawk_API.hideWidget === 'function') {
-        window.Tawk_API.hideWidget();
-      }
-    }
+    window.Tawk_API.customStyle = window.Tawk_API.customStyle || {};
+    window.Tawk_API.customStyle.visibility = window.Tawk_API.customStyle.visibility || {};
+    window.Tawk_API.customStyle.visibility.mobile = {
+      position: 'bl',
+      xOffset: 16,
+      yOffset: 16
+    };
 
     var previousTawkOnLoad = window.Tawk_API.onLoad;
     window.Tawk_API.onLoad = function () {
       if (typeof previousTawkOnLoad === 'function') previousTawkOnLoad();
-      positionTawkWidget();
-      window.setTimeout(positionTawkWidget, 250);
+      if (document.documentElement.classList.contains('side-filter-open') && typeof window.Tawk_API.hideWidget === 'function') {
+        window.Tawk_API.hideWidget();
+      }
     };
-
-    if (window.MutationObserver && document.body) {
-      var tawkObserver = new MutationObserver(function (mutations) {
-        var hasNewFrame = mutations.some(function (mutation) {
-          if (mutation.type === 'attributes') {
-            var isMobile = window.matchMedia ? window.matchMedia('(max-width: 767px)').matches : window.innerWidth < 768;
-            return isMobile && mutation.target.matches && mutation.target.matches('iframe[title*="chat"], iframe[title*="Chat"], iframe[src*="tawk.to"]');
-          }
-
-          return Array.prototype.some.call(mutation.addedNodes, function (node) {
-            return node.nodeType === 1 && (node.tagName === 'IFRAME' || (node.querySelector && node.querySelector('iframe')));
-          });
-        });
-
-        if (hasNewFrame) window.setTimeout(positionTawkWidget, 0);
-      });
-
-      tawkObserver.observe(document.body, {
-        attributes: true,
-        attributeFilter: ['style'],
-        childList: true,
-        subtree: true
-      });
-      window.addEventListener('resize', positionTawkWidget);
-    }
 
     window.Tawk_LoadStart = new Date();
     var tawk = document.createElement('script');
