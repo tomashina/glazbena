@@ -23,8 +23,15 @@
         }
 
         if (isMobile) {
-          frame.style.setProperty('left', '16px', 'important');
-          frame.style.setProperty('right', 'auto', 'important');
+          if (
+            frame.style.getPropertyValue('left') !== '16px' ||
+            frame.style.getPropertyPriority('left') !== 'important' ||
+            frame.style.getPropertyValue('right') !== 'auto' ||
+            frame.style.getPropertyPriority('right') !== 'important'
+          ) {
+            frame.style.setProperty('left', '16px', 'important');
+            frame.style.setProperty('right', 'auto', 'important');
+          }
         } else {
           var left = frame.getAttribute('data-gk-chat-left');
           var right = frame.getAttribute('data-gk-chat-right');
@@ -49,6 +56,11 @@
     if (window.MutationObserver && document.body) {
       var tawkObserver = new MutationObserver(function (mutations) {
         var hasNewFrame = mutations.some(function (mutation) {
+          if (mutation.type === 'attributes') {
+            var isMobile = window.matchMedia ? window.matchMedia('(max-width: 767px)').matches : window.innerWidth < 768;
+            return isMobile && mutation.target.matches && mutation.target.matches('iframe[title*="chat"], iframe[title*="Chat"], iframe[src*="tawk.to"]');
+          }
+
           return Array.prototype.some.call(mutation.addedNodes, function (node) {
             return node.nodeType === 1 && (node.tagName === 'IFRAME' || (node.querySelector && node.querySelector('iframe')));
           });
@@ -57,7 +69,12 @@
         if (hasNewFrame) window.setTimeout(positionTawkWidget, 0);
       });
 
-      tawkObserver.observe(document.body, {childList: true, subtree: true});
+      tawkObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['style'],
+        childList: true,
+        subtree: true
+      });
       window.addEventListener('resize', positionTawkWidget);
     }
 
