@@ -12,44 +12,17 @@
     launcher.setAttribute('aria-hidden', visible ? 'false' : 'true');
   }
 
-  function openMobileTawkChat() {
-    var launcher = document.getElementById('gk-tawk-mobile-launcher');
-    if (launcher) launcher.setAttribute('aria-busy', 'true');
-
-    var attempts = 0;
-    var open = function () {
-      attempts++;
-
-      if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') {
-        if (typeof window.Tawk_API.showWidget === 'function') window.Tawk_API.showWidget();
-        window.Tawk_API.maximize();
-        setMobileTawkLauncherVisible(false);
-        if (launcher) launcher.setAttribute('aria-busy', 'false');
-        return;
-      }
-
-      if (attempts < 40) {
-        window.setTimeout(open, 250);
-      } else if (launcher) {
-        launcher.setAttribute('aria-busy', 'false');
-      }
-    };
-
-    open();
-  }
-
   function ensureMobileTawkLauncher() {
     if (!isMobileTawkViewport()) return;
 
     var launcher = document.getElementById('gk-tawk-mobile-launcher');
     if (!launcher) {
-      launcher = document.createElement('button');
-      launcher.type = 'button';
+      launcher = document.createElement('a');
       launcher.id = 'gk-tawk-mobile-launcher';
+      launcher.href = 'https://tawk.to/chat/66f6b827e5982d6c7bb5a510/1i8ps10ve';
       launcher.setAttribute('aria-label', 'Otvori chat');
       launcher.setAttribute('title', 'Otvori chat');
       launcher.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4.8 3v-3H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"/><path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01"/></svg>';
-      launcher.addEventListener('click', openMobileTawkChat);
       document.body.appendChild(launcher);
     }
 
