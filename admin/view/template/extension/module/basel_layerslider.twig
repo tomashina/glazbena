@@ -503,10 +503,14 @@
           <div class="row">
           <div class="col-sm-6">
           <div>
-       	  <a id="thumb-image{{ section_row }}" data-toggle="image" class="btn btn-default"><i class="fa fa-arrows-alt"></i> {{ text_change_slide_bg }}</a>
-        <input type="hidden" name="sections[{{ section_row }}][thumb_image]" value="{{ section.thumb_image ? section.thumb_image }}" id="input-image{{ section_row }}" />
-        <a id="mobile-image{{ section_row }}" data-toggle="image" class="btn btn-info"><i class="fa fa-mobile"></i> {{ text_change_mobile_bg }}</a>
-        <input type="hidden" name="sections[{{ section_row }}][mobile_image]" value="{{ section.mobile_image ? section.mobile_image }}" id="input-mobile-image{{ section_row }}" />
+            <span>
+              <a id="thumb-image{{ section_row }}" data-toggle="image" class="btn btn-default"><i class="fa fa-arrows-alt"></i> {{ text_change_slide_bg }}</a>
+              <input type="hidden" name="sections[{{ section_row }}][thumb_image]" value="{{ section.thumb_image ? section.thumb_image }}" id="input-image{{ section_row }}" />
+            </span>
+            <span>
+              <a id="mobile-image{{ section_row }}" data-toggle="image" class="btn btn-info"><i class="fa fa-mobile"></i> {{ text_change_mobile_bg }}</a>
+              <input type="hidden" name="sections[{{ section_row }}][mobile_image]" value="{{ section.mobile_image ? section.mobile_image }}" id="input-mobile-image{{ section_row }}" />
+            </span>
           </div>
           </div>
           
@@ -991,10 +995,14 @@ function addSlide() {
 	html += '<div class="row">';
 	html += '<div class="col-sm-6">';
 	html += '<div>';
+	html += '<span>';
 	html += '<a id="thumb-image' + section_row + '" data-toggle="image" class="btn btn-default"><i class="fa fa-arrows-alt"></i> {{ text_change_slide_bg }}</a>';
 	html += '<input type="hidden" id="input-image' + section_row + '" name="sections[' + section_row + '][thumb_image]" />';
+	html += '</span> ';
+	html += '<span>';
 	html += ' <a id="mobile-image' + section_row + '" data-toggle="image" class="btn btn-info"><i class="fa fa-mobile"></i> {{ text_change_mobile_bg }}</a>';
 	html += '<input type="hidden" id="input-mobile-image' + section_row + '" name="sections[' + section_row + '][mobile_image]" />';
+	html += '</span>';
 	html += '</div>';
 	html += '</div>';
 	html += '<div class="col-sm-6 text-right">';
