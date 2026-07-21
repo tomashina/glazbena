@@ -593,7 +593,7 @@ class ControllerExtensionBundleproduct extends Controller {
 			//$this->error['date_to'] = $this->language->get('error_date_to');
 		}
 
-		if ($this->request->post['bundle_seo_url']) {
+		if (!empty($this->request->post['bundle_seo_url']) && is_array($this->request->post['bundle_seo_url'])) {
 			$this->load->model('design/seo_url');
 			
 			foreach ($this->request->post['bundle_seo_url'] as $store_id => $language) {
