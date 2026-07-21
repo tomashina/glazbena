@@ -9,9 +9,9 @@
 <div class="ms-slide {% if section.slide_kenburn is defined %} kenburn {{ section.slide_kenburn }}{% endif %}" data-delay="{{ section.duration }}" {% if section.bg_color|length %} style="background-color:{{ section.bg_color }}"{% endif %}>
 {% if section.is_bg %}
 {% if section.priority %}
-<img src="{{ section.thumb_image }}" {% if section.mobile_image %}srcset="{{ section.mobile_image }} 640w, {{ section.thumb_image }} 800w" sizes="(max-width:767px) 100vw, {{ section.image_width }}px"{% endif %} data-src="{{ section.thumb_image }}" class="slide-bg" width="{{ section.image_width }}" height="{{ section.image_height }}" alt="" loading="eager" fetchpriority="high" decoding="async">
+<img src="{{ section.thumb_image }}" data-src="{{ section.thumb_image }}"{% if section.mobile_image %} data-mobile-src="{{ section.mobile_image }}"{% endif %} class="slide-bg" width="{{ section.image_width }}" height="{{ section.image_height }}" alt="" loading="eager" fetchpriority="high" decoding="async">
 {% else %}
-<img data-src="{{ section.thumb_image }}" class="slide-bg" width="{{ section.image_width }}" height="{{ section.image_height }}" alt="" loading="lazy" decoding="async">
+<img data-src="{{ section.thumb_image }}"{% if section.mobile_image %} data-mobile-src="{{ section.mobile_image }}"{% endif %} class="slide-bg" width="{{ section.image_width }}" height="{{ section.image_height }}" alt="" loading="lazy" decoding="async">
 {% endif %}
 {% endif %}
 {% for key, group in section.groups %}
@@ -74,8 +74,19 @@
 }
 </style>
 <script>
-$(document).ready(function(){
 var gkMobileSlider = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
+if (gkMobileSlider) {
+	$('#masterslider{{ module }} .slide-bg[data-mobile-src]').each(function(){
+		var mobileSrc = $(this).attr('data-mobile-src');
+		$(this).attr('data-src', mobileSrc);
+
+		if ($(this).attr('src')) {
+			$(this).attr('src', mobileSrc);
+		}
+	});
+}
+
+$(document).ready(function(){
 var gkInitSlider = function(){
 $('#masterslider{{ module }}').removeClass('gk-slider-pending');
 var slider = new MasterSlider();
