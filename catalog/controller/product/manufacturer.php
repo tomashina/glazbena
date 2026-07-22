@@ -64,6 +64,8 @@ class ControllerProductManufacturer extends Controller {
 
 	public function info() {
 		$this->load->language('product/manufacturer');
+		$this->load->language('basel/basel_theme');
+		$data['salebadge_status'] = $this->config->get('salebadge_status');
 
 		$this->load->model('catalog/manufacturer');
 
@@ -206,7 +208,17 @@ class ControllerProductManufacturer extends Controller {
 					$special = false;
 					  $specialeur  ='';
 				}
-	
+
+				if ((float)$result['special'] && $this->config->get('salebadge_status')) {
+					if ($this->config->get('salebadge_status') == '2' && (float)$result['price'] > 0) {
+						$sale_badge = '-' . number_format((($result['price'] - $result['special']) / $result['price']) * 100, 0, ',', '.') . '%';
+					} else {
+						$sale_badge = $this->language->get('basel_text_sale');
+					}
+				} else {
+					$sale_badge = false;
+				}
+
 				if ($this->config->get('config_tax')) {
 					$tax = $this->currency->format($tax_price, $this->session->data['currency']);
 				} else {
@@ -245,6 +257,7 @@ class ControllerProductManufacturer extends Controller {
 					'special'     => $special,
                     'category'  => $ocb_category['name'],
 					'quantity'    => $result['quantity'],
+					'sale_badge'  => $sale_badge,
 					'tax'         => $tax,
 					'stock' => $result['stock_status'],
 			        'stock_id' => $result['stock_status_id'],
