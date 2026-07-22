@@ -64,7 +64,7 @@ class ControllerExtensionFeedFacebookstore extends Controller {
                     $output .= '<g:image_link>' . $this->wrapInCDATA('https://www.glazbena-kutija.hr/image/' . $product['image']) . '</g:image_link>';
                       $output .= '<g:brand>' . $this->wrapInCDATA($product['manufacturer']) . '</g:brand>';
                     $output .= '<g:condition>new</g:condition>';
-                    $output .= '<g:availability>in stock</g:availability>';
+                    $output .= '<g:availability>' . ($product['quantity'] > 0 ? 'in stock' : 'out of stock') . '</g:availability>';
 
                    
                     $output .= '<g:price>' . $product['price'] . ' EUR</g:price>';
@@ -168,8 +168,7 @@ class ControllerExtensionFeedFacebookstore extends Controller {
     
     private function wrapInCDATA($in)
     {
-        return "<![CDATA[ " . $in . " ]]>";
-        //return $in;
+        return '<![CDATA[' . str_replace(']]>', ']]]]><![CDATA[>', (string)$in) . ']]>';
     }
     
     

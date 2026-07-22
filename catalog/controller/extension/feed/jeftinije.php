@@ -10,51 +10,12 @@ class ControllerExtensionFeedJeftinije extends Controller
         
         $output = '<?xml version="1.0" encoding="UTF-8"?>';
         $output .= '<CNJExport>';
-        
+
         $this->load->model('catalog/product');
-        
-      $products = array_merge(
-            $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 13)), //aer
-            $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 11)),//alhambra
-            $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 18)),//aosen
-            $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 22)),//apc
-            $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 23)),//artbeat
-            $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 24)),//austin
-            $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 29)),//caline
-                 $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 31)),//cherub
-                 $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 32)),//D'ADDARIO
-                 $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 33)),//daadi
-                  $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 35)),//dejung
-                   $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 16)),//dunlop
-                    $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 38)),//enomusic
-                     $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 39)),//ergoplay
-                      $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 40)),//ernhall
-                       $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 43)),//flight
-                        $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 45)),//gewa
-                         $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 51)),//iberica
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 52)),//JQ
-    
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 55)),//Kepma
 
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 56)),//KLOTZ
-
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 14)),//   Meinl
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 70)),//JMUSEDO
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 72)),//Nino Percussion
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 76)),//PARTSLAND
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 17)),//PEARL FLUTES
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 81)),//ROCKSON
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 86)),//sandona
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 87)),//SAVAREZ
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 91)),//SILK ROAD
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 94)),//TENSON
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 97)),//WAY HUGE
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 99)),//WINGO
-
-                          $this->model_catalog_product->getProducts(array('filter_manufacturer_id' => 100)) //WITTNER
-            
-        );
-  $products = $this->model_catalog_product->getProducts();
+        $products = $this->model_catalog_product->getProducts();
+        $currency_code = $this->currency->has('EUR') ? 'EUR' : $this->config->get('config_currency');
+        $currency_value = $this->currency->getValue($currency_code);
         
         
         foreach ($products as $product) {
@@ -118,6 +79,7 @@ class ControllerExtensionFeedJeftinije extends Controller
 
 
                        $ocimages = $this->getProductImages($product['product_id']);
+                       $str = '';
 
                            foreach ($ocimages as $ocimage) {
 
@@ -167,7 +129,7 @@ class ControllerExtensionFeedJeftinije extends Controller
         
                   
 
-                                 $output .= '<curCode>HRK</curCode>';
+                                 $output .= '<curCode>'. $currency_code .'</curCode>';
 
 
                                 
@@ -207,7 +169,7 @@ class ControllerExtensionFeedJeftinije extends Controller
         }
         $output .= '</CNJExport>';
         
-       $this->response->addHeader('Content-Type: application/xml');
+       $this->response->addHeader('Content-Type: application/xml; charset=utf-8');
      $this->response->setOutput($output);
         
         
@@ -216,7 +178,7 @@ class ControllerExtensionFeedJeftinije extends Controller
     
     private function wrapInCDATA($in)
     {
-        return "<![CDATA[". $in ."]]>";
+        return '<![CDATA[' . str_replace(']]>', ']]]]><![CDATA[>', (string)$in) . ']]>';
     }
     
     

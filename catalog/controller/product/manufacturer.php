@@ -244,6 +244,7 @@ class ControllerProductManufacturer extends Controller {
 					'price'       => $price,
 					'special'     => $special,
                     'category'  => $ocb_category['name'],
+					'quantity'    => $result['quantity'],
 					'tax'         => $tax,
 					'stock' => $result['stock_status'],
 			        'stock_id' => $result['stock_status_id'],
