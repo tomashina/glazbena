@@ -171,6 +171,8 @@ class ControllerProductManufacturer extends Controller {
 			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 
 			$results = $this->model_catalog_product->getProducts($filter_data);
+			$product_ids = array_column($results, 'product_id');
+			$secondary_images = $this->config->get('basel_thumb_swap') ? $this->model_catalog_product->getPrimaryImagesByProductIds($product_ids) : array();
 
 			foreach ($results as $result) {
 				if ($result['image']) {
@@ -207,6 +209,12 @@ class ControllerProductManufacturer extends Controller {
 				} else {
 					$special = false;
 					  $specialeur  ='';
+				}
+
+				if (isset($secondary_images[$result['product_id']])) {
+					$image2 = $this->model_tool_image->resize($secondary_images[$result['product_id']], $this->config->get('theme_default_image_product_width'), $this->config->get('theme_default_image_product_height'));
+				} else {
+					$image2 = false;
 				}
 
 				if ((float)$result['special'] && $this->config->get('salebadge_status')) {
@@ -251,6 +259,7 @@ class ControllerProductManufacturer extends Controller {
 				$data['products'][] = array(
 					'product_id'  => $result['product_id'],
 					'thumb'       => $image,
+					'thumb2'      => $image2,
 					'name'        => $result['name'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
 					'price'       => $price,
