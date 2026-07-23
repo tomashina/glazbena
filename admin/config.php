@@ -43,5 +43,5 @@ define('OPENCART_SERVER', 'https://www.opencart.com/');
 
 // Custom AGmedia
 define('IMPORT_XML_VALIDATION_KEY', getenv('IMPORT_XML_VALIDATION_KEY') ?: '');
-define('IMPORT_XML_PRODUCTS_URL', getenv('IMPORT_XML_PRODUCTS_URL') ?: $root . 'SHOP_sync.xml');
+define('IMPORT_XML_PRODUCTS_URL', getenv('IMPORT_XML_PRODUCTS_URL') ?: dirname($root) . '/glazbena-kutija.hr/SHOP_sync.xml');
 define('ENG_LANGUAGE_ID', 3);
