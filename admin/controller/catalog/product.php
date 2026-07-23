@@ -1513,7 +1513,7 @@ class ControllerCatalogProduct extends Controller {
         \Agmedia\Helpers\Log::stockPile($sql, 'xml_test');
         
         $this->db->query($sql['query']);
-        $this->db->query("UPDATE " . DB_PREFIX . "product p INNER JOIN ag_product_temp pt ON p.model = pt.sifra SET p.quantity = pt.qty, p.price = pt.price;");
+        $this->db->query("UPDATE " . DB_PREFIX . "product p INNER JOIN ag_product_temp pt ON p.model COLLATE utf8mb4_unicode_ci = pt.sifra COLLATE utf8mb4_unicode_ci SET p.quantity = pt.qty, p.price = pt.price;");
         $this->db->query("TRUNCATE TABLE ag_product_temp;");
     
         $this->output([200 => 'success', 'message' => $sql['count'] . ' products successfully updated!']);
