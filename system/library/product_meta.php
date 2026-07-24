@@ -25,7 +25,11 @@ class ProductMeta {
 
 			$description['meta_title'] = $name;
 			$description['meta_keyword'] = $tag_list;
-			$description['tag'] = $tag_list;
+
+			if (!isset($description['tag']) || trim((string)$description['tag']) === '') {
+				$description['tag'] = $tag_list;
+			}
+
 			$descriptions[$language_id] = $description;
 		}
 
