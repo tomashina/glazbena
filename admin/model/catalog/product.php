@@ -21,6 +21,10 @@ class ModelCatalogProduct extends Model {
 
 		if (isset($data['product_attribute'])) {
 			foreach ($data['product_attribute'] as $product_attribute) {
+				if (!isset($product_attribute['preset_id']) || !is_array($product_attribute['preset_id'])) {
+					$product_attribute['preset_id'] = array();
+				}
+
 				if ($product_attribute['attribute_id']) {
 					// Removes duplicates
 					$this->db->query("DELETE FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "' AND attribute_id = '" . (int)$product_attribute['attribute_id'] . "'");
@@ -165,6 +169,10 @@ class ModelCatalogProduct extends Model {
 
 		if (!empty($data['product_attribute'])) {
 			foreach ($data['product_attribute'] as $product_attribute) {
+				if (!isset($product_attribute['preset_id']) || !is_array($product_attribute['preset_id'])) {
+					$product_attribute['preset_id'] = array();
+				}
+
 				if ($product_attribute['attribute_id']) {
 					// Removes duplicates
 					$this->db->query("DELETE FROM " . DB_PREFIX . "product_attribute WHERE product_id = '" . (int)$product_id . "' AND attribute_id = '" . (int)$product_attribute['attribute_id'] . "'");
