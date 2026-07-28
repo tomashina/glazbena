@@ -22,6 +22,8 @@ class ControllerStartupPermission extends Controller {
 			$extension = array(
 				'extension/advertise',
 				'extension/base',
+				'extension/basel',
+				'extension/blog',
 				'extension/dashboard',
 				'extension/analytics',
 				'extension/captcha',

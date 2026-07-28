@@ -128,8 +128,8 @@ class ControllerExtensionModuleProductVariant extends Controller {
 		
 		$this->load->model('user/user_group');		
 		
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'module/product_variant');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'module/product_variant');		
+		$this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', 'module/product_variant');
+		$this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', 'module/product_variant');
 		
 	}
 

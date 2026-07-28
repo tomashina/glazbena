@@ -80,46 +80,35 @@ class ControllerExtensionModuleBaselInstaller extends Controller {
 		// Set User Permissions
 		// ##################################
 		$this->load->model('user/user_group');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/basel/basel');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/basel/basel');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/basel/product_tabs');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/basel/product_tabs');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/basel/productgroups');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/basel/productgroups');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/basel/question');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/basel/question');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/basel/subscriber');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/basel/subscriber');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/basel/testimonial');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/basel/testimonial');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/blog/blog');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/blog/blog');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/blog/blog_category');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/blog/blog_category');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/blog/blog_comment');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/blog/blog_comment');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/blog/blog_setting');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/blog/blog_setting');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/basel_carousel');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/basel_carousel');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/basel_categories');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/basel_categories');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/basel_content');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/basel_content');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/basel_instagram');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/basel_instagram');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/basel_layerslider');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/basel_layerslider');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/basel_megamenu');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/basel_megamenu');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/basel_products');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/basel_products');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/blog_latest');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/blog_latest');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/blog_category');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/blog_category');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/onepagecheckout');
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/onepagecheckout');
+
+		$user_group_id = $this->user->getGroupId();
+		$permission_routes = array(
+			'extension/basel/basel',
+			'extension/basel/product_tabs',
+			'extension/basel/productgroups',
+			'extension/basel/question',
+			'extension/basel/subscriber',
+			'extension/basel/testimonial',
+			'extension/blog/blog',
+			'extension/blog/blog_category',
+			'extension/blog/blog_comment',
+			'extension/blog/blog_setting',
+			'extension/module/basel_carousel',
+			'extension/module/basel_categories',
+			'extension/module/basel_content',
+			'extension/module/basel_instagram',
+			'extension/module/basel_layerslider',
+			'extension/module/basel_megamenu',
+			'extension/module/basel_products',
+			'extension/module/blog_latest',
+			'extension/module/blog_category',
+			'extension/onepagecheckout'
+		);
+
+		foreach ($permission_routes as $route) {
+			$this->model_user_user_group->addPermission($user_group_id, 'access', $route);
+			$this->model_user_user_group->addPermission($user_group_id, 'modify', $route);
+		}
 		
 		// ##################################
 		// Default Blog Settings

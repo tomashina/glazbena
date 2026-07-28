@@ -13,8 +13,8 @@ class ModelExtensionAttemplateInstall extends Model {
 			
 		$this->model_setting_setting->editSetting('module_attemplate', $settings );		
 
-		$this->model_user_user_group->addPermission($this->user->getId(), 'access', 'extension/module/attemplate');			
-		$this->model_user_user_group->addPermission($this->user->getId(), 'modify', 'extension/module/attemplate');	
+		$this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', 'extension/module/attemplate');
+		$this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', 'extension/module/attemplate');
 	}
 
 	public function uninstall() {
