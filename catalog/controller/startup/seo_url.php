@@ -12,6 +12,19 @@ class ControllerStartupSeoUrl extends Controller {
 
 		// Decode URL
 		if (isset($this->request->get['_route_'])) {
+			$parts = explode('/', trim($this->request->get['_route_'], '/'));
+
+			if (count($parts) == 1 && $parts[0] === '') {
+				$parts = array();
+			}
+
+			$request_language_code = $this->config->get('request_language_code');
+			$has_language_prefix = $request_language_code && isset($parts[0]) && strtolower($parts[0]) === strtolower($request_language_code);
+
+			if ($has_language_prefix) {
+				array_shift($parts);
+			}
+
 			$static_routes = array(
 				'kontakt' => 'information/contact',
 				'contact' => 'information/contact',
@@ -23,21 +36,20 @@ class ControllerStartupSeoUrl extends Controller {
 				'ai-context' => 'information/ai_context'
 			);
 
-			$route_key = trim($this->request->get['_route_'], '/');
+			$route_key = implode('/', $parts);
 			if (isset($static_routes[$route_key])) {
 				$this->request->get['route'] = $static_routes[$route_key];
 				return;
 			}
 
-			$parts = explode('/', $this->request->get['_route_']);
-
-			// remove any empty arrays from trailing
-			if (utf8_strlen(end($parts)) == 0) {
-				array_pop($parts);
-			}
-
 			foreach ($parts as $part) {
-				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE keyword = '" . $this->db->escape($part) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "'");
+				$sql = "SELECT * FROM " . DB_PREFIX . "seo_url WHERE keyword = '" . $this->db->escape($part) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "'";
+
+				if ($has_language_prefix) {
+					$sql .= " AND language_id = '" . (int)$this->config->get('config_language_id') . "'";
+				}
+
+				$query = $this->db->query($sql . " LIMIT 1");
 
 				if ($query->num_rows) {
 					$url = explode('=', $query->row['query']);
@@ -94,6 +106,13 @@ class ControllerStartupSeoUrl extends Controller {
 		$url_info = parse_url(str_replace('&amp;', '&', $link));
 
 		$url = '';
+		$language_path = '';
+
+		$current_language_code = isset($this->session->data['language']) ? $this->session->data['language'] : $this->config->get('config_language');
+
+		if ($current_language_code && $current_language_code != $this->config->get('config_language')) {
+			$language_path = '/' . rawurlencode($current_language_code);
+		}
 
 		$data = array();
 
@@ -159,7 +178,7 @@ class ControllerStartupSeoUrl extends Controller {
 				}
 			}
 
-			$this->rewrite_cache[$link] = $url_info['scheme'] . '://' . $url_info['host'] . (isset($url_info['port']) ? ':' . $url_info['port'] : '') . str_replace('/index.php', '', $url_info['path']) . $url . $query;
+			$this->rewrite_cache[$link] = $url_info['scheme'] . '://' . $url_info['host'] . (isset($url_info['port']) ? ':' . $url_info['port'] : '') . str_replace('/index.php', '', $url_info['path']) . $language_path . $url . $query;
 		} else {
 			$this->rewrite_cache[$link] = $link;
 		}

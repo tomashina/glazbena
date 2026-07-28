@@ -107,11 +107,18 @@ try {
 
 	// Attribute Preset accessed a missing preset_id key while saving products
 	// that do not use presets. PHP 8 turns that into output that breaks AJAX.
+	// OpenCart 3.0.5.0 also added an inline style to the attribute-name field;
+	// make the extension's exact OCMOD search match the upgraded template.
 	$patchModification('StvAttrPreset', 'Attributes Preset Values', array(
 		array(
 			'search' => "count(\$product_attribute['preset_id'])",
 			'replace' => "count(\$product_attribute['preset_id'] ?? array())",
 			'expected' => 4
+		),
+		array(
+			'search' => '<td class="text-left" style="width: 40%;"><input type="text" name="product_attribute[{{ attribute_row }}][name]" value="{{ product_attribute.name }}" placeholder="{{ entry_attribute }}" class="form-control"/> <input type="hidden" name="product_attribute[{{ attribute_row }}][attribute_id]" value="{{ product_attribute.attribute_id }}"/></td>',
+			'replace' => '<td class="text-left" style="width: 40%;"><input type="text" name="product_attribute[{{ attribute_row }}][name]" value="{{ product_attribute.name }}" placeholder="{{ entry_attribute }}" class="form-control" style="position:relative;"/> <input type="hidden" name="product_attribute[{{ attribute_row }}][attribute_id]" value="{{ product_attribute.attribute_id }}"/></td>',
+			'expected' => 1
 		)
 	));
 

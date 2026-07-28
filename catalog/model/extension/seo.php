@@ -389,7 +389,7 @@ class ModelExtensionSeo extends Model {
 				continue;
 			}
 			if ($position === 1) {
-				$url = rtrim($this->config->get('config_ssl') ?: $this->config->get('config_url'), '/') . '/';
+				$url = html_entity_decode($this->url->link('common/home'), ENT_QUOTES, 'UTF-8');
 			} else {
 				$url = !empty($breadcrumb['href']) ? html_entity_decode($breadcrumb['href'], ENT_QUOTES, 'UTF-8') : $canonical;
 			}
@@ -411,7 +411,7 @@ class ModelExtensionSeo extends Model {
 		}
 
 		if ($route === 'common/home') {
-			return rtrim($this->config->get('config_ssl') ?: $this->config->get('config_url'), '/') . '/';
+			return html_entity_decode($this->url->link('common/home'), ENT_QUOTES, 'UTF-8');
 		}
 
 		$scheme = !empty($this->request->server['HTTPS']) && $this->request->server['HTTPS'] !== 'off' ? 'https://' : 'http://';

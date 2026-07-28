@@ -154,7 +154,24 @@ class ControllerStartupStartup extends Controller {
 
 		$languages = $this->model_localisation_language->getLanguages();
 
-		if (isset($this->session->data['language'])) {
+		// Language-prefixed URLs must take precedence over a previous session or
+		// cookie. This keeps indexed URLs such as /en-gb/product-keyword
+		// deterministic for both visitors and search engine crawlers.
+		$request_language_code = '';
+
+		if (isset($this->request->get['_route_'])) {
+			$route_parts = explode('/', trim($this->request->get['_route_'], '/'));
+			$route_language_code = isset($route_parts[0]) ? strtolower($route_parts[0]) : '';
+
+			if (isset($languages[$route_language_code])) {
+				$request_language_code = $route_language_code;
+				$this->config->set('request_language_code', $request_language_code);
+			}
+		}
+
+		if ($request_language_code) {
+			$code = $request_language_code;
+		} elseif (isset($this->session->data['language'])) {
 			$code = $this->session->data['language'];
 		}
 
