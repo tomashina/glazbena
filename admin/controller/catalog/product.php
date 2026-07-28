@@ -700,9 +700,9 @@ class ControllerCatalogProduct extends Controller {
 		}
 
 		if (isset($this->request->post['price'])) {
-			$data['price'] = $this->request->post['price'];
+			$data['price'] = number_format((float)$this->request->post['price'], 2, '.', '');
 		} elseif (!empty($product_info)) {
-			$data['price'] = $product_info['price'];
+			$data['price'] = number_format((float)$product_info['price'], 2, '.', '');
 		} else {
 			$data['price'] = '';
 		}
@@ -967,7 +967,7 @@ class ControllerCatalogProduct extends Controller {
 						'option_value_id'         => $product_option_value['option_value_id'],
 						'quantity'                => $product_option_value['quantity'],
 						'subtract'                => $product_option_value['subtract'],
-						'price'                   => $product_option_value['price'],
+						'price'                   => number_format((float)$product_option_value['price'], 2, '.', ''),
 						'price_prefix'            => $product_option_value['price_prefix'],
 						'points'                  => $product_option_value['points'],
 						'points_prefix'           => $product_option_value['points_prefix'],
@@ -1017,7 +1017,7 @@ class ControllerCatalogProduct extends Controller {
 				'customer_group_id' => $product_discount['customer_group_id'],
 				'quantity'          => $product_discount['quantity'],
 				'priority'          => $product_discount['priority'],
-				'price'             => $product_discount['price'],
+				'price'             => number_format((float)$product_discount['price'], 2, '.', ''),
 				'date_start'        => ($product_discount['date_start'] != '0000-00-00') ? $product_discount['date_start'] : '',
 				'date_end'          => ($product_discount['date_end'] != '0000-00-00') ? $product_discount['date_end'] : ''
 			);
@@ -1037,7 +1037,7 @@ class ControllerCatalogProduct extends Controller {
 			$data['product_specials'][] = array(
 				'customer_group_id' => $product_special['customer_group_id'],
 				'priority'          => $product_special['priority'],
-				'price'             => $product_special['price'],
+				'price'             => number_format((float)$product_special['price'], 2, '.', ''),
 				'date_start'        => ($product_special['date_start'] != '0000-00-00') ? $product_special['date_start'] : '',
 				'date_end'          => ($product_special['date_end'] != '0000-00-00') ? $product_special['date_end'] :  ''
 			);

@@ -348,11 +348,11 @@ class ControllerCatalogRecurring extends Controller {
 		}
 
 		if (isset($this->request->post['price'])) {
-			$data['price'] = $this->request->post['price'];
+			$data['price'] = number_format((float)$this->request->post['price'], 2, '.', '');
 		} elseif (!empty($recurring_info)) {
-			$data['price'] = $recurring_info['price'];
+			$data['price'] = number_format((float)$recurring_info['price'], 2, '.', '');
 		} else {
-			$data['price'] = 0;
+			$data['price'] = '0.00';
 		}
 
 		$data['frequencies'] = array();
@@ -415,11 +415,11 @@ class ControllerCatalogRecurring extends Controller {
 		}
 
 		if (isset($this->request->post['trial_price'])) {
-			$data['trial_price'] = $this->request->post['trial_price'];
+			$data['trial_price'] = number_format((float)$this->request->post['trial_price'], 2, '.', '');
 		} elseif (!empty($recurring_info)) {
-			$data['trial_price'] = $recurring_info['trial_price'];
+			$data['trial_price'] = number_format((float)$recurring_info['trial_price'], 2, '.', '');
 		} else {
-			$data['trial_price'] = 0.00;
+			$data['trial_price'] = '0.00';
 		}
 
 		if (isset($this->request->post['trial_frequency'])) {

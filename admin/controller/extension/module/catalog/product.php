@@ -484,12 +484,12 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 							}
 							break;
 						case 'price':
-							$product['special'] = $result['special_price'];
-							$value = $result['price'];
+							$product['special'] = $result['special_price'] ? number_format((float)$result['special_price'], 2, '.', '') : null;
+							$value = number_format((float)$result['price'], 2, '.', '');
 							break;
 						case 'gross_price':
-							$product['gross_special'] = $result['special_price'] ? sprintf('%.4f',round((float)$tax->calculate($result['special_price'], $result['tax_class_id']), 4)) : null;
-							$value = sprintf('%.4f',round((float)$tax->calculate($result['price'], $result['tax_class_id']), 4));
+							$product['gross_special'] = $result['special_price'] ? sprintf('%.2f', round((float)$tax->calculate($result['special_price'], $result['tax_class_id']), 2)) : null;
+							$value = sprintf('%.2f', round((float)$tax->calculate($result['price'], $result['tax_class_id']), 2));
 							break;
 						case 'view_in_store':
 							$product_stores = explode('_', $result['store_ids']);
@@ -1150,8 +1150,14 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 						$product = $this->model_catalog_product->getProduct($id);
 
 						foreach ($data['product_discounts'] as $key => &$value) {
-							$value['price'] = sprintf('%.4f',round((float)$tax->calculate($value['price'], $product['tax_class_id']), 4));
+							$value['price'] = sprintf('%.2f', round((float)$tax->calculate($value['price'], $product['tax_class_id']), 2));
 						}
+						unset($value);
+					} else {
+						foreach ($data['product_discounts'] as &$product_discount) {
+							$product_discount['price'] = number_format((float)$product_discount['price'], 2, '.', '');
+						}
+						unset($product_discount);
 					}
 
 					$template = 'extension/module/catalog/product_qe_form';
@@ -1189,8 +1195,14 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 						$product = $this->model_catalog_product->getProduct($id);
 
 						foreach ($data['product_specials'] as $key => &$value) {
-							$value['price'] = sprintf('%.4f',round((float)$tax->calculate($value['price'], $product['tax_class_id']), 4));
+							$value['price'] = sprintf('%.2f', round((float)$tax->calculate($value['price'], $product['tax_class_id']), 2));
 						}
+						unset($value);
+					} else {
+						foreach ($data['product_specials'] as &$product_special) {
+							$product_special['price'] = number_format((float)$product_special['price'], 2, '.', '');
+						}
+						unset($product_special);
 					}
 
 					$template = 'extension/module/catalog/product_qe_form';
@@ -1364,7 +1376,7 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 									'option_value_id'         => $product_option_value['option_value_id'],
 									'quantity'                => $product_option_value['quantity'],
 									'subtract'                => $product_option_value['subtract'],
-									'price'                   => $data['use_gross_price'] ? sprintf('%.4f',round((float)$tax->calculate($product_option_value['price'], $product['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), 4)) : $product_option_value['price'],
+									'price'                   => $data['use_gross_price'] ? sprintf('%.2f', round((float)$tax->calculate($product_option_value['price'], $product['tax_class_id'], $this->config->get('config_tax') ? 'P' : false), 2)) : number_format((float)$product_option_value['price'], 2, '.', ''),
 									'price_prefix'            => $product_option_value['price_prefix'],
 									'points'                  => $product_option_value['points'],
 									'points_prefix'           => $product_option_value['points_prefix'],
@@ -1439,7 +1451,7 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 
 							$product = $this->model_catalog_product->getProduct($id);
 
-							$response['values'][$id][$column] = sprintf('%.4f',round((float)$product['price'], 4));
+							$response['values'][$id][$column] = sprintf('%.2f', round((float)$product['price'], 2));
 							// $response['values'][$id][$column] = $this->currency->format($product['price'], $this->config->get('config_currency'));
 
 							$special = false;
@@ -1453,7 +1465,7 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 							}
 
 							if ($special) {
-								$response['values'][$id]['special'] = sprintf('%.4f',round((float)$special, 4));
+								$response['values'][$id]['special'] = sprintf('%.2f', round((float)$special, 2));
 								// $response['values'][$id]['special'] = $this->currency->format($special, $this->config->get('config_currency'));
 							} else {
 								$response['values'][$id]['special'] = null;
@@ -1477,7 +1489,7 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 
 							$product = $this->model_catalog_product->getProduct($id);
 
-							$response['values'][$id][$column] = sprintf('%.4f',round((float)$tax->calculate($product['price'], $product['tax_class_id']), 4));
+							$response['values'][$id][$column] = sprintf('%.2f', round((float)$tax->calculate($product['price'], $product['tax_class_id']), 2));
 							// $response['values'][$id][$column] = $this->currency->format($tax->calculate($product['price'], $product['tax_class_id']), $this->config->get('config_currency'));
 
 							$special = false;
@@ -1491,7 +1503,7 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 							}
 
 							if ($special) {
-								$response['values'][$id]['gross_special'] = sprintf('%.4f',round((float)$tax->calculate($special, $product['tax_class_id']), 4));
+								$response['values'][$id]['gross_special'] = sprintf('%.2f', round((float)$tax->calculate($special, $product['tax_class_id']), 2));
 								// $response['values'][$id]['gross_special'] = $this->currency->format($tax->calculate($special, $product['tax_class_id']), $this->config->get('config_currency'));
 							} else {
 								$response['values'][$id]['gross_special'] = null;
@@ -1992,10 +2004,10 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 					$this->load->model('catalog/product');
 
 					if ($expression) {
-						$response['value'] = sprintf('%.4f',round((float)$_results[$id[0]], 4));
+						$response['value'] = sprintf('%.2f', round((float)$_results[$id[0]], 2));
 						// $response['value'] = $this->currency->format($_results[$id[0]], $this->config->get('config_currency'));
 					} else {
-						$response['value'] = sprintf('%.4f',round((float)$value, 4));
+						$response['value'] = sprintf('%.2f', round((float)$value, 2));
 						// $response['value'] = $this->currency->format($value, $this->config->get('config_currency'));
 					}
 
@@ -2009,10 +2021,10 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 							}
 						}
 						if ($special) {
-							$response['values'][$_id]['special'] = sprintf('%.4f',round((float)$special, 4));
+							$response['values'][$_id]['special'] = sprintf('%.2f', round((float)$special, 2));
 							// $response['values'][$_id]['special'] = $this->currency->format($special, $this->config->get('config_currency'));
 						}
-						$response['values'][$_id][$column] = sprintf('%.4f',round((float)$_results[$_id], 4));
+						$response['values'][$_id][$column] = sprintf('%.2f', round((float)$_results[$_id], 2));
 						// $response['values'][$_id][$column] = $this->currency->format($_results[$_id], $this->config->get('config_currency'));
 					}
 				} else if ($column == 'gross_price') {
@@ -2033,10 +2045,10 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 					$product = $this->model_catalog_product->getProduct($id[0]);
 
 					if ($expression) {
-						$response['value'] = sprintf('%.4f',round((float)$tax->calculate($_results[$id[0]], $product['tax_class_id']), 4));
+						$response['value'] = sprintf('%.2f', round((float)$tax->calculate($_results[$id[0]], $product['tax_class_id']), 2));
 						// $response['value'] = $this->currency->format($_results[$id[0]], $this->config->get('config_currency'));
 					} else {
-						$response['value'] = sprintf('%.4f',round((float)$tax->calculate($value, $product['tax_class_id']), 4));
+						$response['value'] = sprintf('%.2f', round((float)$tax->calculate($value, $product['tax_class_id']), 2));
 						// $response['value'] = $this->currency->format($value, $this->config->get('config_currency'));
 					}
 
@@ -2051,10 +2063,10 @@ class ControllerExtensionModuleCatalogProduct extends ControllerExtensionModuleP
 							}
 						}
 						if ($special) {
-							$response['values'][$_id]['special_with_price'] = sprintf('%.4f',round((float)$tax->calculate($special, $product['tax_class_id']), 4));
+							$response['values'][$_id]['special_with_price'] = sprintf('%.2f', round((float)$tax->calculate($special, $product['tax_class_id']), 2));
 							// $response['values'][$_id]['special_with_price'] = $this->currency->format($tax->calculate($special, $product['tax_class_id']), $this->config->get('config_currency'));
 						}
-						$response['values'][$_id][$column] = sprintf('%.4f',round((float)$tax->calculate($_results[$_id], $product['tax_class_id']), 4));
+						$response['values'][$_id][$column] = sprintf('%.2f', round((float)$tax->calculate($_results[$_id], $product['tax_class_id']), 2));
 						// $response['values'][$_id][$column] = $this->currency->format($tax->calculate($_results[$_id], $product['tax_class_id']), $this->config->get('config_currency'));
 					}
 				} else

@@ -241,7 +241,7 @@ class ModelCatalogProduct extends Model {
 			'data'              => $this->normalizeProductQueryCacheData($data)
 		);
 
-		return 'product.query.v2.' . $type . '.' . hash('sha256', serialize($context));
+		return 'product.query.v3.' . $type . '.' . hash('sha256', serialize($context));
 	}
 
 	private function normalizeProductQueryCacheData($value) {
@@ -261,7 +261,7 @@ class ModelCatalogProduct extends Model {
 	}
 
 	private function shouldExcludeDiscontinuedProducts(array $data) {
-		return !empty($data['filter_category_id'])
+		return (!empty($data['filter_category_id']) || !empty($data['filter_manufacturer_id']))
 			&& empty($data['filter_name'])
 			&& empty($data['filter_tag']);
 	}
@@ -355,7 +355,7 @@ public function getProducts($data = array()) {
     ";
 
 	// Discontinued products remain searchable and directly accessible, but are
-	// omitted from normal category listings.
+	// omitted from normal category and manufacturer listings.
 	if ($this->shouldExcludeDiscontinuedProducts($data)) {
 		$sql .= " AND p.stock_status_id <> '" . self::DISCONTINUED_STOCK_STATUS_ID . "'";
 	}
@@ -993,8 +993,8 @@ public function getTotalProducts($data = array()) {
           AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'
     ";
 
-	// Keep category totals in sync with the products shown on the page. Search
-	// results may still include discontinued products.
+	// Keep category and manufacturer totals in sync with the products shown on
+	// the page. Search results may still include discontinued products.
 	if ($this->shouldExcludeDiscontinuedProducts($data)) {
 		$sql .= " AND p.stock_status_id <> '" . self::DISCONTINUED_STOCK_STATUS_ID . "'";
 	}

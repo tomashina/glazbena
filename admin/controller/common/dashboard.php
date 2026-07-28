@@ -14,6 +14,7 @@ if ((int)$this->user->getGroupId() === 10) {
     );
 }
 
+		$this->repairBaselProductGroupsPermissions();
 
 		$this->load->language('common/dashboard');
 
@@ -155,5 +156,20 @@ if ((int)$this->user->getGroupId() === 10) {
 		}
 
 		$this->response->setOutput($this->load->view('common/dashboard', $data));
+	}
+
+	private function repairBaselProductGroupsPermissions() {
+		$route = 'extension/basel/productgroups';
+		$controller = DIR_APPLICATION . 'controller/extension/basel/productgroups.php';
+
+		if ((int)$this->user->getGroupId() !== 1 || !is_file($controller)) {
+			return;
+		}
+
+		if (!$this->user->hasPermission('access', $route) || !$this->user->hasPermission('modify', $route)) {
+			$this->load->model('user/user_group');
+			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', $route);
+			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', $route);
+		}
 	}
 }

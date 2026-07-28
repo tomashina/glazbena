@@ -45,12 +45,21 @@ class ControllerErrorNotFound extends Controller {
 
 		$this->load->model('catalog/category');
 		$data['popular_categories'] = array();
+		$excluded_categories = array('back to school', 'american dream');
 
-		foreach (array_slice($this->model_catalog_category->getCategories(0), 0, 6) as $category) {
+		foreach ($this->model_catalog_category->getCategories(0) as $category) {
+			if (in_array(utf8_strtolower(trim($category['name'])), $excluded_categories, true)) {
+				continue;
+			}
+
 			$data['popular_categories'][] = array(
 				'name' => $category['name'],
 				'href' => $this->url->link('product/category', 'path=' . (int)$category['category_id'])
 			);
+
+			if (count($data['popular_categories']) === 6) {
+				break;
+			}
 		}
 
 		$this->registry->set('seo_entity', array(

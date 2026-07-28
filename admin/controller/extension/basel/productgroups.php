@@ -1,6 +1,7 @@
-<?php 
+<?php
 class ControllerExtensionBaselProductgroups extends Controller {
-	private $error = array(); 
+	private $error = array();
+	private $route = 'extension/basel/productgroups';
 
 	public function index() {
 		
@@ -21,7 +22,7 @@ class ControllerExtensionBaselProductgroups extends Controller {
 			$this->model_setting_setting->editSetting('showintabs', $this->request->post);	
 			
 			$this->session->data['success'] = $this->language->get('text_success');
-			$this->response->redirect($this->url->link('extension/basel/productgroups', $token_prefix . '=' . $this->session->data[$token_prefix], true)); 
+			$this->response->redirect($this->url->link($this->route, $token_prefix . '=' . $this->session->data[$token_prefix], true));
 
 		}
 		
@@ -105,11 +106,11 @@ class ControllerExtensionBaselProductgroups extends Controller {
 
 		$data['breadcrumbs'][] = array(
 			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('extension/basel/productgroups', $token_prefix . '=' . $this->session->data[$token_prefix], true)
+			'href' => $this->url->link($this->route, $token_prefix . '=' . $this->session->data[$token_prefix], true)
 		);			
 		
 
-		$data['action'] = $this->url->link('extension/basel/productgroups', $token_prefix . '=' . $this->session->data[$token_prefix], true);
+		$data['action'] = $this->url->link($this->route, $token_prefix . '=' . $this->session->data[$token_prefix], true);
 		
 		$data['token'] = $this->session->data[$token_prefix];
 
@@ -170,7 +171,7 @@ class ControllerExtensionBaselProductgroups extends Controller {
 	}
 
 	protected function validate() {
-		if (!$this->user->hasPermission('modify', 'extension/basel/productgroups')) {
+		if (!$this->user->hasPermission('modify', $this->route)) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 		
