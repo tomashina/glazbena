@@ -8621,7 +8621,7 @@ ul.sitemap > li > ul > li > ul > li > a {margin-left:28px;opacity:0.8;}
 .price-old,.single-product .price .price-old{color:#595959}
 .instock{color:#087a00}
 #footer .footer-heading{position:relative;color:inherit;font-size:14px;font-weight:600;line-height:1.4;margin:0 0 22px;text-transform:uppercase}
-#footer .footer-heading:after{content:"";display:block;width:30px;margin-top:10px;border-bottom:2px solid currentColor}
+#footer .footer-heading:after{content:"";display:block;width:90%;height:1px;margin-top:2px;background-color:rgba(255,255,255,.8)}
 button.arrow-left,button.arrow-right,button.scroll-to-top,button.newsletter-submit{border:0;padding:0;background-color:transparent;font:inherit}
 button.scroll-to-top{position:fixed;display:block;width:45px;height:45px;right:30px;bottom:-60px;z-index:99;color:#fff;border-radius:2px;transition:all .3s ease}
 .offset250 button.scroll-to-top{bottom:30px}
