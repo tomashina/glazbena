@@ -45,7 +45,7 @@
                 {% set tab_row = 1 %}
                 {% for keyTab, tab in tabs %}
                 {% set tab_row = tab_row + 1 %}
-        		<li><a href="#tab-tab-{{ keyTab }}" data-toggle="tab"><i class="fa fa-minus-circle" onclick="$('a[href=\'#tab-tab-{{ keyTab }}\']').parent().remove(); $('#tab-tab-{{ keyTab }}').remove(); $('#tab a:first').tab('show');"></i> {{ tab.tab_title }}</a></li>
+                <li><a href="#tab-tab-{{ keyTab }}" data-toggle="tab"><i class="fa fa-minus-circle" onclick="$('a[href=\'#tab-tab-{{ keyTab }}\']').parent().remove(); $('#tab-tab-{{ keyTab }}').remove(); $('#tab a:first').tab('show');"></i> <span class="tab-label">{{ tab.tab_title }}</span></a></li>
         		{% endfor %}
                 <li id="tab-add" style="cursor:pointer"><a onclick="addTab();"><i class="fa fa-plus-circle"></i> {{ button_add_tab }}</a></li>        	</ul>
         </div> <!-- col-sm-2 -->
@@ -61,7 +61,7 @@
             <span class="input-group-addon">
             <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.language_id }}" />
             </span>
-            <input class="form-control" type="text" name="showintabs_tab[{{ keyTab }}][title][{{ language.language_id }}]" value="{{ tab.title[language.language_id] }}" class="{% if language.language_id == language_admin_id %}language-title{% endif %}" />
+	            <input class="form-control{% if language.language_id == language_admin_id %} language-title{% endif %}" type="text" name="showintabs_tab[{{ keyTab }}][title][{{ language.language_id }}]" value="{{ tab.title[language.language_id] }}" />
             </div>
             {% endfor %}
             </div>
@@ -75,7 +75,7 @@
                                   </legend>
                                   <div class="field_cont"{% if tab.data_source is defined and tab.data_source != "SP" %} style="display:none"{% endif %}>
                                       <label>{{ entry_products }}</label>
-                                      <input type="text" class="form-control" name="products" value="" id="{{ keyTab }}"/>
+	                                      <input type="text" class="form-control product-search" name="products" value="" id="{{ keyTab }}" autocomplete="off" />
                                     <div id="products-tabs-{{ keyTab }}" class="well well-sm" style="height: 150px; overflow: auto;">
                                     {% if tab.products %}
                                     {% for product_tab in tab.products %}
@@ -169,7 +169,7 @@ function addTab(){
   html += '<span class="input-group-addon">';
   html += '<img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>';
   html += '</span>';
-  html += '<input class="form-control" type="text" name="showintabs_tab[' + tab_row + '][title][{{ language.language_id }}]" value="" {% if language.language_id == language_admin_id %} class="language-title"{% endif %} />';
+	  html += '<input class="form-control{% if language.language_id == language_admin_id %} language-title{% endif %}" type="text" name="showintabs_tab[' + tab_row + '][title][{{ language.language_id }}]" value="" />';
   html += '</div>';
   {% endfor %}
   html += '</div>';
@@ -178,7 +178,7 @@ function addTab(){
   html += '<input type="radio" id="select_product' + tab_row + '" name="showintabs_tab[' + tab_row + '][data_source]" value="SP" checked="checked"/> <label for="select_product' + tab_row + '">{{ header_products_select }}</label> </legend>';
   html += '<div class="field_cont">';
   html += '<label>{{ entry_products }}</label>';
-  html += '<input type="text" class="form-control" name="products" value="" id="' + tab_row + '"/>';
+	  html += '<input type="text" class="form-control product-search" name="products" value="" id="' + tab_row + '" autocomplete="off" />';
   html += '<div id="products-tabs-' + tab_row + '" class="well well-sm" style="height: 150px; overflow: auto;"></div>';
   html += '</div>';
   html += '</fieldset><fieldset><legend>';
@@ -224,93 +224,82 @@ function addTab(){
 
   $('.tab-content.first').append(html);
   
-  $('#tab-add').before('<li><a href="#tab-tab-' + tab_row + '" data-toggle="tab"><i class="fa fa-minus-circle" onclick="$(\'a[href=\\\'#tab-tab-' + tab_row + '\\\']\').parent().remove(); $(\'#tab-tab-' + tab_row + '\').remove(); $(\'#tab a:first\').tab(\'show\');"></i> ' + '{{ text_tab }}' + tab_row + '</a></li>');
+	  $('#tab-add').before('<li><a href="#tab-tab-' + tab_row + '" data-toggle="tab"><i class="fa fa-minus-circle" onclick="$(\'a[href=\\\'#tab-tab-' + tab_row + '\\\']\').parent().remove(); $(\'#tab-tab-' + tab_row + '\').remove(); $(\'#tab a:first\').tab(\'show\');"></i> <span class="tab-label">' + '{{ text_tab }}' + tab_row + '</span></a></li>');
 	
   $('#tab a[href=\'#tab-tab-' + tab_row + '\']').tab('show');
   
-  //Enable autocomplete
-  $('input[name=\'products\']').autocomplete(autocomp_cfg);
-  
-  //Remove products from individual list
-  $('.well').delegate('.fa-minus-circle', 'click', function() {
-  $(this).parent().remove();
-  });
-
-  //open/close the filter methods
-  $('legend > input').on('change', function() {
-  $(this).closest('div').find('div.field_cont').hide();
-  $(this).closest('fieldset').find('div.field_cont').fadeIn();
-  });
+	  initProductAutocomplete($('#' + tab_row));
 }
 
 // show first tab on page load
 $('#tab li:first-child a').tab('show');
-//Autocomplete
-var autocomp_cfg = {
-  delay: 500,
-  source: function(request, response) {
-    $.ajax({
-      url: 'index.php?route=extension/basel/productgroups/autocomplete&user_token={{ token }}&filter_name=' +  encodeURIComponent(request),
-      dataType: 'json',
-      success: function(json) {   
+
+function initProductAutocomplete($input) {
+  if (!$input.length || $input.data('productgroups-autocomplete')) {
+    return;
+  }
+
+  $input.data('productgroups-autocomplete', true);
+  $input.autocomplete({
+    source: function(request, response) {
+      $.ajax({
+        url: 'index.php?route=catalog/product/autocomplete&user_token={{ token }}&filter_name=' + encodeURIComponent(request),
+        dataType: 'json'
+      }).done(function(json) {
         response($.map(json, function(item) {
           return {
             label: item.name,
             value: item.product_id
-          }
+          };
         }));
-      }
-    });
-  }, 
-  
-  select: function(item) {
-    var tab_row = $(this).attr('id');
+      }).fail(function() {
+        response([]);
+      });
+    },
+    select: function(item) {
+      var tabRow = $(this).attr('id');
+      var productId = String(item.value);
+      var $product = $('<div>', {
+        id: 'product-tabs-' + tabRow + '-' + productId
+      });
 
-    $('#product-tabs-' + tab_row + '-' + item.value).remove();
+      $('#product-tabs-' + tabRow + '-' + productId).remove();
 
-    var prodElement = '';
-    prodElement += '<div id="product-tabs-' + tab_row + '-' + item.value + '">' + '<i class="fa fa-minus-circle"></i> ' + item.label ;
-    prodElement += '  <input type="hidden" name="showintabs_tab[' + tab_row + '][products][' + item.value + '][product_id]" value="' + item.value + '" />';
-    prodElement += '</div>';
+      $('<i>', { class: 'fa fa-minus-circle' }).appendTo($product);
+      $product.append(document.createTextNode(' ' + item.label));
+      $('<input>', {
+        type: 'hidden',
+        name: 'showintabs_tab[' + tabRow + '][products][' + productId + '][product_id]',
+        value: productId
+      }).appendTo($product);
 
-    $('#products-tabs-' + tab_row).append(prodElement);
-        
-    return false;
-  },
-  focus: function(event, ui) {
+      $('#products-tabs-' + tabRow).append($product);
+      $(this).val('');
+
       return false;
-  }
-};
-// Autocomplet de productos
-$('input[name=\'products\']').autocomplete(autocomp_cfg);
+    }
+  });
+}
 
-//Delete de productos
-$('.well').delegate('.fa-minus-circle', 'click', function() {
-	$(this).parent().remove();
+$('input[name=\'products\']').each(function() {
+  initProductAutocomplete($(this));
 });
-//--></script>
-<script type="text/javascript"><!--
-//open/close the filter methods
-$('legend > input').on('change', function() {
-  $(this).closest('div').find('div.field_cont').hide();
+
+$(document).on('click', '.well .fa-minus-circle', function() {
+  $(this).parent().remove();
+});
+
+$(document).on('change', 'legend > input', function() {
+  $(this).closest('.tab-pane').find('div.field_cont').hide();
   $(this).closest('fieldset').find('div.field_cont').fadeIn();
 });
-//--></script> 
-<script type="text/javascript"><!--
-//cambio de titulo de pestaña cuando escribe el user
-$('.language-title').on('keyup input paste', function() {
-  var href = $(this).closest('div').attr('id');
-  $('a[href="#' + href + '"] > div').text($(this).val());
+
+$(document).on('input', '.language-title', function() {
+  var paneId = $(this).closest('.tab-pane').attr('id');
+  var title = $(this).val() || '{{ text_tab }}';
+
+  $('#tab a[href="#' + paneId + '"] .tab-label').text(title);
 });
-//--></script> 
-<script type="text/javascript"><!--
-//control delete pestañas
-function removeTab(TabId) {
-  $('#tab-' + TabId ).remove(); 
-  $('#tab-tab-' + TabId).remove(); 
-  $('.vtabs a:first').trigger('click');
-  $('input[value="' + TabId + '"]:checkbox').parent().remove(); 
-}
 //--></script>
 <style>
 .panel-body {
@@ -333,6 +322,12 @@ legend label {
 	margin:0px;
 	padding-bottom:5px;
 	vertical-align:top;
+}
+.product-search + .dropdown-menu {
+	width: 100%;
+	max-height: 300px;
+	overflow-y: auto;
+	z-index: 1050;
 }
 legend input[type="radio"]:checked+label { 
 	color:#222222;
