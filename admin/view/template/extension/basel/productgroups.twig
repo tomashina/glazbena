@@ -61,7 +61,7 @@
             <span class="input-group-addon">
             <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.language_id }}" />
             </span>
-	            <input class="form-control{% if language.language_id == language_admin_id %} language-title{% endif %}" type="text" name="showintabs_tab[{{ keyTab }}][title][{{ language.language_id }}]" value="{{ tab.title[language.language_id] }}" />
+            <input class="form-control{% if language.language_id == language_admin_id %} language-title{% endif %}" type="text" name="showintabs_tab[{{ keyTab }}][title][{{ language.language_id }}]" value="{{ tab.title[language.language_id] }}" />
             </div>
             {% endfor %}
             </div>
@@ -75,7 +75,7 @@
                                   </legend>
                                   <div class="field_cont"{% if tab.data_source is defined and tab.data_source != "SP" %} style="display:none"{% endif %}>
                                       <label>{{ entry_products }}</label>
-	                                      <input type="text" class="form-control product-search" name="products" value="" id="{{ keyTab }}" autocomplete="off" />
+                                      <input type="text" class="form-control product-search" name="products" value="" id="{{ keyTab }}" autocomplete="off" />
                                     <div id="products-tabs-{{ keyTab }}" class="well well-sm" style="height: 150px; overflow: auto;">
                                     {% if tab.products %}
                                     {% for product_tab in tab.products %}
@@ -168,8 +168,7 @@ function addTab(){
   html += '<div class="input-group">';
   html += '<span class="input-group-addon">';
   html += '<img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" /></span>';
-  html += '</span>';
-	  html += '<input class="form-control{% if language.language_id == language_admin_id %} language-title{% endif %}" type="text" name="showintabs_tab[' + tab_row + '][title][{{ language.language_id }}]" value="" />';
+  html += '<input class="form-control{% if language.language_id == language_admin_id %} language-title{% endif %}" type="text" name="showintabs_tab[' + tab_row + '][title][{{ language.language_id }}]" value="" />';
   html += '</div>';
   {% endfor %}
   html += '</div>';
@@ -178,7 +177,7 @@ function addTab(){
   html += '<input type="radio" id="select_product' + tab_row + '" name="showintabs_tab[' + tab_row + '][data_source]" value="SP" checked="checked"/> <label for="select_product' + tab_row + '">{{ header_products_select }}</label> </legend>';
   html += '<div class="field_cont">';
   html += '<label>{{ entry_products }}</label>';
-	  html += '<input type="text" class="form-control product-search" name="products" value="" id="' + tab_row + '" autocomplete="off" />';
+  html += '<input type="text" class="form-control product-search" name="products" value="" id="' + tab_row + '" autocomplete="off" />';
   html += '<div id="products-tabs-' + tab_row + '" class="well well-sm" style="height: 150px; overflow: auto;"></div>';
   html += '</div>';
   html += '</fieldset><fieldset><legend>';
@@ -224,11 +223,11 @@ function addTab(){
 
   $('.tab-content.first').append(html);
   
-	  $('#tab-add').before('<li><a href="#tab-tab-' + tab_row + '" data-toggle="tab"><i class="fa fa-minus-circle" onclick="$(\'a[href=\\\'#tab-tab-' + tab_row + '\\\']\').parent().remove(); $(\'#tab-tab-' + tab_row + '\').remove(); $(\'#tab a:first\').tab(\'show\');"></i> <span class="tab-label">' + '{{ text_tab }}' + tab_row + '</span></a></li>');
+  $('#tab-add').before('<li><a href="#tab-tab-' + tab_row + '" data-toggle="tab"><i class="fa fa-minus-circle" onclick="$(\'a[href=\\\'#tab-tab-' + tab_row + '\\\']\').parent().remove(); $(\'#tab-tab-' + tab_row + '\').remove(); $(\'#tab a:first\').tab(\'show\');"></i> <span class="tab-label">' + '{{ text_tab }}' + tab_row + '</span></a></li>');
 	
   $('#tab a[href=\'#tab-tab-' + tab_row + '\']').tab('show');
   
-	  initProductAutocomplete($('#' + tab_row));
+  initProductAutocomplete($('#' + tab_row));
 }
 
 // show first tab on page load
