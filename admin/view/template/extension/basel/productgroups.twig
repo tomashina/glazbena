@@ -238,26 +238,64 @@ function initProductAutocomplete($input) {
     return;
   }
 
+  var searchTimer;
+  var request;
+  var $dropdown = $('<ul>', {
+    class: 'dropdown-menu product-search-results'
+  });
+
   $input.data('productgroups-autocomplete', true);
-  $input.autocomplete({
-    source: function(request, response) {
-      $.ajax({
-        url: 'index.php?route=catalog/product/autocomplete&user_token={{ token }}&filter_name=' + encodeURIComponent(request),
+  $input.after($dropdown);
+
+  function hideResults() {
+    $dropdown.hide().empty();
+  }
+
+  function loadResults() {
+    var filterName = $.trim($input.val());
+
+    clearTimeout(searchTimer);
+
+    if (filterName.length < 2) {
+      hideResults();
+      return;
+    }
+
+    searchTimer = setTimeout(function() {
+      if (request) {
+        request.abort();
+      }
+
+      request = $.ajax({
+        url: 'index.php?route=catalog/product/autocomplete&user_token={{ token }}&filter_name=' + encodeURIComponent(filterName),
         dataType: 'json'
-      }).done(function(json) {
-        response($.map(json, function(item) {
-          return {
-            label: item.name,
-            value: item.product_id
-          };
-        }));
+      }).done(function(products) {
+        $dropdown.empty();
+
+        $.each(products, function(index, product) {
+          $('<a>', {
+            href: '#',
+            text: product.name
+          }).data('product', product).appendTo($('<li>').appendTo($dropdown));
+        });
+
+        $dropdown.toggle(products.length > 0);
       }).fail(function() {
-        response([]);
+        hideResults();
       });
-    },
-    select: function(item) {
-      var tabRow = $(this).attr('id');
-      var productId = String(item.value);
+    }, 250);
+  }
+
+  $input.on('input focus', loadResults);
+
+  $input.on('blur', function() {
+    setTimeout(hideResults, 150);
+  });
+
+  $dropdown.on('mousedown', 'a', function(event) {
+      var product = $(this).data('product');
+      var tabRow = $input.attr('id');
+      var productId = String(product.product_id);
       var $product = $('<div>', {
         id: 'product-tabs-' + tabRow + '-' + productId
       });
@@ -265,7 +303,7 @@ function initProductAutocomplete($input) {
       $('#product-tabs-' + tabRow + '-' + productId).remove();
 
       $('<i>', { class: 'fa fa-minus-circle' }).appendTo($product);
-      $product.append(document.createTextNode(' ' + item.label));
+      $product.append(document.createTextNode(' ' + product.name));
       $('<input>', {
         type: 'hidden',
         name: 'showintabs_tab[' + tabRow + '][products][' + productId + '][product_id]',
@@ -273,10 +311,10 @@ function initProductAutocomplete($input) {
       }).appendTo($product);
 
       $('#products-tabs-' + tabRow).append($product);
-      $(this).val('');
+      $input.val('').focus();
+      hideResults();
 
-      return false;
-    }
+      event.preventDefault();
   });
 }
 
@@ -322,7 +360,11 @@ legend label {
 	padding-bottom:5px;
 	vertical-align:top;
 }
-.product-search + .dropdown-menu {
+.product-search-results {
+	position:relative;
+	top:auto;
+	left:auto;
+	float:none;
 	width: 100%;
 	max-height: 300px;
 	overflow-y: auto;
