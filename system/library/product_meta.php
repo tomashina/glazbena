@@ -44,58 +44,24 @@ class ProductMeta {
 			$title_text = html_entity_decode($title_text, ENT_QUOTES, 'UTF-8');
 		}
 
+		// Automatic tags must come from the title only. Existing manual tags are preserved above.
 		$title_tokens = self::tokenize($title_text);
-		$description_text = strip_tags(
-			str_replace(array('</p>', '</li>', '<br>', '<br/>', '<br />'), ' ', (string)$html)
-		);
-
-		for ($decode = 0; $decode < 2; $decode++) {
-			$description_text = html_entity_decode($description_text, ENT_QUOTES, 'UTF-8');
-		}
-
-		$description_text = str_replace(array('&nbsp;', '&amp;nbsp;', "\xC2\xA0"), ' ', $description_text);
-		$description_tokens = self::tokenize($description_text);
 		$stop_words = array_fill_keys(self::$stop_words, true);
-		$candidates = array();
-		$position = 0;
+		$tags = array();
 
 		foreach ($title_tokens as $token) {
 			$token = self::normalizeToken($token);
 
-			if (!self::isUsefulToken($token, true, $stop_words)) {
+			if (!self::isUsefulToken($token, $stop_words)) {
 				continue;
 			}
 
-			if (!isset($candidates[$token])) {
-				$candidates[$token] = array('score' => 0, 'position' => $position++);
+			if (!isset($tags[$token])) {
+				$tags[$token] = true;
 			}
-
-			$candidates[$token]['score'] += 100;
 		}
 
-		foreach ($description_tokens as $token) {
-			$token = self::normalizeToken($token);
-
-			if (!self::isUsefulToken($token, false, $stop_words)) {
-				continue;
-			}
-
-			if (!isset($candidates[$token])) {
-				$candidates[$token] = array('score' => 0, 'position' => $position++);
-			}
-
-			$candidates[$token]['score'] += 1;
-		}
-
-		uksort($candidates, function($left, $right) use ($candidates) {
-			if ($candidates[$left]['score'] === $candidates[$right]['score']) {
-				return $candidates[$left]['position'] <=> $candidates[$right]['position'];
-			}
-
-			return $candidates[$right]['score'] <=> $candidates[$left]['score'];
-		});
-
-		return array_slice(array_keys($candidates), 0, $limit);
+		return array_slice(array_keys($tags), 0, $limit);
 	}
 
 	private static function tokenize($text) {
@@ -116,18 +82,14 @@ class ProductMeta {
 		return strtolower($token);
 	}
 
-	private static function isUsefulToken($token, $from_title, array $stop_words) {
+	private static function isUsefulToken($token, array $stop_words) {
 		if ($token === '' || isset($stop_words[$token])) {
 			return false;
 		}
 
 		$length = function_exists('mb_strlen') ? mb_strlen($token, 'UTF-8') : strlen($token);
 
-		if ($length < ($from_title ? 2 : 3)) {
-			return false;
-		}
-
-		if (!$from_title && preg_match('/^\p{N}+$/u', $token)) {
+		if ($length < 2) {
 			return false;
 		}
 
