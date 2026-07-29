@@ -15,6 +15,7 @@ if ((int)$this->user->getGroupId() === 10) {
 }
 
 		$this->repairBaselProductGroupsPermissions();
+		$this->repairWebpGeneratorPermissions();
 
 		$this->load->language('common/dashboard');
 
@@ -28,6 +29,11 @@ if ((int)$this->user->getGroupId() === 10) {
 
   $data['link_megesalespro'] = $this->url->link('extension/module/boost_special_manager',
                 'user_token=' . $this->session->data['user_token'], true);
+
+        $data['link_webp_generator'] = $this->url->link('extension/module/webp_generator',
+                'user_token=' . $this->session->data['user_token'], true);
+        $data['can_access_webp_generator'] = (int)$this->user->getGroupId() === 1
+                || $this->user->hasPermission('access', 'extension/module/webp_generator');
 
         
 
@@ -169,6 +175,25 @@ if ((int)$this->user->getGroupId() === 10) {
 		if (!$this->user->hasPermission('access', $route) || !$this->user->hasPermission('modify', $route)) {
 			$this->load->model('user/user_group');
 			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', $route);
+			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', $route);
+		}
+	}
+
+	private function repairWebpGeneratorPermissions() {
+		$route = 'extension/module/webp_generator';
+		$controller = DIR_APPLICATION . 'controller/extension/module/webp_generator.php';
+
+		if ((int)$this->user->getGroupId() !== 1 || !is_file($controller)) {
+			return;
+		}
+
+		$this->load->model('user/user_group');
+
+		if (!$this->user->hasPermission('access', $route)) {
+			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'access', $route);
+		}
+
+		if (!$this->user->hasPermission('modify', $route)) {
 			$this->model_user_user_group->addPermission($this->user->getGroupId(), 'modify', $route);
 		}
 	}

@@ -162,6 +162,162 @@ $(document).ready(function() {
 	});
 });
 
+// Restore the Attribute Preset controls when the legacy OCMOD only partially
+// modifies the OpenCart 3.0.5.0 product form. Once OCMOD renders the controls
+// itself, this compatibility initializer detects them and does nothing.
+$(document).ready(function() {
+	var $attributeTable = $('#attribute');
+
+	if (!$attributeTable.length || !$('#attemplate').length) {
+		return;
+	}
+
+	function initializeAttributePresetRow(row) {
+		var $row = $(row);
+		var rowId = $row.attr('id') || '';
+		var rowMatch = rowId.match(/^attribute-row(\d+)$/);
+
+		if (!rowMatch) {
+			return;
+		}
+
+		var attributeRow = rowMatch[1];
+		var $attributeName = $row.find('input[name="product_attribute[' + attributeRow + '][name]"]');
+		var $attributeId = $row.find('input[name="product_attribute[' + attributeRow + '][attribute_id]"]');
+
+		if (!$attributeName.length || !$attributeId.length) {
+			return;
+		}
+
+		// A text field or drop-list means the complete extension is already active.
+		var $existingPreset = $row.find('input[name="product_attribute[' + attributeRow + '][preset]"], select[name="product_attribute[' + attributeRow + '][preset_id][]"]');
+
+		if ($existingPreset.length) {
+			$existingPreset.closest('.test')
+				.css('position', 'relative')
+				.children('.dropdown-menu')
+				.css('width', '100%');
+
+			return;
+		}
+
+		var presetName = 'product_attribute[' + attributeRow + '][preset]';
+		var presetIdName = 'product_attribute[' + attributeRow + '][preset_id][]';
+		var $presetContainer = $('<div class="test attribute-preset-compat"></div>').css('position', 'relative');
+		var $preset = $('<input type="text" class="form-control" autocomplete="off">')
+			.attr('name', presetName)
+			.attr('placeholder', 'Odaberite spremljenu vrijednost');
+		var $presetId = $('<input type="hidden">').attr('name', presetIdName).val('');
+
+		$presetContainer.append($preset, $presetId);
+		$attributeName.after($presetContainer).after('<br>');
+
+		$preset.autocomplete({
+			'source': function(request, response) {
+				var currentAttributeId = $attributeId.val();
+
+				$.ajax({
+					url: 'index.php?route=extension/module/atpresets/autocomplete&user_token=' + encodeURIComponent(getURLVar('user_token')) + '&filter_name=' + encodeURIComponent(request) + '&attribute_id=' + encodeURIComponent(currentAttributeId),
+					dataType: 'json',
+					success: function(json) {
+						response($.map(json, function(item) {
+							return {
+								category: item.attribute_name || '',
+								attribute_id: item.attribute_id || currentAttributeId,
+								label: item.not_decoded_text,
+								label_decoded: item.text,
+								values: item.texts || {},
+								value: item.preset_id
+							};
+						}));
+					}
+				});
+			},
+			'select': function(item) {
+				$preset.val(item.label_decoded);
+				$presetId.val(item.value);
+
+				if (item.attribute_id) {
+					$attributeId.val(item.attribute_id);
+
+					if (item.category) {
+						$attributeName.val(item.category);
+					}
+				}
+
+				$.each(item.values, function(languageId, text) {
+					$row.find('textarea[name="product_attribute[' + attributeRow + '][product_attribute_description][' + languageId + '][text]"]').val(text);
+				});
+			}
+		});
+
+		$presetContainer.children('.dropdown-menu').css('width', '100%');
+
+		var $actions = $row.children('td').last();
+
+		if (!$actions.find('.attribute-preset-save, button[onclick^="add_preset("]').length) {
+			var $savePreset = $('<button type="button" class="btn btn-primary attribute-preset-save" style="margin-top:20px;" data-toggle="tooltip"></button>')
+				.attr('title', 'Spremi vrijednosti kao novi predložak')
+				.append('<i class="fa fa-plus-circle"></i>');
+
+			$savePreset.on('click', function() {
+				var texts = {};
+
+				$row.find('textarea[name^="product_attribute[' + attributeRow + '][product_attribute_description]"]').each(function() {
+					var languageMatch = ($(this).attr('name') || '').match(/\[product_attribute_description\]\[(\d+)\]\[text\]$/);
+
+					if (languageMatch) {
+						texts[languageMatch[1]] = $(this).val();
+					}
+				});
+
+				$.ajax({
+					url: 'index.php?route=extension/module/atpresets/insert&user_token=' + encodeURIComponent(getURLVar('user_token')),
+					type: 'post',
+					data: {
+						attribute_id: $attributeId.val(),
+						texts: texts
+					},
+					dataType: 'json',
+					success: function(json) {
+						if (json.preset_id) {
+							$presetId.val(json.preset_id);
+							$preset.val(json.preset_decoded || json.preset || '');
+						}
+
+						if (json.message) {
+							alert(json.message);
+						}
+					},
+					error: function() {
+						alert('Spremljenu vrijednost nije moguće dodati.');
+					}
+				});
+			});
+
+			$actions.append('<br>').append($savePreset);
+		}
+	}
+
+	function initializeAttributePresetRows() {
+		$attributeTable.find('tbody > tr[id^="attribute-row"]').each(function() {
+			initializeAttributePresetRow(this);
+		});
+	}
+
+	initializeAttributePresetRows();
+
+	if (window.MutationObserver) {
+		var attributePresetObserver = new MutationObserver(function() {
+			initializeAttributePresetRows();
+		});
+
+		attributePresetObserver.observe($attributeTable.find('tbody').get(0), {
+			childList: true
+		});
+	}
+});
+
 // Autocomplete */
 (function($) {
 	$.fn.autocomplete = function(option) {

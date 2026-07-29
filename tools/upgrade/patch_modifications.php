@@ -109,6 +109,7 @@ try {
 	// that do not use presets. PHP 8 turns that into output that breaks AJAX.
 	// OpenCart 3.0.5.0 also added an inline style to the attribute-name field;
 	// make the extension's exact OCMOD search match the upgraded template.
+	// Keep the add-preset action recognizable as the blue plus used previously.
 	$patchModification('StvAttrPreset', 'Attributes Preset Values', array(
 		array(
 			'search' => "count(\$product_attribute['preset_id'])",
@@ -119,6 +120,11 @@ try {
 			'search' => '<td class="text-left" style="width: 40%;"><input type="text" name="product_attribute[{{ attribute_row }}][name]" value="{{ product_attribute.name }}" placeholder="{{ entry_attribute }}" class="form-control"/> <input type="hidden" name="product_attribute[{{ attribute_row }}][attribute_id]" value="{{ product_attribute.attribute_id }}"/></td>',
 			'replace' => '<td class="text-left" style="width: 40%;"><input type="text" name="product_attribute[{{ attribute_row }}][name]" value="{{ product_attribute.name }}" placeholder="{{ entry_attribute }}" class="form-control" style="position:relative;"/> <input type="hidden" name="product_attribute[{{ attribute_row }}][attribute_id]" value="{{ product_attribute.attribute_id }}"/></td>',
 			'expected' => 1
+		),
+		array(
+			'search' => 'class="fa fa-save"',
+			'replace' => 'class="fa fa-plus-circle"',
+			'expected' => 2
 		)
 	));
 

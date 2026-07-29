@@ -1,0 +1,283 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if not gd_available %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_webp_support }}</div>
+    {% endif %}
+    {% if not can_modify %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_permission }}</div>
+    {% endif %}
+
+    <div class="alert alert-info">
+      <i class="fa fa-info-circle"></i> {{ text_on_demand }}
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6 col-lg-3">
+        <div class="panel panel-default">
+          <div class="panel-body text-center">
+            <div class="text-muted">{{ text_source_images }}</div>
+            <strong id="stat-source-images" style="font-size: 24px;">{{ total_product_images }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="panel panel-default">
+          <div class="panel-body text-center">
+            <div class="text-muted">{{ text_cached_webp }}</div>
+            <strong id="stat-webp-files" style="font-size: 24px;">{{ webp_files }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="panel panel-default">
+          <div class="panel-body text-center">
+            <div class="text-muted">{{ text_cache_size }}</div>
+            <strong id="stat-webp-size" style="font-size: 24px;">{{ webp_size }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="panel panel-default">
+          <div class="panel-body text-center">
+            <div class="text-muted">{{ text_target_count }}</div>
+            <strong id="stat-target-count" style="font-size: 24px;">{{ target_count }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-picture-o"></i> {{ text_tool }}</h3>
+      </div>
+      <div class="panel-body">
+        <p>{{ text_intro }}</p>
+
+        <div class="row">
+          <div class="col-md-7">
+            <h4>{{ text_dimensions }}</h4>
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>{{ text_dimension_name }}</th>
+                    <th class="text-center">{{ text_dimension_size }}</th>
+                    <th class="text-center">{{ text_quality }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for size in sizes %}
+                  <tr>
+                    <td>{{ size.label }}</td>
+                    <td class="text-center">{{ size.width }} × {{ size.height }}</td>
+                    <td class="text-center">{{ quality }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="well">
+              <div class="form-group">
+                <label for="input-batch-size">{{ text_batch_size }}</label>
+                <select id="input-batch-size" class="form-control">
+                  <option value="3" selected="selected">3</option>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                </select>
+                <p class="help-block">{{ text_batch_help }}</p>
+              </div>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="input-force" value="1"> {{ text_force }}
+                </label>
+                <p class="help-block">{{ text_force_help }}</p>
+              </div>
+              <button type="button" id="button-generate" class="btn btn-primary btn-lg" {% if not gd_available or not can_modify or total_product_images == 0 %}disabled="disabled"{% endif %}>
+                <i class="fa fa-play"></i> {{ button_generate }}
+              </button>
+              <button type="button" id="button-stop" class="btn btn-danger btn-lg" style="display: none;">
+                <i class="fa fa-stop"></i> {{ button_stop }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="generator-progress" style="display: none;">
+          <div class="progress" style="height: 28px; margin-bottom: 10px;">
+            <div id="generator-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%; line-height: 28px;">0%</div>
+          </div>
+          <p id="generator-status" class="text-muted">{{ text_ready }}</p>
+          <div class="row text-center">
+            <div class="col-xs-4"><strong id="count-generated">0</strong><br><span class="text-muted">{{ text_generated }}</span></div>
+            <div class="col-xs-4"><strong id="count-skipped">0</strong><br><span class="text-muted">{{ text_skipped }}</span></div>
+            <div class="col-xs-4"><strong id="count-failed">0</strong><br><span class="text-muted">{{ text_failed }}</span></div>
+          </div>
+          <div id="generator-errors" class="alert alert-warning" style="display: none; margin-top: 15px;">
+            <strong>{{ text_errors }}</strong>
+            <ul></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript"><!--
+(function() {
+  'use strict';
+
+  var messages = {{ javascript_translations|json_encode|raw }};
+  var running = false;
+  var stopRequested = false;
+  var start = 0;
+  var totals = { generated: 0, skipped: 0, failed: 0 };
+
+  function setRunning(value) {
+    running = value;
+    $('#button-generate').prop('disabled', value || {{ (not gd_available or not can_modify or total_product_images == 0) ? 'true' : 'false' }});
+    $('#input-batch-size, #input-force').prop('disabled', value);
+    $('#button-stop').toggle(value).prop('disabled', false);
+  }
+
+  function setStatus(message, type) {
+    var className = type === 'error' ? 'text-danger' : (type === 'success' ? 'text-success' : 'text-muted');
+    $('#generator-status').removeClass('text-danger text-success text-muted').addClass(className).text(message);
+  }
+
+  function updateCounts() {
+    $('#count-generated').text(totals.generated);
+    $('#count-skipped').text(totals.skipped);
+    $('#count-failed').text(totals.failed);
+  }
+
+  function updateProgress(percent) {
+    percent = Math.max(0, Math.min(100, parseInt(percent, 10) || 0));
+    $('#generator-progress-bar').css('width', percent + '%').attr('aria-valuenow', percent).text(percent + '%');
+  }
+
+  function addErrors(errors) {
+    if (!errors || !errors.length) {
+      return;
+    }
+
+    var $list = $('#generator-errors ul');
+    $('#generator-errors').show();
+
+    $.each(errors, function(index, error) {
+      if ($list.children().length >= 50) {
+        return false;
+      }
+
+      var suffix = error.size ? ' (' + error.size + ')' : '';
+      $('<li>').text(error.file + suffix + ': ' + error.message).appendTo($list);
+    });
+  }
+
+  function refreshStats() {
+    $.getJSON('{{ stats_url }}', function(stats) {
+      if (!stats.error) {
+        $('#stat-source-images').text(stats.total_product_images);
+        $('#stat-webp-files').text(stats.webp_files);
+        $('#stat-webp-size').text(stats.webp_size);
+        $('#stat-target-count').text(stats.target_count);
+      }
+    });
+  }
+
+  function finish(message, type) {
+    setRunning(false);
+    $('#generator-progress-bar').removeClass('active');
+    setStatus(message, type);
+    refreshStats();
+  }
+
+  function runBatch() {
+    if (stopRequested) {
+      finish(messages.stopped, 'warning');
+      return;
+    }
+
+    $.ajax({
+      url: '{{ generate_url }}',
+      type: 'post',
+      dataType: 'json',
+      data: {
+        start: start,
+        limit: $('#input-batch-size').val(),
+        force: $('#input-force').is(':checked') ? 1 : 0
+      },
+      success: function(result) {
+        if (result.error) {
+          finish(result.error, 'error');
+          return;
+        }
+
+        totals.generated += parseInt(result.generated, 10) || 0;
+        totals.skipped += parseInt(result.skipped, 10) || 0;
+        totals.failed += parseInt(result.failed, 10) || 0;
+        start = parseInt(result.next_start, 10) || 0;
+
+        updateCounts();
+        updateProgress(result.percent);
+        addErrors(result.errors);
+        setStatus(messages.processing.replace('%1$d', result.processed).replace('%2$d', result.total));
+
+        if (result.done) {
+          updateProgress(100);
+          finish(messages.complete, 'success');
+        } else {
+          window.setTimeout(runBatch, 50);
+        }
+      },
+      error: function() {
+        finish(messages.request_failed, 'error');
+      }
+    });
+  }
+
+  $('#button-generate').on('click', function() {
+    if (running) {
+      return;
+    }
+
+    if ($('#input-force').is(':checked') && !window.confirm(messages.confirm_force)) {
+      return;
+    }
+
+    start = 0;
+    totals = { generated: 0, skipped: 0, failed: 0 };
+    stopRequested = false;
+    $('#generator-errors').hide().find('ul').empty();
+    $('#generator-progress').show();
+    $('#generator-progress-bar').addClass('active');
+    updateCounts();
+    updateProgress(0);
+    setStatus(messages.starting);
+    setRunning(true);
+    runBatch();
+  });
+
+  $('#button-stop').on('click', function() {
+    stopRequested = true;
+    $(this).prop('disabled', true);
+    setStatus(messages.stopping);
+  });
+}());
+//--></script>
+{{ footer }}

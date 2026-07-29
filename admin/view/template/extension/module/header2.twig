@@ -88,6 +88,10 @@ Info stranice</a></li> -->
 
   <li><a href="{{ link_megesalespro }}" class="btn btn-info"><i class="fa fa-bars" aria-hidden="true"></i> Akcije</a></li>
 
+{% if can_access_webp_generator %}
+  <li><a href="{{ link_webp_generator }}" class="btn btn-info"><i class="fa fa-file-image-o" aria-hidden="true"></i> WebP slike</a></li>
+{% endif %}
+
 <!--  <li><a href="{{ link_home_megafilter }}" class="btn btn-info"><i class="fa fa-bars" aria-hidden="true"></i> Mega Filter</a></li> -->
 
 
