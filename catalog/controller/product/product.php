@@ -277,10 +277,11 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 			$this->load->model('tool/image');
 
 			if ($product_info['image']) {
-			//	$data['popup'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'));
-
-                $data['popup'] = 'image/'.$product_info['image'];
-
+				$data['popup'] = $this->model_tool_image->resize(
+					$product_info['image'],
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'),
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')
+				);
 			} else {
 				$data['popup'] = '';
 			}
@@ -296,9 +297,15 @@ $this->document->setKeywords(!empty($product_info['meta_keyword']) ? $product_in
 			$results = $this->model_catalog_product->getProductImages($this->request->get['product_id']);
 
 			foreach ($results as $result) {
+				$popup = $this->model_tool_image->resize(
+					$result['image'],
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'),
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')
+				);
+
 				$data['images'][] = array(
-					'popup' => 'image/'.$result['image'],
-					'large' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')),
+					'popup' => $popup,
+					'large' => $popup,
 					'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_additional_height'))
 				);
 			}

@@ -147,6 +147,8 @@
   var stopRequested = false;
   var start = 0;
   var totals = { generated: 0, skipped: 0, failed: 0 };
+  var generateUrl = {{ generate_url|json_encode|raw }};
+  var statsUrl = {{ stats_url|json_encode|raw }};
 
   function setRunning(value) {
     running = value;
@@ -190,7 +192,7 @@
   }
 
   function refreshStats() {
-    $.getJSON('{{ stats_url }}', function(stats) {
+    $.getJSON(statsUrl, function(stats) {
       if (!stats.error) {
         $('#stat-source-images').text(stats.total_product_images);
         $('#stat-webp-files').text(stats.webp_files);
@@ -214,7 +216,7 @@
     }
 
     $.ajax({
-      url: '{{ generate_url }}',
+      url: generateUrl,
       type: 'post',
       dataType: 'json',
       data: {

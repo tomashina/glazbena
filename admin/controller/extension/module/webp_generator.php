@@ -25,8 +25,8 @@ class ControllerExtensionModuleWebpGenerator extends Controller {
 		);
 
 		$data['cancel'] = $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true);
-		$data['generate_url'] = $this->url->link($this->route . '/generate', 'user_token=' . $this->session->data['user_token'], true);
-		$data['stats_url'] = $this->url->link($this->route . '/stats', 'user_token=' . $this->session->data['user_token'], true);
+		$data['generate_url'] = str_replace('&amp;', '&', $this->url->link($this->route . '/generate', 'user_token=' . $this->session->data['user_token'], true));
+		$data['stats_url'] = str_replace('&amp;', '&', $this->url->link($this->route . '/stats', 'user_token=' . $this->session->data['user_token'], true));
 		$data['sizes'] = $this->getImageSizes();
 		$data['quality'] = ModelExtensionModuleWebpGenerator::QUALITY;
 		$data['gd_available'] = extension_loaded('gd') && function_exists('imagewebp');
