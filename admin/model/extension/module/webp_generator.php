@@ -5,9 +5,11 @@ class ModelExtensionModuleWebpGenerator extends Model {
 	public function getTotalProductImages() {
 		$query = $this->db->query(
 			"SELECT COUNT(*) AS total FROM (" .
-			"SELECT image FROM `" . DB_PREFIX . "product` WHERE image <> '' " .
+			"SELECT image FROM `" . DB_PREFIX . "product` WHERE status = '1' AND image <> '' " .
 			"UNION " .
-			"SELECT image FROM `" . DB_PREFIX . "product_image` WHERE image <> ''" .
+			"SELECT pi.image FROM `" . DB_PREFIX . "product_image` pi " .
+			"INNER JOIN `" . DB_PREFIX . "product` p ON (p.product_id = pi.product_id) " .
+			"WHERE p.status = '1' AND pi.image <> ''" .
 			") product_images"
 		);
 
@@ -20,9 +22,11 @@ class ModelExtensionModuleWebpGenerator extends Model {
 
 		$query = $this->db->query(
 			"SELECT image FROM (" .
-			"SELECT image FROM `" . DB_PREFIX . "product` WHERE image <> '' " .
+			"SELECT image FROM `" . DB_PREFIX . "product` WHERE status = '1' AND image <> '' " .
 			"UNION " .
-			"SELECT image FROM `" . DB_PREFIX . "product_image` WHERE image <> ''" .
+			"SELECT pi.image FROM `" . DB_PREFIX . "product_image` pi " .
+			"INNER JOIN `" . DB_PREFIX . "product` p ON (p.product_id = pi.product_id) " .
+			"WHERE p.status = '1' AND pi.image <> ''" .
 			") product_images ORDER BY image ASC LIMIT " . $start . "," . $limit
 		);
 
