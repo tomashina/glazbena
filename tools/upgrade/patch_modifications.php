@@ -8,6 +8,19 @@ if (PHP_SAPI !== 'cli') {
 require dirname(__DIR__, 2) . '/config.php';
 
 $refresh = in_array('--refresh', $argv, true);
+$only_code = null;
+
+foreach ($argv as $argument) {
+	if (strpos($argument, '--only=') === 0) {
+		$only_code = substr($argument, strlen('--only='));
+
+		if ($only_code === '') {
+			fwrite(STDERR, "The --only option requires a modification code.\n");
+			exit(1);
+		}
+	}
+}
+
 $session_id = null;
 $database = new mysqli(DB_HOSTNAME, DB_USERNAME, DB_PASSWORD, DB_DATABASE, (int)DB_PORT);
 
@@ -18,7 +31,11 @@ if ($database->connect_errno) {
 
 $table = DB_PREFIX . 'modification';
 
-$patchModification = function ($code, $name, array $replacements) use ($database, $table) {
+$patchModification = function ($code, $name, array $replacements) use ($database, $table, $only_code) {
+	if ($only_code !== null && $only_code !== $code) {
+		return;
+	}
+
 	$statement = $database->prepare(
 		"SELECT `modification_id`, `xml` FROM `" . $table . "` WHERE `code` = ? AND `name` = ? LIMIT 1"
 	);
@@ -42,7 +59,9 @@ $patchModification = function ($code, $name, array $replacements) use ($database
 		$count = 0;
 		$xml = str_replace($replacement['search'], $replacement['replace'], $xml, $count);
 
-		if ($count !== $replacement['expected']) {
+		$allow_missing = !empty($replacement['allow_missing']);
+
+		if ($count !== $replacement['expected'] && !($allow_missing && $count === 0)) {
 			throw new RuntimeException(
 				'Modification ' . $modification_id . ' pattern count mismatch: expected ' .
 				$replacement['expected'] . ', found ' . $count
@@ -135,7 +154,10 @@ try {
 		array(
 			'search' => 'pim.js?v=3.0.7.1',
 			'replace' => 'pim.js?v=3.0.7.2',
-			'expected' => 2
+			'expected' => 2,
+			// Some installations already carry a later extension version. The
+			// cache-buster is unrelated to the remaining compatibility patches.
+			'allow_missing' => true
 		)
 	));
 
