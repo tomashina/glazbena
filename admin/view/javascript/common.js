@@ -209,6 +209,20 @@ $(document).ready(function() {
 			.attr('placeholder', 'Odaberite spremljenu vrijednost');
 		var $presetId = $('<input type="hidden">').attr('name', presetIdName).val('');
 
+		function getAttributeTexts() {
+			var texts = {};
+
+			$row.find('textarea[name^="product_attribute[' + attributeRow + '][product_attribute_description]"]').each(function() {
+				var languageMatch = ($(this).attr('name') || '').match(/\[product_attribute_description\]\[(\d+)\]\[text\]$/);
+
+				if (languageMatch) {
+					texts[languageMatch[1]] = $(this).val();
+				}
+			});
+
+			return texts;
+		}
+
 		$presetContainer.append($preset, $presetId);
 		$attributeName.after($presetContainer).after('<br>');
 
@@ -253,6 +267,36 @@ $(document).ready(function() {
 
 		$presetContainer.children('.dropdown-menu').css('width', '100%');
 
+		var currentTexts = getAttributeTexts();
+		var hasCurrentText = false;
+
+		$.each(currentTexts, function(languageId, text) {
+			if (text !== '') {
+				hasCurrentText = true;
+				return false;
+			}
+		});
+
+		if ($attributeId.val() && hasCurrentText) {
+			$.ajax({
+				url: 'index.php?route=extension/module/atpresets/resolve&user_token=' + encodeURIComponent(getURLVar('user_token')),
+				type: 'post',
+				data: {
+					attribute_id: $attributeId.val(),
+					texts: currentTexts
+				},
+				dataType: 'json',
+				success: function(json) {
+					// Do not overwrite a value the administrator entered while
+					// the existing preset was being resolved.
+					if (!$preset.val() && json.preset_id) {
+						$presetId.val(json.preset_id);
+						$preset.val(json.preset);
+					}
+				}
+			});
+		}
+
 		var $actions = $row.children('td').last();
 
 		if (!$actions.find('.attribute-preset-save, button[onclick^="add_preset("]').length) {
@@ -261,22 +305,12 @@ $(document).ready(function() {
 				.append('<i class="fa fa-plus-circle"></i>');
 
 			$savePreset.on('click', function() {
-				var texts = {};
-
-				$row.find('textarea[name^="product_attribute[' + attributeRow + '][product_attribute_description]"]').each(function() {
-					var languageMatch = ($(this).attr('name') || '').match(/\[product_attribute_description\]\[(\d+)\]\[text\]$/);
-
-					if (languageMatch) {
-						texts[languageMatch[1]] = $(this).val();
-					}
-				});
-
 				$.ajax({
 					url: 'index.php?route=extension/module/atpresets/insert&user_token=' + encodeURIComponent(getURLVar('user_token')),
 					type: 'post',
 					data: {
 						attribute_id: $attributeId.val(),
-						texts: texts
+						texts: getAttributeTexts()
 					},
 					dataType: 'json',
 					success: function(json) {

@@ -25,15 +25,29 @@ class File {
 		$files = glob(DIR_CACHE . 'cache.' . preg_replace('/[^A-Z0-9\._-]/i', '', $key) . '.*');
 
 		if ($files) {
-			$handle = fopen($files[0], 'r');
+			$handle = @fopen($files[0], 'r');
 
-			flock($handle, LOCK_SH);
+			if (!$handle) {
+				return false;
+			}
 
-			$data = fread($handle, filesize($files[0]));
+			if (!flock($handle, LOCK_SH)) {
+				fclose($handle);
+				return false;
+			}
+
+			// Read from the already opened stream. The cache file can be
+			// unlinked by another request after glob(), so asking the path
+			// for its size here causes a warning even though the handle is
+			// still valid.
+			$data = stream_get_contents($handle);
 
 			flock($handle, LOCK_UN);
-
 			fclose($handle);
+
+			if ($data === false || $data === '') {
+				return false;
+			}
 
 			return json_decode($data, true);
 		}

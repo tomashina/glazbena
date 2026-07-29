@@ -224,6 +224,48 @@ class ControllerExtensionModuleAtpresets extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}	
 
+	public function resolve() {
+		$json = array(
+			'preset_id' => 0,
+			'preset'    => ''
+		);
+
+		if (
+			isset($this->request->post['attribute_id']) &&
+			isset($this->request->post['texts']) &&
+			is_array($this->request->post['texts'])
+		) {
+			$descriptions = array();
+
+			foreach ($this->request->post['texts'] as $language_id => $text) {
+				if ((int)$language_id > 0 && is_scalar($text)) {
+					$descriptions[(int)$language_id] = (string)$text;
+				}
+			}
+
+			if ($descriptions) {
+				$this->load->model('extension/atpresets/atpresets');
+
+				$preset_id = $this->model_extension_atpresets_atpresets->existsPreset(array(
+					'attribute_id' => (int)$this->request->post['attribute_id'],
+					'descriptions' => $descriptions
+				));
+
+				if ($preset_id) {
+					$json['preset_id'] = (int)$preset_id;
+					$json['preset'] = html_entity_decode(
+						$this->model_extension_atpresets_atpresets->getPresetTitle($preset_id),
+						ENT_QUOTES,
+						'UTF-8'
+					);
+				}
+			}
+		}
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
 	public function insert() {
 		$json = array();
 		$this->load->language('extension/module/atpresets');
