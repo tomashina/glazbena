@@ -164,6 +164,19 @@ try {
 		)
 	));
 
+	// Special Manager searched for the generic "return array(" line without
+	// an index. OpenCart therefore injected its getProduct pricing code before
+	// every array return in the model, including early returns where $query and
+	// $product_id do not exist. Restrict the operation to getProduct's first
+	// return; the two field replacements below it are already specific.
+	$patchModification('special-manager', 'Special Manager', array(
+		array(
+			'search' => '<search><![CDATA[return array(]]></search>',
+			'replace' => '<search index="0"><![CDATA[return array(]]></search>',
+			'expected' => 1
+		)
+	));
+
 	// Product variants are grouped by an exact identifier (MPN, SKU, EAN,
 	// etc.). Do not send that identifier through the full catalogue search,
 	// which uses multiple leading-wildcard LIKE conditions.
