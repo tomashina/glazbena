@@ -185,7 +185,6 @@ class ControllerExtensionBlogBlogComment extends Controller {
 		$pagination->total = $total;
 		$pagination->page = $page;
 		$pagination->limit = $this->config->get('config_limit_admin');
-		$pagination->text = $this->language->get('text_pagination');
 		$pagination->url = $this->url->link('extension/blog/blog_comment', $token_prefix . '=' . $this->session->data[$token_prefix] . $url . '&page={page}', true);
 					
 		$data['pagination'] = $pagination->render();

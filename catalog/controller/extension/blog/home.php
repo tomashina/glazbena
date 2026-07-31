@@ -166,7 +166,6 @@ class ControllerExtensionBlogHome extends Controller {
 		$pagination->page = $page;
 		$pagination->limit = $this->config->get('blogsetting_blogs_per_page');
 		if (empty($pagination->limit)) {$pagination->limit = 5;}
-		$pagination->text = $this->language->get('text_pagination');
 		$pagination->url = $this->url->link('extension/blog/home', $url . '&page={page}');
 
 		$data['pagination'] = $pagination->render();

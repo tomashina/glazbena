@@ -1090,7 +1090,6 @@ class ControllerExtensionModuleMegaFilter extends Controller {
 		$pagination->total = $total;
 		$pagination->page = $page;
 		$pagination->limit = $limit;
-		$pagination->text = $this->language->get('text_pagination');
 		$pagination->url = $this->url->link($route, 'user_token=' . $this->session->data['user_token'] . $url . '&page={page}', 'SSL');
 		
 		return $pagination->render();
