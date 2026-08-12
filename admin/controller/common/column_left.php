@@ -661,31 +661,6 @@ class ControllerCommonColumnLeft extends Controller {
 			}	
 
 			if ($report) {
-			
-			$data['menus'][] = array(
-				'id'       => 'menu-report',
-				'icon'	   => 'fa-bar-chart-o', 
-				'name'	   => $this->language->get('text_reports'),
-				'href'     => '',
-				'children' => $report
-			);	
-			}
-			// Stats
-			$this->load->model('sale/order');
-	
-			$order_total = $this->model_sale_order->getTotalOrders();
-			
-			$this->load->model('report/statistics');
-			
-			$complete_total = $this->model_report_statistics->getValue('order_complete');
-			
-			if ((float)$complete_total && $order_total) {
-				$data['complete_status'] = round(($complete_total / $order_total) * 100);
-			} else {
-				$data['complete_status'] = 0;
-			}
-
-			if ($report) {
 				$data['menus'][] = array(
 					'id'       => 'menu-report',
 					'icon'	   => 'fa-bar-chart',

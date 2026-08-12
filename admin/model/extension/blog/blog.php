@@ -2,7 +2,7 @@
 class ModelExtensionBlogBlog extends Model {
 	public function addBlog($data) {
 		$this->db->query("INSERT INTO " . DB_PREFIX . "blog SET 
-		sort_order = '" . $this->db->escape($data['image']) . "', 
+		sort_order = '" . (int)$data['sort_order'] . "',
 		image = '" . $this->db->escape($data['image']) . "', 
 		status = '" . (int)$data['status'] . "', 
 		author = '" . $this->db->escape($data['author']) . "',

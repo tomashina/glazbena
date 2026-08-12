@@ -55,8 +55,23 @@ class ControllerExtensionModuleBlogLatest extends Controller {
 			$tags = false;
 		}
 
-		if ($setting['characters']) {
-			$description = utf8_substr(strip_tags(html_entity_decode($result['short_description'], ENT_QUOTES, 'UTF-8')), 0, 220) . '...';
+		if (!empty($setting['characters'])) {
+			require_once(DIR_SYSTEM . 'library/blog_meta.php');
+
+			$characters = 220;
+			$short_description = BlogMeta::plainText($result['short_description']);
+			$body_description = BlogMeta::plainText($result['description']);
+			$description_source = $short_description;
+
+			if (utf8_strlen($description_source) < $characters && utf8_strlen($body_description) > utf8_strlen($description_source)) {
+				$description_source = $body_description;
+			}
+
+			$description = BlogMeta::excerpt($description_source, $characters);
+
+			if (utf8_strlen($description_source) > utf8_strlen($description)) {
+				$description .= '...';
+			}
 		} else {
 			$description = false;
 		}

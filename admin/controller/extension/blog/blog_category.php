@@ -346,7 +346,7 @@ class ControllerExtensionBlogBlogCategory extends Controller {
 		}
 
 		foreach ($this->request->post['blog_category_description'] as $language_id => $value) {
-			if ((strlen(utf8_decode($value['name'])) < 2) || (strlen(utf8_decode($value['name'])) > 255)) {
+			if ((utf8_strlen($value['name']) < 2) || (utf8_strlen($value['name']) > 255)) {
 				$this->error['name'][$language_id] = $this->language->get('error_name');
 			}
 		}

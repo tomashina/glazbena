@@ -590,12 +590,44 @@ class ControllerExtensionBlogBlog extends Controller {
 	}
 
 	private function validateForm() {
+		if (!empty($this->request->post['blog_description']) && is_array($this->request->post['blog_description'])) {
+			require_once(DIR_SYSTEM . 'library/blog_meta.php');
+			$this->request->post['blog_description'] = BlogMeta::autofillDescriptions($this->request->post['blog_description']);
+
+			$blog_titles = array();
+
+			foreach ($this->request->post['blog_description'] as $language_id => $description) {
+				$blog_titles[$language_id] = isset($description['title']) ? $description['title'] : '';
+			}
+
+			require_once(DIR_SYSTEM . 'library/seo_keyword.php');
+
+			if ((float)VERSION >= 3.0) {
+				$blog_seo_url = isset($this->request->post['blog_seo_url']) && is_array($this->request->post['blog_seo_url'])
+					? $this->request->post['blog_seo_url']
+					: array();
+				$blog_query = isset($this->request->get['blog_id'])
+					? 'blog_id=' . (int)$this->request->get['blog_id']
+					: '';
+
+				$this->request->post['blog_seo_url'] = SeoKeyword::autofill(
+					$this->db,
+					$blog_seo_url,
+					$blog_titles,
+					$blog_query
+				);
+			} elseif (empty($this->request->post['keyword'])) {
+				$first_title = $blog_titles ? reset($blog_titles) : '';
+				$this->request->post['keyword'] = SeoKeyword::slugify($first_title);
+			}
+		}
+
 		if (!$this->user->hasPermission('modify', 'extension/blog/blog')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
 
 		foreach ($this->request->post['blog_description'] as $language_id => $value) {
-			if ((strlen(utf8_decode($value['title'])) < 3) || (strlen(utf8_decode($value['title'])) > 128)) {
+			if ((utf8_strlen($value['title']) < 3) || (utf8_strlen($value['title']) > 128)) {
 				$this->error['title'][$language_id] = $this->language->get('error_title');
 			}
 		
