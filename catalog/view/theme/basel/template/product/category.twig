@@ -83,7 +83,20 @@
               gkInitCategorySlider();
             });
           </script>
-          <style>#content .categories.carousel .item>a:first-child{display:block;aspect-ratio:1/1}#content .categories.carousel .item>a:first-child img{display:block;width:100%;height:100%;object-fit:contain}#content .categories.carousel .slick-arrow{opacity:1!important;color:#111!important;background:rgba(255,255,255,.94)!important;border:1px solid #d8d8d8!important;border-radius:50%}#content .categories.carousel .slick-arrow svg{display:block;width:22px;height:22px;margin:auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}</style>
+          <style>
+          #content .categories.carousel .item>a:first-child{display:block;aspect-ratio:1/1}
+          #content .categories.carousel .item>a:first-child img{display:block;width:100%;height:100%;object-fit:contain}
+          #content .categories.carousel .slick-arrow{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-top:-22px;padding:0;opacity:1!important;color:#111!important;background:rgba(255,255,255,.94)!important;border:1px solid #d8d8d8!important;border-radius:50%;cursor:pointer;transition:opacity .2s!important}
+          #content .categories.carousel .slick-arrow svg{display:block;width:22px;height:22px;margin:auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+          @media(min-width:992px){
+          #content .categories.carousel .arrow-left,#content .categories.carousel:hover .arrow-left{left:12px!important}
+          #content .categories.carousel .arrow-right,#content .categories.carousel:hover .arrow-right{right:12px!important}
+          }
+          @media(max-width:991px){
+          #content .categories.carousel .arrow-left,#content .categories.carousel:hover .arrow-left{left:15px!important}
+          #content .categories.carousel .arrow-right,#content .categories.carousel:hover .arrow-right{right:15px!important}
+          }
+          </style>
      {% endif %}
 
       {% if products %}
