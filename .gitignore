@@ -27,6 +27,7 @@ image/tmp/
 # Database dumps and private import feeds
 *.sql
 !database/migrations/20260827_orderreviews_safe_delivery.sql
+!database/migrations/20260827_agmedia_review_reminder_migrate.sql
 SHOP_sync.xml
 upgrade-backups/
 

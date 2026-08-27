@@ -1,0 +1,256 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-review-reminder" data-toggle="tooltip" title="{{ button_save|escape }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel|escape }}" data-toggle="tooltip" title="{{ button_cancel|escape }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title|escape }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href|escape }}">{{ breadcrumb.text|escape }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning|escape }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success|escape }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+
+    <div class="alert alert-info"><i class="fa fa-shield"></i> {{ text_independent_notice }}</div>
+
+    <form action="{{ action|escape }}" method="post" enctype="multipart/form-data" id="form-review-reminder" class="form-horizontal">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i class="fa fa-cog"></i> {{ text_settings }}</h3>
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-9">
+              <select name="module_agmedia_review_reminder_status" id="input-status" class="form-control">
+                {% if module_agmedia_review_reminder_status %}
+                <option value="1" selected="selected">{{ text_enabled }}</option>
+                <option value="0">{{ text_disabled }}</option>
+                {% else %}
+                <option value="1">{{ text_enabled }}</option>
+                <option value="0" selected="selected">{{ text_disabled }}</option>
+                {% endif %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group required">
+            <label class="col-sm-3 control-label"><span data-toggle="tooltip" title="{{ help_order_status }}">{{ entry_order_status }}</span></label>
+            <div class="col-sm-9">
+              <div class="well well-sm" style="height: 150px; overflow: auto; margin-bottom: 5px;">
+                {% for order_status in order_statuses %}
+                <div class="checkbox">
+                  <label>
+                    {% if order_status.order_status_id in module_agmedia_review_reminder_order_status_id %}
+                    <input type="checkbox" name="module_agmedia_review_reminder_order_status_id[]" value="{{ order_status.order_status_id|escape }}" checked="checked" /> {{ order_status.name|escape }}
+                    {% else %}
+                    <input type="checkbox" name="module_agmedia_review_reminder_order_status_id[]" value="{{ order_status.order_status_id|escape }}" /> {{ order_status.name|escape }}
+                    {% endif %}
+                  </label>
+                </div>
+                {% endfor %}
+              </div>
+              <a href="#" id="select-all-statuses">{{ text_select_all }}</a> / <a href="#" id="unselect-all-statuses">{{ text_unselect_all }}</a>
+              {% if error_order_status %}<div class="text-danger">{{ error_order_status }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group required">
+            <label class="col-sm-3 control-label" for="input-delay-days"><span data-toggle="tooltip" title="{{ help_delay_days }}">{{ entry_delay_days }}</span></label>
+            <div class="col-sm-3">
+              <input type="number" name="module_agmedia_review_reminder_delay_days" value="{{ module_agmedia_review_reminder_delay_days|escape }}" min="0" max="90" id="input-delay-days" class="form-control" />
+              {% if error_delay_days %}<div class="text-danger">{{ error_delay_days }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group required">
+            <label class="col-sm-3 control-label" for="input-batch-size"><span data-toggle="tooltip" title="{{ help_batch_size }}">{{ entry_batch_size }}</span></label>
+            <div class="col-sm-3">
+              <input type="number" name="module_agmedia_review_reminder_batch_size" value="{{ module_agmedia_review_reminder_batch_size|escape }}" min="1" max="10" id="input-batch-size" class="form-control" />
+              {% if error_batch_size %}<div class="text-danger">{{ error_batch_size }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group required">
+            <label class="col-sm-3 control-label" for="input-hourly-limit"><span data-toggle="tooltip" title="{{ help_hourly_limit }}">{{ entry_hourly_limit }}</span></label>
+            <div class="col-sm-3">
+              <input type="number" name="module_agmedia_review_reminder_hourly_limit" value="{{ module_agmedia_review_reminder_hourly_limit|escape }}" min="1" max="2" id="input-hourly-limit" class="form-control" />
+              {% if error_hourly_limit %}<div class="text-danger">{{ error_hourly_limit }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group required">
+            <label class="col-sm-3 control-label" for="input-max-age-days"><span data-toggle="tooltip" title="{{ help_max_age_days }}">{{ entry_max_age_days }}</span></label>
+            <div class="col-sm-3">
+              <input type="number" name="module_agmedia_review_reminder_max_age_days" value="{{ module_agmedia_review_reminder_max_age_days|escape }}" min="1" max="365" id="input-max-age-days" class="form-control" />
+              {% if error_max_age_days %}<div class="text-danger">{{ error_max_age_days }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="form-group required">
+            <label class="col-sm-3 control-label" for="input-max-attempts"><span data-toggle="tooltip" title="{{ help_max_attempts }}">{{ entry_max_attempts }}</span></label>
+            <div class="col-sm-3">
+              <input type="number" name="module_agmedia_review_reminder_max_attempts" value="{{ module_agmedia_review_reminder_max_attempts|escape }}" min="1" max="5" id="input-max-attempts" class="form-control" />
+              {% if error_max_attempts %}<div class="text-danger">{{ error_max_attempts }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i class="fa fa-envelope"></i> {{ text_email }}</h3>
+        </div>
+        <div class="panel-body">
+          {% if not smtp_ready %}
+          <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_smtp_not_ready }}</div>
+          {% endif %}
+          {% if not review_status %}
+          <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_reviews_disabled }}</div>
+          {% elseif not review_guest %}
+          <div class="alert alert-warning"><i class="fa fa-info-circle"></i> {{ warning_guest_reviews }}</div>
+          {% endif %}
+          <div class="alert alert-warning"><i class="fa fa-info-circle"></i> {{ text_core_review_notice }}</div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{ entry_smtp }}</label>
+            <div class="col-sm-9"><p class="form-control-static"><strong>{{ mail_engine|upper|escape }}</strong> — {{ smtp_host|escape }}{% if smtp_port %}:{{ smtp_port|escape }}{% endif %}</p></div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-sender-name">{{ entry_sender_name }}</label>
+            <div class="col-sm-9"><input type="text" value="{{ sender_name|escape }}" id="input-sender-name" class="form-control" readonly="readonly" /></div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-sender-email">{{ entry_sender_email }}</label>
+            <div class="col-sm-9"><input type="text" value="{{ sender_email|escape }}" id="input-sender-email" class="form-control" readonly="readonly" /><p class="help-block">{{ help_sender }}</p></div>
+          </div>
+
+          <ul class="nav nav-tabs" id="language-tabs">
+            {% for language in languages %}
+            <li{% if loop.first %} class="active"{% endif %}><a href="#language-{{ language.language_id|escape }}" data-toggle="tab"><img src="language/{{ language.code|escape }}/{{ language.code|escape }}.png" title="{{ language.name|escape }}" /> {{ language.name|escape }}</a></li>
+            {% endfor %}
+          </ul>
+          <div class="tab-content">
+            {% for language in languages %}
+            <div class="tab-pane{% if loop.first %} active{% endif %}" id="language-{{ language.language_id|escape }}">
+              <div class="form-group required">
+                <label class="col-sm-3 control-label" for="input-subject-{{ language.language_id|escape }}">{{ entry_subject }}</label>
+                <div class="col-sm-9">
+                  <input type="text" name="module_agmedia_review_reminder_subject[{{ language.language_id|escape }}]" value="{{ module_agmedia_review_reminder_subject[language.language_id]|escape }}" maxlength="180" id="input-subject-{{ language.language_id|escape }}" class="form-control" />
+                  {% if error_subject[language.language_id] %}<div class="text-danger">{{ error_subject[language.language_id]|escape }}</div>{% endif %}
+                </div>
+              </div>
+              <div class="form-group required">
+                <label class="col-sm-3 control-label" for="input-body-{{ language.language_id|escape }}">{{ entry_body }}</label>
+                <div class="col-sm-9">
+                  <textarea name="module_agmedia_review_reminder_body[{{ language.language_id|escape }}]" id="input-body-{{ language.language_id|escape }}" data-toggle="summernote" class="form-control">{{ module_agmedia_review_reminder_body[language.language_id]|escape }}</textarea>
+                  {% if error_body[language.language_id] %}<div class="text-danger">{{ error_body[language.language_id]|escape }}</div>{% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="well well-sm"><strong>{{ text_placeholders }}</strong> <code>{customer_name}</code> <code>{order_id}</code> <code>{order_date}</code> <code>{products}</code> <code>{store_name}</code> <code>{unsubscribe_url}</code></div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i class="fa fa-clock-o"></i> {{ text_cron }}</h3>
+        </div>
+        <div class="panel-body">
+          <div class="alert alert-danger"><i class="fa fa-lock"></i> {{ text_token_warning }}</div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-cron-url">{{ entry_cron_url }}</label>
+            <div class="col-sm-9">
+              <div class="input-group">
+                <input type="text" value="{{ cron_url|escape }}" id="input-cron-url" class="form-control" readonly="readonly" autocomplete="off" />
+                <span class="input-group-btn"><button type="button" id="button-copy-cron" class="btn btn-default"><i class="fa fa-copy"></i> {{ button_copy }}</button></span>
+              </div>
+              <p class="help-block">{{ help_cron }}</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-9 col-sm-offset-3">
+              <button type="submit" name="regenerate_token" value="1" class="btn btn-warning" formnovalidate="formnovalidate" onclick="return confirm('{{ text_confirm_regenerate|escape('js') }}');"><i class="fa fa-refresh"></i> {{ button_regenerate }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_recent_deliveries }}</h3>
+      </div>
+      <div class="panel-body">
+        {% if delivery_summary %}
+        <p>
+          {% for status, total in delivery_summary %}
+          <span class="label label-default">{{ (delivery_statuses[status] is defined ? delivery_statuses[status] : status)|escape }}: {{ total|escape }}</span>
+          {% endfor %}
+        </p>
+        {% endif %}
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead><tr><th>{{ column_order }}</th><th>{{ column_email }}</th><th>{{ column_status }}</th><th>{{ column_attempts }}</th><th>{{ column_updated }}</th><th>{{ column_error }}</th></tr></thead>
+            <tbody>
+              {% if recent_deliveries %}
+              {% for delivery in recent_deliveries %}
+              <tr>
+                <td>#{{ delivery.order_id|escape }}</td>
+                <td>{{ delivery.email|escape }}</td>
+                <td>{{ (delivery_statuses[delivery.status] is defined ? delivery_statuses[delivery.status] : delivery.status)|escape }}</td>
+                <td>{{ delivery.attempts|escape }}</td>
+                <td>{{ (delivery.sent_at ? delivery.sent_at : delivery.date_modified)|escape }}</td>
+                <td><span title="{{ delivery.last_error|escape }}">{{ delivery.last_error|slice(0, 120)|escape }}{% if delivery.last_error|length > 120 %}…{% endif %}</span></td>
+              </tr>
+              {% endfor %}
+              {% else %}
+              <tr><td colspan="6" class="text-center">{{ text_no_deliveries }}</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript"><!--
+$('#select-all-statuses').on('click', function(event) {
+  event.preventDefault();
+  $('input[name="module_agmedia_review_reminder_order_status_id[]"]').prop('checked', true);
+});
+
+$('#unselect-all-statuses').on('click', function(event) {
+  event.preventDefault();
+  $('input[name="module_agmedia_review_reminder_order_status_id[]"]').prop('checked', false);
+});
+
+$('#button-copy-cron').on('click', function() {
+  var input = document.getElementById('input-cron-url');
+  input.focus();
+  input.select();
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(input.value);
+  } else {
+    document.execCommand('copy');
+  }
+});
+//--></script>
+{{ footer }}

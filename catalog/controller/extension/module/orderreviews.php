@@ -47,6 +47,15 @@ class ControllerExtensionModuleOrderReviews extends Controller {
 			return;
 		}
 
+		if ($this->config->get('module_agmedia_review_reminder_legacy_endpoint_disabled')) {
+			$this->response->addHeader('HTTP/1.1 410 Gone');
+			$this->response->setOutput(json_encode(array(
+				'status' => 'retired',
+				'message' => 'This legacy OrderReviews sender has been replaced by AG Media Review Reminder.'
+			)));
+			return;
+		}
+
 		if ($this->config->get('config_mail_engine') !== 'smtp') {
 			$this->response->addHeader('HTTP/1.1 503 Service Unavailable');
 			$this->response->setOutput(json_encode(array(

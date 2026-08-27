@@ -1276,6 +1276,24 @@ max-height:600px;
     $('.table-cell.right .inner').theiaStickySidebar({containerSelector:'.product-info'});
       {% endif %}
 
+// Open the core review form when a customer follows a review-reminder link.
+    if (window.location.hash === '#tab-review' || /(?:^|[?&])review=write(?:&|$)/.test(window.location.search)) {
+      var $reviewTabLink = $('a[href="#tab-review"]').first();
+
+      if ($reviewTabLink.length) {
+        $reviewTabLink.tab('show');
+
+        window.setTimeout(function() {
+          var $reviewPanel = $('#tab-review');
+
+          if ($reviewPanel.length) {
+            $('html, body').animate({scrollTop: $reviewPanel.offset().top - 100}, 500);
+            $reviewPanel.find('textarea[name="text"]').first().trigger('focus');
+          }
+        }, 150);
+      }
+    }
+
 // Reviews/Question scroll link
     $(".to_tabs").click(function() {
       $('html, body').animate({
