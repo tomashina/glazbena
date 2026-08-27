@@ -30,14 +30,25 @@ final class AgmediaReviewReminderPolicy {
 	public static function normaliseBodyHtml($value) {
 		$value = (string)$value;
 
-		// Repair content saved by the first admin template revision, which
-		// encoded the complete HTML document before the WYSIWYG editor loaded it.
-		if (strpos($value, '<') === false
-			&& preg_match('/&lt;\/?(?:p|div|table|tbody|tr|td|a|strong|em|br|ul|ol|li|h[1-6])(?:\s|&gt;)/i', $value)) {
-			$decoded = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+		// Repair one or more encoding layers saved by the first admin template
+		// revisions. Only accept the decoded candidate when it produces a real
+		// supported HTML tag, so ordinary text entities remain untouched.
+		if (strpos($value, '<') === false) {
+			$candidate = $value;
 
-			if (strpos($decoded, '<') !== false) {
-				$value = $decoded;
+			for ($layer = 0; $layer < 5; $layer++) {
+				$decoded = html_entity_decode($candidate, ENT_QUOTES, 'UTF-8');
+
+				if ($decoded === $candidate) {
+					break;
+				}
+
+				$candidate = $decoded;
+
+				if (preg_match('/<\/?(?:p|div|table|tbody|tr|td|a|strong|em|br|ul|ol|li|h[1-6])(?:\s|>)/i', $candidate)) {
+					$value = $candidate;
+					break;
+				}
 			}
 		}
 
