@@ -401,18 +401,24 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 		}
 
 		if (isset($value[$languageId]) && trim((string)$value[$languageId]) !== '') {
-			return $value[$languageId];
+			return $key === 'module_agmedia_review_reminder_body'
+				? AgmediaReviewReminderPolicy::normaliseBodyHtml($value[$languageId])
+				: $value[$languageId];
 		}
 
 		$currentLanguageId = (int)$this->config->get('config_language_id');
 
 		if (isset($value[$currentLanguageId]) && trim((string)$value[$currentLanguageId]) !== '') {
-			return $value[$currentLanguageId];
+			return $key === 'module_agmedia_review_reminder_body'
+				? AgmediaReviewReminderPolicy::normaliseBodyHtml($value[$currentLanguageId])
+				: $value[$currentLanguageId];
 		}
 
 		foreach ($value as $candidate) {
 			if (trim((string)$candidate) !== '') {
-				return $candidate;
+				return $key === 'module_agmedia_review_reminder_body'
+					? AgmediaReviewReminderPolicy::normaliseBodyHtml($candidate)
+					: $candidate;
 			}
 		}
 

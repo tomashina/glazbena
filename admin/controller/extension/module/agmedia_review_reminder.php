@@ -28,6 +28,8 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 			}
 		}
 
+		$settings['module_agmedia_review_reminder_body'] = $this->normaliseBodies($settings['module_agmedia_review_reminder_body']);
+
 		$settings['module_agmedia_review_reminder_min_order_date'] = AgmediaReviewReminderPolicy::normaliseMinOrderDate(
 			isset($settings['module_agmedia_review_reminder_min_order_date']) ? $settings['module_agmedia_review_reminder_min_order_date'] : ''
 		);
@@ -62,6 +64,10 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 
 			if (!isset($this->request->post['module_agmedia_review_reminder_order_status_id'])) {
 				$settings['module_agmedia_review_reminder_order_status_id'] = array();
+			}
+
+			if (isset($settings['module_agmedia_review_reminder_body']) && is_array($settings['module_agmedia_review_reminder_body'])) {
+				$settings['module_agmedia_review_reminder_body'] = $this->normaliseBodies($settings['module_agmedia_review_reminder_body']);
 			}
 		}
 
@@ -144,6 +150,10 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 			$data[$key] = $value;
 		}
 
+		$data['module_agmedia_review_reminder_body'] = $this->prepareBodiesForTextarea(
+			(array)$data['module_agmedia_review_reminder_body']
+		);
+
 		$data['module_agmedia_review_reminder_order_status_id'] = array_map('intval', (array)$data['module_agmedia_review_reminder_order_status_id']);
 
 		if (empty($data['module_agmedia_review_reminder_cron_token'])) {
@@ -175,6 +185,8 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 				$settings[$array_key] = $defaults[$array_key];
 			}
 		}
+
+		$settings['module_agmedia_review_reminder_body'] = $this->normaliseBodies($settings['module_agmedia_review_reminder_body']);
 
 		$settings['module_agmedia_review_reminder_min_order_date'] = AgmediaReviewReminderPolicy::normaliseMinOrderDate(
 			isset($settings['module_agmedia_review_reminder_min_order_date']) ? $settings['module_agmedia_review_reminder_min_order_date'] : ''
@@ -238,7 +250,7 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 
 		$languages = $this->model_localisation_language->getLanguages();
 		$subjects = isset($this->request->post['module_agmedia_review_reminder_subject']) && is_array($this->request->post['module_agmedia_review_reminder_subject']) ? $this->request->post['module_agmedia_review_reminder_subject'] : array();
-		$bodies = isset($this->request->post['module_agmedia_review_reminder_body']) && is_array($this->request->post['module_agmedia_review_reminder_body']) ? $this->request->post['module_agmedia_review_reminder_body'] : array();
+		$bodies = isset($this->request->post['module_agmedia_review_reminder_body']) && is_array($this->request->post['module_agmedia_review_reminder_body']) ? $this->normaliseBodies($this->request->post['module_agmedia_review_reminder_body']) : array();
 
 		foreach ($languages as $language) {
 			$language_id = (int)$language['language_id'];
@@ -284,7 +296,7 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 			'module_agmedia_review_reminder_max_age_days' => (int)$post['module_agmedia_review_reminder_max_age_days'],
 			'module_agmedia_review_reminder_max_attempts' => (int)$post['module_agmedia_review_reminder_max_attempts'],
 			'module_agmedia_review_reminder_subject' => isset($post['module_agmedia_review_reminder_subject']) && is_array($post['module_agmedia_review_reminder_subject']) ? $post['module_agmedia_review_reminder_subject'] : array(),
-			'module_agmedia_review_reminder_body' => isset($post['module_agmedia_review_reminder_body']) && is_array($post['module_agmedia_review_reminder_body']) ? $post['module_agmedia_review_reminder_body'] : array(),
+			'module_agmedia_review_reminder_body' => isset($post['module_agmedia_review_reminder_body']) && is_array($post['module_agmedia_review_reminder_body']) ? $this->normaliseBodies($post['module_agmedia_review_reminder_body']) : array(),
 			'module_agmedia_review_reminder_cron_token' => $cron_token ?: $this->generateToken(),
 			'module_agmedia_review_reminder_legacy_endpoint_disabled' => 1
 		);
@@ -308,6 +320,22 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 		}
 
 		return array_values($result);
+	}
+
+	private function normaliseBodies(array $bodies) {
+		foreach ($bodies as $language_id => $body) {
+			$bodies[$language_id] = AgmediaReviewReminderPolicy::normaliseBodyHtml($body);
+		}
+
+		return $bodies;
+	}
+
+	private function prepareBodiesForTextarea(array $bodies) {
+		foreach ($bodies as $language_id => $body) {
+			$bodies[$language_id] = AgmediaReviewReminderPolicy::prepareBodyForTextarea($body);
+		}
+
+		return $bodies;
 	}
 
 	private function getDefaults() {
