@@ -189,11 +189,25 @@ class ControllerExtensionModuleOrderReviews extends Controller
 		$this->data['cancel']                          = $this->extensions_link;
 		$this->data['moduleSettings']                  = $this->moduleModel->getSetting($this->moduleName, $store['store_id']);
 		$this->data['moduleData']                      = (isset($this->data['moduleSettings'][$this->moduleName])) ? $this->data['moduleSettings'][$this->moduleName] : array();
+		$nextReviewMailId = !empty($this->data['moduleData']['NextReviewMailId']) ? (int)$this->data['moduleData']['NextReviewMailId'] : 1;
+
+		if (!empty($this->data['moduleData']['ReviewMail']) && is_array($this->data['moduleData']['ReviewMail'])) {
+			foreach ($this->data['moduleData']['ReviewMail'] as $reviewMailKey => $reviewMail) {
+				$existingId = is_array($reviewMail) && isset($reviewMail['id']) ? (int)$reviewMail['id'] : (int)$reviewMailKey;
+				$nextReviewMailId = max($nextReviewMailId, $existingId + 1);
+			}
+		}
+
+		if ($this->moduleModel->checkDbTable('orderreviews_delivery')) {
+			$nextReviewMailId = max($nextReviewMailId, $this->moduleModel->getMaxDeliveryReviewmailId($store['store_id']) + 1);
+		}
+
+		$this->data['nextReviewMailId'] = max(1, $nextReviewMailId);
 		$this->data['moduleData']['orderStatuses']     = $this->getAllOrderStatuses();
 		
 		$this->data['moduleData']['customerGroups']    = $this->model_customer_customer_group->getCustomerGroups();
 
-		if (isset($this->data['moduleData']['ReviewMail'])) {
+		if (!empty($this->data['moduleData']['ReviewMail']) && is_array($this->data['moduleData']['ReviewMail'])) {
 			foreach ($this->data['moduleData']['ReviewMail'] as $key => $value) {
 				$this->data['moduleData']['ReviewMail'][$key]['products']= !empty($this->data['moduleData']['ReviewMail'][$key]['products'])?$this->moduleModel->getProductsInIDArray($this->data['moduleData']['ReviewMail'][$key]['products']):array();
 				$this->data['moduleData']['ReviewMail'][$key]['categories']= !empty($this->data['moduleData']['ReviewMail'][$key]['categories'])?$this->moduleModel->getCategoriesByID($this->data['moduleData']['ReviewMail'][$key]['categories']):array();
@@ -210,7 +224,10 @@ class ControllerExtensionModuleOrderReviews extends Controller
         } else {
             $this->data['cronPhpPath'] .= 'php ';
         }
-        $this->data['cronPhpPath'] .= dirname(DIR_APPLICATION) . '/' . $this->vendorFolder . '/'.$this->moduleName.'/sendEmails.php';
+		$this->data['cronPhpPath'] .= dirname(DIR_APPLICATION) . '/' . $this->vendorFolder . '/'.$this->moduleName.'/sendEmails.php';
+		$cronToken = hash_hmac('sha256', 'orderreviews-cron-v1', (string)$this->config->get('config_encryption'));
+		$cronCatalogURL = defined('HTTPS_CATALOG') && HTTPS_CATALOG ? HTTPS_CATALOG : $this->data['catalogURL'];
+		$this->data['cronURL'] = rtrim($cronCatalogURL, '/') . '/index.php?route=' . $this->module_path . '/sendEmails&token=' . $cronToken;
 
 		// License Data
 		$hostname                                      = (!empty($_SERVER['HTTP_HOST'])) ? $_SERVER['HTTP_HOST'] : '';
@@ -403,7 +420,6 @@ class ControllerExtensionModuleOrderReviews extends Controller
 
         $this->model_setting_event->addEvent($this->eventGroup, "admin/model/catalog/review/deleteReview/after", $this->module_path . "/adminModelCatalogReviewDeleteAfter");
         $this->model_setting_event->addEvent($this->eventGroup, "catalog/model/checkout/order/getOrder/after", $this->module_path . "/handleGetOrderAfter");
-        $this->model_setting_event->addEvent($this->eventGroup, "catalog/model/checkout/order/addOrderHistory/after", $this->module_path . "/handleAddOrderHistory");
         $this->model_setting_event->addEvent($this->eventGroup, "catalog/view/account/order_list/after", $this->module_path . "/viewOrderHistoryAfter");
     }
 

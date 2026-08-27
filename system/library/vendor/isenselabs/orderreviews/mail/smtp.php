@@ -2,7 +2,18 @@
 namespace Vendor\iSenseLabs\OrderReviews\Mail;
 
 class Smtp {
-    public $smtp_hostname;
+	    public $to;
+	    public $from;
+	    public $sender;
+	    public $reply_to;
+	    public $subject;
+	    public $text;
+	    public $html;
+	    public $attachments = array();
+	    public $bcc;
+	    public $parameter;
+	    public $before_data_terminator;
+	    public $smtp_hostname;
     public $smtp_username;
     public $smtp_password;
     public $smtp_port = 25;
@@ -138,7 +149,9 @@ class Smtp {
                     throw new \Exception('Error: STARTTLS not accepted from server!');
                 }
 
-                stream_socket_enable_crypto($handle, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+	                if (stream_socket_enable_crypto($handle, true, STREAM_CRYPTO_METHOD_TLS_CLIENT) !== true) {
+	                    throw new \Exception('Error: TLS could not be established!');
+	                }
             }
 
             if (!empty($this->smtp_username)  && !empty($this->smtp_password)) {
@@ -265,7 +278,8 @@ class Smtp {
                 }
 
                 if ((substr($reply, 0, 3) != 250) && (substr($reply, 0, 3) != 251)) {
-                    throw new \Exception('Error: RCPT TO not accepted from server!');
+                    $code = (int)substr($reply, 0, 3);
+                    throw new \Exception('Error: RCPT TO not accepted from server! ' . trim(preg_replace('/\s+/', ' ', $reply)), $code);
                 }
             } else {
                 foreach ($this->to as $recipient) {
@@ -282,7 +296,8 @@ class Smtp {
                     }
 
                     if ((substr($reply, 0, 3) != 250) && (substr($reply, 0, 3) != 251)) {
-                        throw new \Exception('Error: RCPT TO not accepted from server!');
+                        $code = (int)substr($reply, 0, 3);
+                        throw new \Exception('Error: RCPT TO not accepted from server! ' . trim(preg_replace('/\s+/', ' ', $reply)), $code);
                     }
                 }
             }
@@ -312,8 +327,14 @@ class Smtp {
             foreach ($lines as $line) {
                 $results = str_split($line, 998);
 
-                foreach ($results as $result) {
-                    if (substr(PHP_OS, 0, 3) != 'WIN') {
+	            foreach ($results as $result) {
+	                // SMTP dot-stuffing prevents a message line beginning with a dot
+	                // from being interpreted as the end of the DATA command.
+	                if (isset($result[0]) && $result[0] === '.') {
+	                    $result = '.' . $result;
+	                }
+
+	                if (substr(PHP_OS, 0, 3) != 'WIN') {
                         fputs($handle, $result . "\r\n");
                     } else {
                         fputs($handle, str_replace("\n", "\r\n", $result) . "\r\n");
@@ -321,7 +342,11 @@ class Smtp {
                 }
             }
 
-            fputs($handle, '.' . "\r\n");
+	            if (is_callable($this->before_data_terminator)) {
+	                call_user_func($this->before_data_terminator);
+	            }
+
+	            fputs($handle, '.' . "\r\n");
 
             $reply = '';
 
@@ -333,9 +358,16 @@ class Smtp {
                 }
             }
 
-            if (substr($reply, 0, 3) != 250) {
-                throw new \Exception('Error: DATA not accepted from server!');
-            }
+	            if (substr($reply, 0, 3) != 250) {
+	                $code = (int)substr($reply, 0, 3);
+	                $cleanReply = trim(preg_replace('/\s+/', ' ', $reply));
+
+	                if ($code >= 400 && $code <= 599) {
+	                    throw new \Exception('Error: DATA not accepted from server! ' . $cleanReply, $code);
+	                }
+
+	                throw new \Exception('Error: SMTP outcome unknown after message DATA. ' . $cleanReply, $code);
+	            }
 
             fputs($handle, 'QUIT' . "\r\n");
 
@@ -349,11 +381,9 @@ class Smtp {
                 }
             }
 
-            if (substr($reply, 0, 3) != 221) {
-                throw new \Exception('Error: QUIT not accepted from server!');
-            }
-
             fclose($handle);
+
+            return true;
         }
     }
 }

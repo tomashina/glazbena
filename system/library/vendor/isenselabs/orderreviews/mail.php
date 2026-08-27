@@ -2,6 +2,7 @@
 namespace Vendor\iSenseLabs\OrderReviews;
 
 class Mail {
+    protected $adaptor;
     protected $to;
     protected $from;
     protected $sender;
@@ -12,6 +13,13 @@ class Mail {
     protected $attachments = array();
     protected $bcc;       
     public $parameter;
+    public $smtp_hostname;
+    public $smtp_username;
+    public $smtp_password;
+    public $smtp_port = 25;
+    public $smtp_timeout = 5;
+    public $verp = false;
+    public $before_data_terminator;
 
     public function __construct($adaptor = 'mail') {
         $class = 'Vendor\\iSenseLabs\\OrderReviews\\Mail\\' . $adaptor;
@@ -60,6 +68,10 @@ class Mail {
         $this->attachments[] = $filename;
     }
 
+    public function setBeforeDataTerminator($callback) {
+        $this->before_data_terminator = $callback;
+    }
+
     public function send() {
         if (!$this->to) {
             throw new \Exception('Error: E-Mail to required!');
@@ -82,9 +94,13 @@ class Mail {
         }
 
         foreach (get_object_vars($this) as $key => $value) {
+            if ($key === 'adaptor') {
+                continue;
+            }
+
             $this->adaptor->$key = $value;
         }
 
-        $this->adaptor->send();
+        return $this->adaptor->send();
     }
 }

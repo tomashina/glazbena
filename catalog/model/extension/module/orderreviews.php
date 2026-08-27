@@ -4,7 +4,6 @@ class ModelExtensionModuleOrderReviews extends Model {
 	public function sendMail($data = array()) {
 		$store_data = $this->getCurrentStore($data['store_id']);
 		$this->load->config('isenselabs/orderreviews');
-		$this->load->model('setting/setting');
 
 		$mailToUser = new Vendor\iSenseLabs\OrderReviews\Mail($this->config->get('config_mail_engine'));
         $mailToUser->parameter = $this->config->get('config_mail_parameter');
@@ -14,41 +13,422 @@ class ModelExtensionModuleOrderReviews extends Model {
         $mailToUser->smtp_port = $this->config->get('config_mail_smtp_port');
         $mailToUser->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
 
+		$fromAddress = filter_var($this->config->get('config_mail_smtp_username'), FILTER_VALIDATE_EMAIL)
+			? $this->config->get('config_mail_smtp_username')
+			: $store_data['store_email'];
+
 		$mailToUser->setTo($data['email']);
-		$mailToUser->setFrom($store_data['store_email']);
+		$mailToUser->setFrom($fromAddress);
+
+		if (filter_var($store_data['store_email'], FILTER_VALIDATE_EMAIL)) {
+			$mailToUser->setReplyTo($store_data['store_email']);
+		}
+
 		$mailToUser->setSender(html_entity_decode($store_data['name'], ENT_QUOTES, 'UTF-8'));
 		$mailToUser->setSubject(html_entity_decode($data['subject'], ENT_QUOTES, 'UTF-8'));
 		$mailToUser->setHtml($data['message']);
 
-		if(!$this->checkDbTable('orderreviews_setting')){
-			$moduleSettings = $this->model_setting_setting->getSetting('orderreviews', $data['store_id']);
-		} else {
-			$moduleSettings = $this->getSetting('orderreviews', $data['store_id']);
+		if (isset($data['before_data_terminator']) && is_callable($data['before_data_terminator'])) {
+			$mailToUser->setBeforeDataTerminator($data['before_data_terminator']);
 		}
 
-		if(isset($moduleSettings['orderreviews']['BCC']) && $moduleSettings['orderreviews']['BCC'] == 'yes') {
-			$mailToUser->setBcc($store_data['store_email']);
-		}
+		// BCC is intentionally disabled for automated review delivery. It adds
+		// another SMTP recipient and can turn an otherwise valid delivery into a failure.
 
-		$mailToUser->send();
-
-		if ($mailToUser)
-			return true;
-		else
-			return false;
+		return (bool)$mailToUser->send();
 	}
 
-	public function getOrders($orderID, $dayLimit, $dateType = 'date_added', $store_id = 0) {
-		$query =  $this->db->query("
-			SELECT * FROM `" . DB_PREFIX . "order`
-				WHERE `order_status_id`=" . (int)$orderID . "
-				AND store_id = " . (int)$store_id . "
-				AND DATE(`" . $dateType . "`) <= '" . date("Y-m-d ", strtotime('-' . $dayLimit . ' days')) . "'
-				AND order_id NOT IN (SELECT order_id FROM `" . DB_PREFIX . "orderreviews_mail_log`)"
-		);
+	public function getOrders($orderID, $dayLimit, $dateType = 'date_added', $store_id = 0, $reviewmail_id = 0, $limit = 2, $max_age_days = 45, $max_attempts = 3, $customer_group_id = 'send_all') {
+		$dateType = in_array($dateType, array('date_added', 'date_modified'), true) ? $dateType : 'date_added';
+		$dayLimit = max(0, (int)$dayLimit);
+		$limit = max(1, min(20, (int)$limit));
+		$max_age_days = max(1, min(365, (int)$max_age_days));
+		$max_attempts = max(1, min(5, (int)$max_attempts));
 
+		$customerGroupSql = $customer_group_id === 'send_all'
+			? ''
+			: ' AND o.customer_group_id = ' . (int)$customer_group_id;
+		$newOrderWindowSql = $dayLimit > $max_age_days
+			? ' AND 1 = 0'
+			: ' AND o.`' . $dateType . '` <= DATE_SUB(NOW(), INTERVAL ' . $dayLimit . ' DAY)'
+				. ' AND o.`' . $dateType . '` >= DATE_SUB(NOW(), INTERVAL ' . $max_age_days . ' DAY)';
+
+		$sql = "SELECT o.*, d.delivery_id AS orderreviews_delivery_id
+			FROM `" . DB_PREFIX . "order` o
+			LEFT JOIN `" . DB_PREFIX . "orderreviews_delivery` d
+				ON d.store_id = o.store_id AND d.order_id = o.order_id
+			LEFT JOIN `" . DB_PREFIX . "orderreviews_suppression` s
+				ON s.email = LOWER(TRIM(o.email))
+			WHERE o.store_id = " . (int)$store_id . "
+				AND NOT EXISTS (
+					SELECT 1 FROM `" . DB_PREFIX . "orderreviews_mail_log` ml
+					WHERE ml.store_id = o.store_id AND ml.order_id = o.order_id
+				)
+				AND NOT EXISTS (
+					SELECT 1 FROM `" . DB_PREFIX . "orderreviews_log` rl
+					WHERE rl.order_id = o.order_id
+				)
+				AND s.suppression_id IS NULL
+				AND (
+					(
+						d.reviewmail_id = " . (int)$reviewmail_id . "
+						AND d.status IN ('pending', 'retry')
+						AND d.available_at <= NOW()
+						AND d.attempts < " . $max_attempts . "
+					)
+					OR (
+						d.delivery_id IS NULL
+						AND o.order_status_id = " . (int)$orderID . "
+						" . $customerGroupSql . "
+						" . $newOrderWindowSql . "
+					)
+				)
+			ORDER BY o.`" . $dateType . "` ASC, o.order_id ASC
+			LIMIT " . $limit;
+
+		$query = $this->db->query($sql);
 
 		return $query->rows;
+	}
+
+	public function ensureDeliverySchema() {
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "orderreviews_delivery` (
+			`delivery_id` INT(11) NOT NULL AUTO_INCREMENT,
+			`store_id` INT(11) NOT NULL DEFAULT 0,
+			`order_id` INT(11) NOT NULL,
+			`reviewmail_id` INT(11) NOT NULL DEFAULT 0,
+			`email` VARCHAR(254) NOT NULL,
+			`status` VARCHAR(16) NOT NULL DEFAULT 'pending',
+			`attempts` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+			`available_at` DATETIME NOT NULL,
+			`locked_at` DATETIME NULL DEFAULT NULL,
+			`last_attempt_at` DATETIME NULL DEFAULT NULL,
+			`sent_at` DATETIME NULL DEFAULT NULL,
+			`last_smtp_code` SMALLINT UNSIGNED NULL DEFAULT NULL,
+			`last_error` VARCHAR(1000) NULL DEFAULT NULL,
+			`created_at` DATETIME NOT NULL,
+			`updated_at` DATETIME NOT NULL,
+			PRIMARY KEY (`delivery_id`),
+			UNIQUE KEY `uniq_orderreviews_delivery_order` (`store_id`, `order_id`),
+			KEY `idx_orderreviews_delivery_queue` (`status`, `available_at`, `delivery_id`),
+			KEY `idx_orderreviews_delivery_attempt` (`last_attempt_at`),
+			KEY `idx_orderreviews_delivery_email` (`email`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
+
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "orderreviews_suppression` (
+			`suppression_id` INT(11) NOT NULL AUTO_INCREMENT,
+			`email` VARCHAR(254) NOT NULL,
+			`reason` VARCHAR(1000) NULL DEFAULT NULL,
+			`source` VARCHAR(32) NOT NULL DEFAULT 'worker',
+			`created_at` DATETIME NOT NULL,
+			`updated_at` DATETIME NOT NULL,
+			PRIMARY KEY (`suppression_id`),
+			UNIQUE KEY `uniq_orderreviews_suppression_email` (`email`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
+
+		if ($this->checkDbTable('orderreviews_mail_log')) {
+			$this->ensureDeliveryIndex('orderreviews_mail_log', 'idx_orderreviews_mail_log_order', '`store_id`, `order_id`');
+		}
+
+		if ($this->checkDbTable('orderreviews_log')) {
+			$this->ensureDeliveryIndex('orderreviews_log', 'idx_orderreviews_log_order', '`order_id`');
+		}
+	}
+
+	public function acquireDeliveryLock() {
+		$lockName = 'orderreviews:' . sha1(DB_PREFIX . DB_DATABASE);
+		$query = $this->db->query("SELECT GET_LOCK('" . $this->db->escape($lockName) . "', 0) AS acquired");
+
+		return !empty($query->row['acquired']);
+	}
+
+	public function releaseDeliveryLock() {
+		$lockName = 'orderreviews:' . sha1(DB_PREFIX . DB_DATABASE);
+		$this->db->query("SELECT RELEASE_LOCK('" . $this->db->escape($lockName) . "')");
+	}
+
+	public function recoverStaleDeliveries() {
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery`
+			SET status = 'retry',
+				attempts = GREATEST(attempts - 1, 0),
+				available_at = NOW(),
+				last_error = 'Worker stopped before the SMTP DATA terminator; delivery returned to the queue.',
+				locked_at = NULL,
+				updated_at = NOW()
+			WHERE status = 'processing'
+				AND locked_at < DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery`
+			SET status = 'unknown',
+				last_error = 'Worker stopped after the SMTP attempt; delivery outcome is unknown.',
+				locked_at = NULL,
+				updated_at = NOW()
+			WHERE status = 'sending'
+				AND locked_at < DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
+	}
+
+	public function getRecentDeliveryAttemptCount() {
+		$query = $this->db->query("SELECT COUNT(*) AS total
+			FROM `" . DB_PREFIX . "orderreviews_delivery`
+			WHERE last_attempt_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+
+		return (int)$query->row['total'];
+	}
+
+	public function finalizeIneligibleDeliveries($store_id, $reviewmail_id, $max_attempts) {
+		$store_id = (int)$store_id;
+		$reviewmail_id = (int)$reviewmail_id;
+		$max_attempts = max(1, min(5, (int)$max_attempts));
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery` d
+			INNER JOIN `" . DB_PREFIX . "order` o
+				ON o.store_id = d.store_id AND o.order_id = d.order_id
+			INNER JOIN `" . DB_PREFIX . "orderreviews_suppression` s
+				ON s.email = LOWER(TRIM(o.email)) AND s.email = d.email
+			SET d.status = 'suppressed',
+				d.locked_at = NULL,
+				d.last_error = 'Recipient is present on the suppression list.',
+				d.updated_at = NOW()
+			WHERE d.store_id = " . $store_id . "
+				AND d.reviewmail_id = " . $reviewmail_id . "
+				AND d.status IN ('pending', 'retry')");
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery` d
+			SET d.status = 'cancelled',
+				d.locked_at = NULL,
+				d.last_error = 'A review already exists for this order.',
+				d.updated_at = NOW()
+			WHERE d.store_id = " . $store_id . "
+				AND d.reviewmail_id = " . $reviewmail_id . "
+				AND d.status IN ('pending', 'retry')
+				AND EXISTS (
+					SELECT 1 FROM `" . DB_PREFIX . "orderreviews_log` rl
+					WHERE rl.order_id = d.order_id
+				)");
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery` d
+			LEFT JOIN `" . DB_PREFIX . "order` o
+				ON o.store_id = d.store_id AND o.order_id = d.order_id
+			SET d.status = 'cancelled',
+				d.locked_at = NULL,
+				d.last_error = 'Order no longer exists.',
+				d.updated_at = NOW()
+			WHERE d.store_id = " . $store_id . "
+				AND d.reviewmail_id = " . $reviewmail_id . "
+				AND d.status IN ('pending', 'retry')
+				AND o.order_id IS NULL");
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery`
+			SET status = 'failed',
+				locked_at = NULL,
+				last_error = 'Maximum delivery attempts reached.',
+				updated_at = NOW()
+			WHERE store_id = " . $store_id . "
+				AND reviewmail_id = " . $reviewmail_id . "
+				AND status IN ('pending', 'retry')
+				AND attempts >= " . $max_attempts);
+	}
+
+	public function claimDelivery($store_id, $order_id, $reviewmail_id, $email, $max_attempts = 3) {
+		$email = $this->normaliseEmail($email);
+		$max_attempts = max(1, min(5, (int)$max_attempts));
+
+		$this->db->query("INSERT IGNORE INTO `" . DB_PREFIX . "orderreviews_delivery`
+			SET store_id = " . (int)$store_id . ",
+				order_id = " . (int)$order_id . ",
+				reviewmail_id = " . (int)$reviewmail_id . ",
+				email = '" . $this->db->escape($email) . "',
+				status = 'pending',
+				available_at = NOW(),
+				created_at = NOW(),
+				updated_at = NOW()");
+
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery`
+			SET status = 'processing',
+				email = '" . $this->db->escape($email) . "',
+				attempts = attempts + 1,
+				locked_at = NOW(),
+				last_attempt_at = NOW(),
+				last_smtp_code = NULL,
+				last_error = NULL,
+				updated_at = NOW()
+			WHERE store_id = " . (int)$store_id . "
+				AND order_id = " . (int)$order_id . "
+				AND reviewmail_id = " . (int)$reviewmail_id . "
+				AND status IN ('pending', 'retry')
+				AND available_at <= NOW()
+				AND attempts < " . $max_attempts);
+
+		if (!$this->db->countAffected()) {
+			return 0;
+		}
+
+		$query = $this->db->query("SELECT delivery_id
+			FROM `" . DB_PREFIX . "orderreviews_delivery`
+			WHERE store_id = " . (int)$store_id . " AND order_id = " . (int)$order_id . "
+			LIMIT 1");
+
+		return !empty($query->row['delivery_id']) ? (int)$query->row['delivery_id'] : 0;
+	}
+
+	public function markDeliverySent($delivery_id, $store_id, $order_id) {
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery`
+			SET status = 'sent', sent_at = NOW(), locked_at = NULL, updated_at = NOW()
+			WHERE delivery_id = " . (int)$delivery_id . " AND status = 'sending'");
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "orderreviews_mail_log` (`date`, `store_id`, `order_id`)
+			SELECT NOW(), " . (int)$store_id . ", " . (int)$order_id . "
+			FROM DUAL
+			WHERE NOT EXISTS (
+				SELECT 1 FROM `" . DB_PREFIX . "orderreviews_mail_log`
+				WHERE store_id = " . (int)$store_id . " AND order_id = " . (int)$order_id . "
+			)");
+	}
+
+	public function markDeliveryCancelled($delivery_id, $reason) {
+		$this->updateDeliveryStatus($delivery_id, 'cancelled', 0, $reason, null);
+	}
+
+	public function cancelQueuedDelivery($store_id, $order_id, $reviewmail_id, $reason) {
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery`
+			SET status = 'cancelled',
+				locked_at = NULL,
+				last_error = '" . $this->db->escape($this->sanitiseDeliveryError($reason)) . "',
+				updated_at = NOW()
+			WHERE store_id = " . (int)$store_id . "
+				AND order_id = " . (int)$order_id . "
+				AND reviewmail_id = " . (int)$reviewmail_id . "
+				AND status IN ('pending', 'retry')");
+	}
+
+	public function markDeliverySending($delivery_id) {
+		$this->db->query("UPDATE `" . DB_PREFIX . "orderreviews_delivery`
+			SET status = 'sending', locked_at = NOW(), updated_at = NOW()
+			WHERE delivery_id = " . (int)$delivery_id . " AND status = 'processing'");
+
+		if (!$this->db->countAffected()) {
+			throw new Exception('Delivery could not enter the SMTP sending state.');
+		}
+	}
+
+	public function markDeliveryUnknown($delivery_id, Exception $exception) {
+		$this->updateDeliveryStatus($delivery_id, 'unknown', (int)$exception->getCode(), $exception->getMessage(), null);
+	}
+
+	public function markDeliverySuppressed($delivery_id, $email, $reason, $source = 'worker') {
+		$email = $this->normaliseEmail($email);
+		$reason = $this->sanitiseDeliveryError($reason);
+		$source = substr(preg_replace('/[^a-z0-9_-]/i', '', (string)$source), 0, 32);
+
+		$this->db->query("INSERT INTO `" . DB_PREFIX . "orderreviews_suppression`
+			SET email = '" . $this->db->escape($email) . "',
+				reason = '" . $this->db->escape($reason) . "',
+				source = '" . $this->db->escape($source ?: 'worker') . "',
+				created_at = NOW(),
+				updated_at = NOW()
+			ON DUPLICATE KEY UPDATE
+				reason = VALUES(reason), source = VALUES(source), updated_at = NOW()");
+
+		$this->updateDeliveryStatus($delivery_id, 'suppressed', 0, $reason, null);
+	}
+
+	public function markDeliveryFailed($delivery_id, Exception $exception, $max_attempts = 3) {
+		$code = (int)$exception->getCode();
+		$error = $this->sanitiseDeliveryError($exception->getMessage());
+		$query = $this->db->query("SELECT attempts FROM `" . DB_PREFIX . "orderreviews_delivery` WHERE delivery_id = " . (int)$delivery_id);
+		$attempts = !empty($query->row['attempts']) ? (int)$query->row['attempts'] : $max_attempts;
+
+		if ($attempts >= (int)$max_attempts) {
+			$this->updateDeliveryStatus($delivery_id, 'failed', $code, $error, null);
+			return 'failed';
+		}
+
+		$backoffMinutes = $attempts <= 1 ? 75 : ($attempts === 2 ? 360 : 1440);
+		$this->updateDeliveryStatus($delivery_id, 'retry', $code, $error, $backoffMinutes);
+
+		return 'retry';
+	}
+
+	public function isPermanentRecipientFailure(Exception $exception) {
+		$code = (int)$exception->getCode();
+		$message = strtolower($exception->getMessage());
+
+		if (!in_array($code, array(550, 551, 553), true) || strpos($message, 'rcpt to') === false) {
+			return false;
+		}
+
+		$invalidAddressSignals = array(
+			'5.1.1',
+			'5.1.2',
+			'5.1.3',
+			'5.1.6',
+			'5.1.10',
+			'no such user',
+			'user unknown',
+			'unknown user',
+			'mailbox does not exist',
+			'recipient address does not exist'
+		);
+
+		foreach ($invalidAddressSignals as $signal) {
+			if (strpos($message, $signal) !== false) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public function isUnknownDeliveryFailure(Exception $exception) {
+		return stripos($exception->getMessage(), 'outcome unknown after message data') !== false;
+	}
+
+	public function isValidDeliveryEmail($email) {
+		$email = $this->normaliseEmail($email);
+
+		return strlen($email) <= 254 && filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+	}
+
+	public function isDeliveryEmailSuppressed($email) {
+		$email = $this->normaliseEmail($email);
+		$query = $this->db->query("SELECT suppression_id FROM `" . DB_PREFIX . "orderreviews_suppression`
+			WHERE email = '" . $this->db->escape($email) . "' LIMIT 1");
+
+		return $query->num_rows > 0;
+	}
+
+	private function updateDeliveryStatus($delivery_id, $status, $smtp_code, $error, $backoff_minutes) {
+		$sql = "UPDATE `" . DB_PREFIX . "orderreviews_delivery`
+			SET status = '" . $this->db->escape($status) . "',
+				locked_at = NULL,
+				last_smtp_code = " . ((int)$smtp_code > 0 ? (int)$smtp_code : 'NULL') . ",
+				last_error = '" . $this->db->escape($this->sanitiseDeliveryError($error)) . "',
+				updated_at = NOW()";
+
+		if ($backoff_minutes !== null) {
+			$sql .= ", available_at = DATE_ADD(NOW(), INTERVAL " . max(1, (int)$backoff_minutes) . " MINUTE)";
+		}
+
+		$sql .= " WHERE delivery_id = " . (int)$delivery_id . " AND status IN ('processing', 'sending')";
+		$this->db->query($sql);
+	}
+
+	private function normaliseEmail($email) {
+		return strtolower(trim((string)$email));
+	}
+
+	private function sanitiseDeliveryError($error) {
+		$error = trim(preg_replace('/\s+/', ' ', strip_tags((string)$error)));
+
+		return substr($error, 0, 1000);
+	}
+
+	private function ensureDeliveryIndex($table, $index, $columns) {
+		$query = $this->db->query("SHOW INDEX FROM `" . DB_PREFIX . $table . "` WHERE Key_name = '" . $this->db->escape($index) . "'");
+
+		if (!$query->num_rows) {
+			$this->db->query("ALTER TABLE `" . DB_PREFIX . $table . "` ADD KEY `" . $index . "` (" . $columns . ")");
+		}
 	}
 
 	public function getOrderProducts($order_id) {
@@ -141,9 +521,9 @@ class ModelExtensionModuleOrderReviews extends Model {
 
 	private function getCatalogURL() {
         if (isset($_SERVER['HTTPS']) && (($_SERVER['HTTPS'] == 'on') || ($_SERVER['HTTPS'] == '1'))) {
-            $storeURL = HTTP_SERVER;
+			$storeURL = HTTPS_SERVER;
         } else {
-            $storeURL = HTTPS_SERVER;
+			$storeURL = HTTP_SERVER;
         }
         return $storeURL;
     }
