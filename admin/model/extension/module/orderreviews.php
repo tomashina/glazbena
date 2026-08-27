@@ -13,14 +13,48 @@ class ModelExtensionModuleOrderReviews extends Model {
 			`store_id` int(1) NOT NULL,
 	 	 	`privacy_policy` INT(11) NULL DEFAULT '0',
 			`date_created` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-			PRIMARY KEY (`log_id`));
+			PRIMARY KEY (`log_id`),
+			KEY `idx_orderreviews_log_order` (`order_id`));
 			");
 		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "orderreviews_mail_log` (
 			`id` INT(11) NOT NULL AUTO_INCREMENT,
 			`date` DATETIME NULL DEFAULT NULL,  
 			`store_id` INT(11) NOT NULL DEFAULT 0,  
 			`order_id` INT(11) NOT NULL,
-			 PRIMARY KEY (`id`))");
+			 PRIMARY KEY (`id`),
+			 KEY `idx_orderreviews_mail_log_order` (`store_id`, `order_id`))");
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "orderreviews_delivery` (
+			`delivery_id` INT(11) NOT NULL AUTO_INCREMENT,
+			`store_id` INT(11) NOT NULL DEFAULT 0,
+			`order_id` INT(11) NOT NULL,
+			`reviewmail_id` INT(11) NOT NULL DEFAULT 0,
+			`email` VARCHAR(254) NOT NULL,
+			`status` VARCHAR(16) NOT NULL DEFAULT 'pending',
+			`attempts` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+			`available_at` DATETIME NOT NULL,
+			`locked_at` DATETIME NULL DEFAULT NULL,
+			`last_attempt_at` DATETIME NULL DEFAULT NULL,
+			`sent_at` DATETIME NULL DEFAULT NULL,
+			`last_smtp_code` SMALLINT UNSIGNED NULL DEFAULT NULL,
+			`last_error` VARCHAR(1000) NULL DEFAULT NULL,
+			`created_at` DATETIME NOT NULL,
+			`updated_at` DATETIME NOT NULL,
+			PRIMARY KEY (`delivery_id`),
+			UNIQUE KEY `uniq_orderreviews_delivery_order` (`store_id`, `order_id`),
+			KEY `idx_orderreviews_delivery_queue` (`status`, `available_at`, `delivery_id`),
+			KEY `idx_orderreviews_delivery_attempt` (`last_attempt_at`),
+			KEY `idx_orderreviews_delivery_email` (`email`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "orderreviews_suppression` (
+			`suppression_id` INT(11) NOT NULL AUTO_INCREMENT,
+			`email` VARCHAR(254) NOT NULL,
+			`reason` VARCHAR(1000) NULL DEFAULT NULL,
+			`source` VARCHAR(32) NOT NULL DEFAULT 'worker',
+			`created_at` DATETIME NOT NULL,
+			`updated_at` DATETIME NOT NULL,
+			PRIMARY KEY (`suppression_id`),
+			UNIQUE KEY `uniq_orderreviews_suppression_email` (`email`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci");
 		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "orderreviews_setting` (
 			`setting_id` int(11) NOT NULL AUTO_INCREMENT,
 			`store_id` int(11) NOT NULL DEFAULT '0',
@@ -57,6 +91,8 @@ class ModelExtensionModuleOrderReviews extends Model {
   	public function uninstall() {
 		$this->db->query("DROP TABLE IF EXISTS ".DB_PREFIX."orderreviews_log");
 		$this->db->query("DROP TABLE IF EXISTS ".DB_PREFIX."orderreviews_mail_log");
+		$this->db->query("DROP TABLE IF EXISTS ".DB_PREFIX."orderreviews_delivery");
+		$this->db->query("DROP TABLE IF EXISTS ".DB_PREFIX."orderreviews_suppression");
 		$this->db->query("DROP TABLE IF EXISTS ".DB_PREFIX."orderreviews_setting");
 		$this->db->query("DROP TABLE IF EXISTS ".DB_PREFIX."orderreviews_mail");
   	}
@@ -64,14 +100,20 @@ class ModelExtensionModuleOrderReviews extends Model {
 	public function editSetting($code, $data, $store_id = 0) {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "orderreviews_setting` WHERE store_id = '" . (int)$store_id . "' AND `code` = 'orderreviews'");
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "orderreviews_mail` WHERE store_id = '" . (int)$store_id . "' AND `code` = 'orderreviewsMailTemplate'");
+		$configuredReviewmailIds = array();
 
 		foreach ($data as $key => $value) {
 			if ($key == 'orderreviewsMailTemplate') {
-				foreach ($value['ReviewMail'] as $values) {
+				$reviewMails = isset($value['ReviewMail']) && is_array($value['ReviewMail']) ? $value['ReviewMail'] : array();
+
+				foreach ($reviewMails as $reviewMailKey => $values) {
+					$reviewmailId = is_array($values) && isset($values['id']) ? (int)$values['id'] : (int)$reviewMailKey;
+					$configuredReviewmailIds[] = $reviewmailId;
+
 					if (!is_array($values)) {
-						$this->db->query("INSERT INTO " . DB_PREFIX . "orderreviews_mail SET mail_id = '" . $values['id'] . "', store_id = '" . (int)$store_id . "', `code` = 'orderreviewsMailTemplate', `key` = 'ReviewMail', `value` = '" . $this->db->escape($values) . "'");
+						$this->db->query("INSERT INTO " . DB_PREFIX . "orderreviews_mail SET mail_id = '" . $reviewmailId . "', store_id = '" . (int)$store_id . "', `code` = 'orderreviewsMailTemplate', `key` = 'ReviewMail', `value` = '" . $this->db->escape($values) . "'");
 					} else {
-						$this->db->query("INSERT INTO " . DB_PREFIX . "orderreviews_mail SET mail_id = '" . $values['id'] . "', store_id = '" . (int)$store_id . "', `code` = 'orderreviewsMailTemplate', `key` = 'ReviewMail', `value` = '" . $this->db->escape(json_encode($values, true)) . "', serialized = '1'");
+						$this->db->query("INSERT INTO " . DB_PREFIX . "orderreviews_mail SET mail_id = '" . $reviewmailId . "', store_id = '" . (int)$store_id . "', `code` = 'orderreviewsMailTemplate', `key` = 'ReviewMail', `value` = '" . $this->db->escape(json_encode($values, true)) . "', serialized = '1'");
 					}
 				}
 			} else {
@@ -81,6 +123,22 @@ class ModelExtensionModuleOrderReviews extends Model {
 					$this->db->query("INSERT INTO " . DB_PREFIX . "orderreviews_setting SET store_id = '" . (int)$store_id . "', `code` = 'orderreviews', `key` = '" . $this->db->escape($key) . "', `value` = '" . $this->db->escape(json_encode($value, true)) . "', serialized = '1'");
 				}
 			}
+		}
+
+		if ($this->checkDbTable('orderreviews_delivery')) {
+			$sql = "UPDATE `" . DB_PREFIX . "orderreviews_delivery`
+				SET status = 'cancelled',
+					locked_at = NULL,
+					last_error = 'Review mail template was removed.',
+					updated_at = NOW()
+				WHERE store_id = " . (int)$store_id . "
+					AND status IN ('pending', 'retry')";
+
+			if ($configuredReviewmailIds) {
+				$sql .= " AND reviewmail_id NOT IN (" . implode(',', array_map('intval', array_unique($configuredReviewmailIds))) . ")";
+			}
+
+			$this->db->query($sql);
 		}
 	}
 
@@ -247,8 +305,17 @@ class ModelExtensionModuleOrderReviews extends Model {
 			`id` INT(11) NOT NULL AUTO_INCREMENT,
 			`date` DATETIME NULL DEFAULT NULL,  
 			`store_id` INT(11) NOT NULL DEFAULT 0,  
-			`order_id` INT(11) NOT NULL,
-			 PRIMARY KEY (`id`))");
+				`order_id` INT(11) NOT NULL,
+				 PRIMARY KEY (`id`),
+				 KEY `idx_orderreviews_mail_log_order` (`store_id`, `order_id`))");
+	}
+
+	public function getMaxDeliveryReviewmailId($store_id = 0) {
+		$query = $this->db->query("SELECT MAX(reviewmail_id) AS max_id
+			FROM `" . DB_PREFIX . "orderreviews_delivery`
+			WHERE store_id = " . (int)$store_id);
+
+		return !empty($query->row['max_id']) ? (int)$query->row['max_id'] : 0;
 	}
 	
 	public function viewLogs($page=1, $limit=8, $store=0,$sort="id", $order="DESC") {	
