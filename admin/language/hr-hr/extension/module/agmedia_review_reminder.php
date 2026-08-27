@@ -19,6 +19,7 @@ $_['text_no_deliveries'] = 'Još nema poruka u redu za slanje.';
 
 // Polja
 $_['entry_status'] = 'Status';
+$_['entry_min_order_date'] = 'Početni datum narudžbi';
 $_['entry_order_status'] = 'Dopušteni statusi narudžbe';
 $_['entry_delay_days'] = 'Odgoda nakon narudžbe (dana)';
 $_['entry_batch_size'] = 'Poruka po cron pozivu';
@@ -34,6 +35,7 @@ $_['entry_cron_url'] = 'EasyCron URL';
 
 // Pomoć
 $_['help_order_status'] = 'U obzir ulaze samo narudžbe koje trenutačno imaju jedan od označenih statusa. Ponovni pokušaj se otkazuje ako narudžba više nije dopuštena.';
+$_['help_min_order_date'] = 'Trajna sigurnosna granica. Narudžbe prije 27. 8. 2026. nikad se ne stavljaju u red niti šalju, čak ni ako se kasnije poveća maksimalna starost.';
 $_['help_delay_days'] = 'Pričekaj ovoliko punih dana od datuma narudžbe prije dodavanja podsjetnika u red. Dopušteno: 0–90.';
 $_['help_batch_size'] = 'Mala vrijednost štiti mail server. Započnite s 1. Dopušteno: 1–10.';
 $_['help_hourly_limit'] = 'Tvrda sigurnosna granica za domenu. Broji se svaki SMTP pokušaj, uključujući neuspješne. Započnite s 1. Dopušteno: 1–2, čime ostaje rezerva ispod hosting granice od 5.';
@@ -71,6 +73,7 @@ $_['error_smtp_not_ready'] = 'Autenticirani SMTP nije potpuno podešen. Cron ne�
 $_['error_reviews_disabled'] = 'OpenCart recenzije proizvoda su isključene. Uključite ih u postavkama trgovine prije aktiviranja ovog modula.';
 $_['warning_guest_reviews'] = 'Recenzije gostiju su isključene. Kupci koji su naručili bez korisničkog računa morat će se prijaviti i možda neće moći ostaviti recenziju.';
 $_['error_order_status'] = 'Označite barem jedan dopušteni status narudžbe.';
+$_['error_min_order_date'] = 'Datum mora biti valjan i ne smije biti prije %s.';
 $_['error_number_range'] = 'Unesite cijeli broj od %d do %d.';
 $_['error_max_age_delay'] = 'Granica starosti narudžbe ne može biti kraća od odgode slanja.';
 $_['error_subject'] = 'Predmet mora imati između 3 i 180 znakova.';

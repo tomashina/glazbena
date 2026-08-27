@@ -93,6 +93,7 @@ CREATE TABLE `oc_order` (
   `store_id` INT UNSIGNED NOT NULL DEFAULT 0,
   `email` VARCHAR(254) NOT NULL DEFAULT '',
   `language_id` INT UNSIGNED NOT NULL DEFAULT 1,
+  `date_added` DATETIME NOT NULL DEFAULT '2026-08-27 00:00:00',
   PRIMARY KEY (`order_id`)
 ) ENGINE=InnoDB;
 
@@ -103,7 +104,10 @@ INSERT INTO `oc_order` (`order_id`, `store_id`, `email`, `language_id`) VALUES
   (7,0,'failed@example.test',1), (8,0,'suppressed@example.test',1),
   (9,0,'cancelled@example.test',1), (10,0,'odd@example.test',1),
   (11,0,'mail-log@example.test',1), (12,0,'review-log@example.test',1),
-  (13,0,'processing-zero@example.test',1);
+  (13,0,'processing-zero@example.test',1), (14,0,'before-cutoff@example.test',1),
+  (15,0,'at-cutoff@example.test',1), (16,0,'after-cutoff@example.test',1);
+UPDATE `oc_order` SET `date_added`='2026-08-26 23:59:59' WHERE `order_id`=14;
+UPDATE `oc_order` SET `date_added`='2026-08-28 00:00:00' WHERE `order_id`=16;
 
 CREATE TABLE `oc_setting` (
   `setting_id` INT NOT NULL AUTO_INCREMENT,
@@ -149,7 +153,10 @@ INSERT INTO `oc_orderreviews_delivery`
  (0,10,'odd@example.test','unexpected',1,NOW(),NULL,NOW(),NULL,'future state',NOW(),NOW()),
  (0,11,'mail-log@example.test','pending',0,NOW(),NULL,NULL,NULL,NULL,NOW(),NOW()),
  (0,12,'review-log@example.test','pending',0,NOW(),NULL,NULL,NULL,NULL,NOW(),NOW()),
- (0,13,'processing-zero@example.test','processing',0,NOW(),NOW(),NOW(),NULL,NULL,NOW(),NOW());
+ (0,13,'processing-zero@example.test','processing',0,NOW(),NOW(),NOW(),NULL,NULL,NOW(),NOW()),
+ (0,14,'before-cutoff@example.test','pending',0,NOW(),NULL,NULL,NULL,NULL,NOW(),NOW()),
+ (0,15,'at-cutoff@example.test','pending',0,NOW(),NULL,NULL,NULL,NULL,NOW(),NOW()),
+ (0,16,'after-cutoff@example.test','retry',1,NOW(),NULL,NOW(),NULL,'temporary reject',NOW(),NOW());
 
 CREATE TABLE `oc_orderreviews_mail_log` (
   `id` INT NOT NULL AUTO_INCREMENT,
@@ -224,7 +231,7 @@ SQL;
 		1 => 'pending', 2 => 'retry', 3 => 'retry', 4 => 'unknown',
 		5 => 'unknown', 6 => 'sent', 7 => 'failed', 8 => 'suppressed',
 		9 => 'cancelled', 10 => 'unknown', 11 => 'sent', 12 => 'suppressed',
-		13 => 'retry'
+		13 => 'retry', 14 => 'cancelled', 15 => 'pending', 16 => 'retry'
 	);
 
 	foreach ($expected as $orderId => $status) {
@@ -233,13 +240,15 @@ SQL;
 
 	assertSameValue(0, value($connection, "SELECT `attempts` FROM `oc_agmedia_review_reminder_delivery` WHERE `order_id`=3", 'attempts'), 'Pre-SMTP processing attempt was not undone');
 	assertSameValue(0, value($connection, "SELECT `attempts` FROM `oc_agmedia_review_reminder_delivery` WHERE `order_id`=13", 'attempts'), 'Zero pre-SMTP attempts must not underflow');
-	assertSameValue(13, value($connection, "SELECT COUNT(*) AS total FROM `oc_agmedia_review_reminder_delivery`", 'total'), 'Unexpected delivery count');
+	assertSameValue(16, value($connection, "SELECT COUNT(*) AS total FROM `oc_agmedia_review_reminder_delivery`", 'total'), 'Unexpected delivery count');
+	assertSameValue(0, value($connection, "SELECT COUNT(*) AS total FROM `oc_agmedia_review_reminder_delivery` d INNER JOIN `oc_order` o ON o.`store_id`=d.`store_id` AND o.`order_id`=d.`order_id` WHERE o.`date_added` < '2026-08-27 00:00:00' AND d.`status` IN ('pending','retry','processing','sending')", 'total'), 'An active pre-cutoff delivery survived migration');
 	assertSameValue(3, value($connection, "SELECT COUNT(*) AS total FROM `oc_agmedia_review_reminder_suppression`", 'total'), 'Suppression was not copied to every store plus suppressed delivery');
 	assertSameValue(0, value($connection, "SELECT COUNT(*) AS total FROM `oc_agmedia_review_reminder_attempt`", 'total'), 'Synthetic attempts must not consume the hourly quota');
 	assertSameValue(254, value($connection, "SELECT CHARACTER_MAXIMUM_LENGTH AS length FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='oc_agmedia_review_reminder_delivery' AND COLUMN_NAME='email'", 'length'), 'Delivery email column length mismatch');
 	assertSameValue(1, value($connection, "SELECT COUNT(*) AS total FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='oc_agmedia_review_reminder_attempt' AND INDEX_NAME='date_added'", 'total'), 'Global hourly index is missing');
 
 	assertSameValue('0', value($connection, "SELECT `value` FROM `oc_setting` WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_status'", 'value'), 'New module must remain disabled');
+	assertSameValue('2026-08-27', value($connection, "SELECT `value` FROM `oc_setting` WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_min_order_date'", 'value'), 'Permanent live cutover date is missing');
 	assertSameValue('[3,5]', value($connection, "SELECT `value` FROM `oc_setting` WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_order_status_id'", 'value'), 'Legacy status IDs were not consolidated');
 	assertSameValue('14', value($connection, "SELECT `value` FROM `oc_setting` WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_delay_days'", 'value'), 'Conservative maximum delay was not migrated');
 	assertSameValue('2', value($connection, "SELECT `value` FROM `oc_setting` WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_hourly_limit'", 'value'), 'Legacy hourly limit was not clamped to the safe maximum');
@@ -250,14 +259,17 @@ SQL;
 	// A repeat run must neither duplicate records nor reset settings edited after the
 	// one-time operational migration marker was written.
 	$connection->query(str_replace('oc_', $tablePrefix, "UPDATE `oc_setting` SET `value`='21' WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_delay_days'"));
-	$connection->query(str_replace('oc_', $tablePrefix, "UPDATE `oc_agmedia_review_reminder_delivery` SET `status`='pending' WHERE `order_id` IN (4,11)"));
+	$connection->query(str_replace('oc_', $tablePrefix, "UPDATE `oc_setting` SET `value`='2026-09-01' WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_min_order_date'"));
+	$connection->query(str_replace('oc_', $tablePrefix, "UPDATE `oc_agmedia_review_reminder_delivery` SET `status`='pending' WHERE `order_id` IN (4,11,14)"));
 	runSql($connection, $migration);
 
-	assertSameValue(13, value($connection, "SELECT COUNT(*) AS total FROM `oc_agmedia_review_reminder_delivery`", 'total'), 'Repeat migration duplicated deliveries');
+	assertSameValue(16, value($connection, "SELECT COUNT(*) AS total FROM `oc_agmedia_review_reminder_delivery`", 'total'), 'Repeat migration duplicated deliveries');
 	assertSameValue(3, value($connection, "SELECT COUNT(*) AS total FROM `oc_agmedia_review_reminder_suppression`", 'total'), 'Repeat migration duplicated suppressions');
 	assertSameValue('unknown', value($connection, "SELECT `status` FROM `oc_agmedia_review_reminder_delivery` WHERE `order_id`=4", 'status'), 'Repeat migration did not restore ambiguous terminal state');
 	assertSameValue('sent', value($connection, "SELECT `status` FROM `oc_agmedia_review_reminder_delivery` WHERE `order_id`=11", 'status'), 'Repeat migration did not restore confirmed sent state');
+	assertSameValue('cancelled', value($connection, "SELECT `status` FROM `oc_agmedia_review_reminder_delivery` WHERE `order_id`=14", 'status'), 'Repeat migration reactivated a pre-cutoff order');
 	assertSameValue('21', value($connection, "SELECT `value` FROM `oc_setting` WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_delay_days'", 'value'), 'Repeat migration overwrote a post-migration setting');
+	assertSameValue('2026-09-01', value($connection, "SELECT `value` FROM `oc_setting` WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_min_order_date'", 'value'), 'Repeat migration moved a later safety cutoff backwards');
 
 	// Optional legacy tables really are optional: exercise the dynamic no-op branches
 	// using a second isolated prefix with only the three core OpenCart tables.
@@ -265,7 +277,7 @@ SQL;
 	$tablePrefix = $originalPrefix . 'clean_';
 	$cleanSeed = str_replace('oc_', $tablePrefix, <<<'SQL'
 CREATE TABLE `oc_store` (`store_id` INT UNSIGNED NOT NULL, PRIMARY KEY (`store_id`)) ENGINE=InnoDB;
-CREATE TABLE `oc_order` (`order_id` INT UNSIGNED NOT NULL, `store_id` INT UNSIGNED NOT NULL DEFAULT 0, `email` VARCHAR(254) NOT NULL DEFAULT '', `language_id` INT UNSIGNED NOT NULL DEFAULT 1, PRIMARY KEY (`order_id`)) ENGINE=InnoDB;
+CREATE TABLE `oc_order` (`order_id` INT UNSIGNED NOT NULL, `store_id` INT UNSIGNED NOT NULL DEFAULT 0, `email` VARCHAR(254) NOT NULL DEFAULT '', `language_id` INT UNSIGNED NOT NULL DEFAULT 1, `date_added` DATETIME NOT NULL DEFAULT '2026-08-27 00:00:00', PRIMARY KEY (`order_id`)) ENGINE=InnoDB;
 CREATE TABLE `oc_setting` (`setting_id` INT NOT NULL AUTO_INCREMENT, `store_id` INT NOT NULL DEFAULT 0, `code` VARCHAR(128) NOT NULL, `key` VARCHAR(128) NOT NULL, `value` TEXT NOT NULL, `serialized` TINYINT NOT NULL, PRIMARY KEY (`setting_id`)) ENGINE=InnoDB;
 SQL
 	);
@@ -275,6 +287,7 @@ SQL
 	runSql($connection, $cleanMigration);
 	assertSameValue(0, value($connection, "SELECT COUNT(*) AS total FROM `oc_agmedia_review_reminder_delivery`", 'total'), 'Clean migration invented delivery history');
 	assertSameValue(1, value($connection, "SELECT COUNT(*) AS total FROM `oc_setting` WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_status'", 'total'), 'Clean repeat migration duplicated status settings');
+	assertSameValue('2026-08-27', value($connection, "SELECT `value` FROM `oc_setting` WHERE `code`='module_agmedia_review_reminder' AND `key`='module_agmedia_review_reminder_min_order_date'", 'value'), 'Clean migration did not enforce the live cutover date');
 	$tablePrefix = $originalPrefix;
 
 	echo "AGmedia Review Reminder migration test passed.\n";

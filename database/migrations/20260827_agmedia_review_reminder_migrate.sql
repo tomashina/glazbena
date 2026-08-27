@@ -440,6 +440,55 @@ SET @arr_legacy_max_age_days := CASE
   ELSE GREATEST(COALESCE(@arr_legacy_max_age_days, 45), COALESCE(@arr_legacy_delay_days, 0))
 END;
 
+-- The legacy module was already uninstalled on this production site, so its sent
+-- history may no longer exist. This permanent floor is intentionally independent
+-- of max_age_days: no order before 2026-08-27 can ever enter the new queue.
+UPDATE `oc_setting`
+SET `value` = CASE
+      WHEN `value` REGEXP '^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])$'
+        AND `value` >= '2026-08-27' THEN `value`
+      ELSE '2026-08-27'
+    END,
+    `serialized` = 0
+WHERE `store_id` = 0
+  AND `code` = 'module_agmedia_review_reminder'
+  AND `key` = 'module_agmedia_review_reminder_min_order_date';
+INSERT INTO `oc_setting` (`store_id`, `code`, `key`, `value`, `serialized`)
+SELECT 0, 'module_agmedia_review_reminder', 'module_agmedia_review_reminder_min_order_date', '2026-08-27', 0
+WHERE NOT EXISTS (
+  SELECT 1 FROM `oc_setting`
+  WHERE `store_id` = 0
+    AND `code` = 'module_agmedia_review_reminder'
+    AND `key` = 'module_agmedia_review_reminder_min_order_date'
+);
+
+-- Quarantine any active row that may already have been created before this rule
+-- was deployed. A pre-cutoff `sending` row remains ambiguous and therefore becomes
+-- unknown; every other pre-DATA active state is safely cancelled without sending.
+UPDATE `oc_agmedia_review_reminder_attempt` a
+INNER JOIN `oc_agmedia_review_reminder_delivery` d ON d.`delivery_id` = a.`delivery_id`
+INNER JOIN `oc_order` o ON o.`store_id` = d.`store_id` AND o.`order_id` = d.`order_id`
+SET a.`outcome` = 'failed',
+    a.`error` = 'Order predates permanent 2026-08-27 delivery cutoff.',
+    a.`date_finished` = NOW()
+WHERE o.`date_added` < '2026-08-27 00:00:00'
+  AND d.`status` IN ('pending', 'retry', 'processing', 'sending')
+  AND a.`outcome` = 'started';
+
+UPDATE `oc_agmedia_review_reminder_delivery` d
+INNER JOIN `oc_order` o ON o.`store_id` = d.`store_id` AND o.`order_id` = d.`order_id`
+SET d.`next_attempt_at` = NULL,
+    d.`claimed_at` = NULL,
+    d.`last_error` = CASE
+      WHEN d.`status` = 'sending'
+        THEN 'Pre-cutoff SMTP outcome is unknown; automatic retry disabled.'
+      ELSE 'Order predates permanent 2026-08-27 delivery cutoff; sending disabled.'
+    END,
+    d.`status` = CASE WHEN d.`status` = 'sending' THEN 'unknown' ELSE 'cancelled' END,
+    d.`date_modified` = NOW()
+WHERE o.`date_added` < '2026-08-27 00:00:00'
+  AND d.`status` IN ('pending', 'retry', 'processing', 'sending');
+
 -- Always keep the independent module disabled during its first migration.
 UPDATE `oc_setting`
 SET `value` = '0', `serialized` = 0
@@ -568,7 +617,19 @@ FROM `oc_agmedia_review_reminder_delivery`;
 SELECT COUNT(*) AS `suppressed_addresses_by_store`
 FROM `oc_agmedia_review_reminder_suppression`;
 
+SELECT COUNT(*) AS `active_records_before_cutoff_must_be_zero`
+FROM `oc_agmedia_review_reminder_delivery` d
+INNER JOIN `oc_order` o ON o.`store_id` = d.`store_id` AND o.`order_id` = d.`order_id`
+WHERE o.`date_added` < '2026-08-27 00:00:00'
+  AND d.`status` IN ('pending', 'retry', 'processing', 'sending');
+
 SELECT
+  COALESCE((
+    SELECT `value` FROM `oc_setting`
+    WHERE `store_id` = 0 AND `code` = 'module_agmedia_review_reminder'
+      AND `key` = 'module_agmedia_review_reminder_min_order_date'
+    ORDER BY `setting_id` DESC LIMIT 1
+  ), '2026-08-27') AS `configured_min_order_date`,
   COALESCE((
     SELECT `value` FROM `oc_setting`
     WHERE `store_id` = 0 AND `code` = 'module_agmedia_review_reminder'

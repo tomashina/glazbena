@@ -19,6 +19,7 @@ $_['text_no_deliveries'] = 'No reminders have been queued yet.';
 
 // Entry
 $_['entry_status'] = 'Status';
+$_['entry_min_order_date'] = 'Earliest order date';
 $_['entry_order_status'] = 'Eligible order statuses';
 $_['entry_delay_days'] = 'Delay after order (days)';
 $_['entry_batch_size'] = 'Messages per cron run';
@@ -34,6 +35,7 @@ $_['entry_cron_url'] = 'EasyCron URL';
 
 // Help
 $_['help_order_status'] = 'Only orders currently in one of these statuses are eligible. A retry is cancelled if the order is no longer eligible.';
+$_['help_min_order_date'] = 'Permanent safety boundary. Orders before 27 August 2026 are never queued or sent, even if the maximum age is increased later.';
 $_['help_delay_days'] = 'Wait this many full days after the order date before queueing a reminder. Allowed: 0–90.';
 $_['help_batch_size'] = 'Keep this small to protect the mail server. Start with 1. Allowed: 1–10.';
 $_['help_hourly_limit'] = 'A hard domain-safety limit. Every SMTP attempt counts, including failed attempts. Start with 1. Allowed: 1–2, leaving reserve below the hosting threshold of 5.';
@@ -71,6 +73,7 @@ $_['error_smtp_not_ready'] = 'Authenticated SMTP is not fully configured. The cr
 $_['error_reviews_disabled'] = 'OpenCart product reviews are disabled. Enable them in the store settings before activating this module.';
 $_['warning_guest_reviews'] = 'Guest reviews are disabled. Customers who ordered without an account will need to sign in and may be unable to leave a review.';
 $_['error_order_status'] = 'Select at least one eligible order status.';
+$_['error_min_order_date'] = 'Enter a valid date that is not earlier than %s.';
 $_['error_number_range'] = 'Enter a whole number from %d to %d.';
 $_['error_max_age_delay'] = 'The oldest order limit cannot be shorter than the delivery delay.';
 $_['error_subject'] = 'The subject must contain between 3 and 180 characters.';

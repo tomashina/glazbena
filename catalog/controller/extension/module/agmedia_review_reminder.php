@@ -1,4 +1,5 @@
 <?php
+require_once(DIR_SYSTEM . 'library/agmedia_review_reminder/policy.php');
 
 class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 	public function index() {
@@ -88,6 +89,7 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 			$summary['queued'] = $this->model_extension_module_agmedia_review_reminder->enqueueEligible(
 				$storeId,
 				$settings['order_status_ids'],
+				$settings['min_order_date'],
 				$settings['delay_days'],
 				$settings['max_age_days']
 			);
@@ -122,6 +124,7 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 					(int)$delivery['order_id'],
 					$storeId,
 					$settings['order_status_ids'],
+					$settings['min_order_date'],
 					$settings['delay_days'],
 					$settings['max_age_days']
 				);
@@ -350,12 +353,17 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 
 	private function getWorkerSettings() {
 		$orderStatusIds = array_values(array_unique(array_filter(array_map('intval', (array)$this->config->get('module_agmedia_review_reminder_order_status_id')))));
+		$minOrderDate = AgmediaReviewReminderPolicy::normaliseMinOrderDate(
+			$this->config->get('module_agmedia_review_reminder_min_order_date')
+		);
+
 		$delayDays = max(0, min(90, (int)$this->config->get('module_agmedia_review_reminder_delay_days')));
 		$maxAgeDays = (int)$this->config->get('module_agmedia_review_reminder_max_age_days');
 		$maxAgeDays = max($delayDays, min(365, $maxAgeDays > 0 ? $maxAgeDays : 45));
 
 		return array(
 			'order_status_ids' => $orderStatusIds,
+			'min_order_date' => $minOrderDate,
 			'delay_days' => $delayDays,
 			'batch_size' => max(1, min(10, (int)$this->config->get('module_agmedia_review_reminder_batch_size') ?: 1)),
 			'hourly_limit' => max(1, min(2, (int)$this->config->get('module_agmedia_review_reminder_hourly_limit') ?: 1)),

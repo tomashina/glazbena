@@ -1,5 +1,8 @@
 <?php
+require_once(DIR_SYSTEM . 'library/agmedia_review_reminder/policy.php');
+
 class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
+
 	private $error = array();
 	private $route = 'extension/module/agmedia_review_reminder';
 	private $setting_code = 'module_agmedia_review_reminder';
@@ -24,6 +27,10 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 				$settings[$array_key] = $defaults[$array_key];
 			}
 		}
+
+		$settings['module_agmedia_review_reminder_min_order_date'] = AgmediaReviewReminderPolicy::normaliseMinOrderDate(
+			isset($settings['module_agmedia_review_reminder_min_order_date']) ? $settings['module_agmedia_review_reminder_min_order_date'] : ''
+		);
 
 		if (!preg_match('/^[a-f0-9]{64}$/D', $current_token) && $this->user->hasPermission('modify', $this->route)) {
 			$settings['module_agmedia_review_reminder_cron_token'] = $this->generateToken();
@@ -61,6 +68,7 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 		$data = $this->language->all();
 		$data['error_warning'] = isset($this->error['warning']) ? $this->error['warning'] : '';
 		$data['error_order_status'] = isset($this->error['order_status']) ? $this->error['order_status'] : '';
+		$data['error_min_order_date'] = isset($this->error['min_order_date']) ? $this->error['min_order_date'] : '';
 		$data['error_delay_days'] = isset($this->error['delay_days']) ? $this->error['delay_days'] : '';
 		$data['error_batch_size'] = isset($this->error['batch_size']) ? $this->error['batch_size'] : '';
 		$data['error_hourly_limit'] = isset($this->error['hourly_limit']) ? $this->error['hourly_limit'] : '';
@@ -100,6 +108,7 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 		$data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
 		$data['languages'] = $this->model_localisation_language->getLanguages();
 		$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
+		$data['min_order_date_floor'] = AgmediaReviewReminderPolicy::MIN_ORDER_DATE;
 		$data['sender_name'] = (string)$this->config->get('config_name');
 		$data['sender_email'] = (string)($this->config->get('config_mail_smtp_username') ?: $this->config->get('config_email'));
 		$data['mail_engine'] = (string)$this->config->get('config_mail_engine');
@@ -167,6 +176,10 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 			}
 		}
 
+		$settings['module_agmedia_review_reminder_min_order_date'] = AgmediaReviewReminderPolicy::normaliseMinOrderDate(
+			isset($settings['module_agmedia_review_reminder_min_order_date']) ? $settings['module_agmedia_review_reminder_min_order_date'] : ''
+		);
+
 		if (empty($settings['module_agmedia_review_reminder_cron_token']) || !preg_match('/^[a-f0-9]{64}$/D', (string)$settings['module_agmedia_review_reminder_cron_token'])) {
 			$settings['module_agmedia_review_reminder_cron_token'] = $defaults['module_agmedia_review_reminder_cron_token'];
 		}
@@ -200,6 +213,14 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 
 		if (!is_array($order_statuses) || !$this->normaliseOrderStatusIds($order_statuses)) {
 			$this->error['order_status'] = $this->language->get('error_order_status');
+		}
+
+		$min_order_date = isset($this->request->post['module_agmedia_review_reminder_min_order_date'])
+			? trim((string)$this->request->post['module_agmedia_review_reminder_min_order_date'])
+			: '';
+
+		if (!AgmediaReviewReminderPolicy::isValidOrderDate($min_order_date) || $min_order_date < AgmediaReviewReminderPolicy::MIN_ORDER_DATE) {
+			$this->error['min_order_date'] = sprintf($this->language->get('error_min_order_date'), AgmediaReviewReminderPolicy::MIN_ORDER_DATE);
 		}
 
 		$this->validateInteger('delay_days', 0, 90);
@@ -254,6 +275,9 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 		return array(
 			'module_agmedia_review_reminder_status' => !empty($post['module_agmedia_review_reminder_status']) ? 1 : 0,
 			'module_agmedia_review_reminder_order_status_id' => $order_statuses,
+			'module_agmedia_review_reminder_min_order_date' => AgmediaReviewReminderPolicy::normaliseMinOrderDate(
+				isset($post['module_agmedia_review_reminder_min_order_date']) ? $post['module_agmedia_review_reminder_min_order_date'] : ''
+			),
 			'module_agmedia_review_reminder_delay_days' => (int)$post['module_agmedia_review_reminder_delay_days'],
 			'module_agmedia_review_reminder_batch_size' => (int)$post['module_agmedia_review_reminder_batch_size'],
 			'module_agmedia_review_reminder_hourly_limit' => (int)$post['module_agmedia_review_reminder_hourly_limit'],
@@ -310,6 +334,7 @@ class ControllerExtensionModuleAgmediaReviewReminder extends Controller {
 		return array(
 			'module_agmedia_review_reminder_status' => 0,
 			'module_agmedia_review_reminder_order_status_id' => $complete_statuses,
+			'module_agmedia_review_reminder_min_order_date' => AgmediaReviewReminderPolicy::MIN_ORDER_DATE,
 			'module_agmedia_review_reminder_delay_days' => 7,
 			'module_agmedia_review_reminder_batch_size' => 1,
 			'module_agmedia_review_reminder_hourly_limit' => 1,

@@ -4,6 +4,12 @@
 licencu, predloške ni njihov endpoint. Cilj prijelaza je sačuvati povijest slanja i
 spriječiti da kupac dobije drugi podsjetnik za istu narudžbu.
 
+Na ovom liveu stari OrderReviews modul deinstaliran je prije migracije. Njegov
+`uninstall()` briše svih šest `oc_orderreviews_*` tablica, pa povijest možda više nije
+dostupna. Zbog toga novi modul ima nepovratnu sigurnosnu granicu
+`min_order_date = 2026-08-27`: **narudžbe prije 27. 8. 2026. nikad se ne stavljaju u
+queue niti šalju**. Današnje i buduće narudžbe i dalje čekaju podešenu odgodu.
+
 ## Što migracija čuva
 
 Migracija [20260827_agmedia_review_reminder_migrate.sql](../database/migrations/20260827_agmedia_review_reminder_migrate.sql)
@@ -49,15 +55,17 @@ Novi worker računa starost od nepromjenjivog `order.date_added`. Promjena statu
 uređivanje narudžbe ne pokreću odgodu ispočetka. Stari predlošci mogli su koristiti
 `date_modified`. Prije uključivanja zato provjeriti je li migrirana odgoda primjerena;
 granica `max_age_days` sprječava obradu cijele stare povijesti.
+Neovisno o toj kliznoj granici, fiksni početni datum `2026-08-27` uvijek ima prednost
+i ne može se postaviti na raniji datum kroz admin ni izravnom starom DB vrijednošću.
 
 ## Redoslijed aktivacije na liveu
 
 1. Napraviti backup baze.
-2. U EasyCronu isključiti stari URL
-   `route=extension/module/orderreviews/sendEmails`. Ne ostavljati oba crona aktivna.
-   Stari modul zasad ne deinstalirati: njegova `uninstall()` metoda briše povijesne
-   `oc_orderreviews_*` tablice potrebne za migraciju, audit i mogući povratak.
-3. Pričekati da eventualni već pokrenuti HTTP zahtjev završi. Brza provjera:
+2. U EasyCronu provjeriti da je stari URL
+   `route=extension/module/orderreviews/sendEmails` isključen. Stari modul je već
+   deinstaliran i ne treba ga ponovno instalirati.
+3. Ako `oc_orderreviews_delivery` još postoji iz backupa, pričekati da eventualni
+   stari HTTP zahtjev završi i provjeriti:
 
    ```sql
    SELECT status, COUNT(*) AS total, MAX(updated_at) AS last_change
@@ -66,8 +74,8 @@ granica `max_age_days` sprječava obradu cijele stare povijesti.
    GROUP BY status;
    ```
 
-   Migracija će stari `sending` svejedno pretvoriti u terminalni `unknown`, ali se SQL
-   ne smije izvršavati paralelno s workerom koji još piše u bazu.
+   Ako tablica ne postoji, ovaj upit preskočiti. Migracijski SQL sam prepoznaje
+   nedostajuće legacy tablice i nastavlja sigurnim putem s početnim datumom.
 
 4. U OpenCart adminu otvoriti **Extensions → Extensions → Modules**, pronaći
    **AGmedia Review Reminder** i kliknuti **Install**. Modul se instalira isključen.
@@ -80,6 +88,7 @@ granica `max_age_days` sprječava obradu cijele stare povijesti.
 7. U novom modulu provjeriti:
 
    - SMTP prikazuje `SMTP` i ispravan host/port;
+   - `Početni datum narudžbi = 2026-08-27`;
    - statuse narudžbi i odgodu;
    - `Messages per cron run = 1`;
    - `Maximum attempts per hour = 1` za početno razdoblje;
@@ -157,6 +166,11 @@ za poruke čiji se prijašnji SMTP ishod ne može dokazati.
 
 ## Povratak bez duplog slanja
 
+Na ovom liveu povratak na stari modul nije moguć bez DB backupa jer je njegov
+`uninstall()` obrisao legacy tablice. Najsigurniji rollback je isključiti novi modul i
+novi EasyCron; pritom se ništa ne šalje. Sljedeći legacy rollback koraci vrijede samo
+ako su stare tablice prethodno vraćene iz provjerenog backupa.
+
 Ako novi worker još nema nijedan pokušaj, dovoljno je isključiti novi EasyCron i novi
 modul; stari cron može se privremeno vratiti tek nakon potvrde da nije bilo slanja i
 ručnog uklanjanja cutover markera:
@@ -199,9 +213,8 @@ WHERE NOT EXISTS (
 Tek nakon te zaštite i pregleda statusa smije se uključiti stari worker. Nove tablice se
 ne brišu: ostaju audit i deduplikacijska zaštita za kasniju ponovnu instalaciju.
 
-Nakon duljeg urednog rada novog modula stare tablice mogu se zasebno arhivirati. Ne
-koristiti **Uninstall** starog modula kao način uklanjanja licencnog upozorenja dok taj
-arhiv nije napravljen; upozorenje se ne pojavljuje u novom, neovisnom modulu.
+Ako se stare tablice pronađu u backupu, sačuvati ih kao zaseban arhiv prije bilo kakvog
+brisanja. Licencno upozorenje ne postoji u novom, neovisnom modulu.
 
 ## Test migracije za razvoj
 

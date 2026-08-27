@@ -1,4 +1,5 @@
 <?php
+require_once(DIR_SYSTEM . 'library/agmedia_review_reminder/policy.php');
 
 class ModelExtensionModuleAgmediaReviewReminder extends Model {
 	private $tableExistsCache = array();
@@ -88,7 +89,7 @@ class ModelExtensionModuleAgmediaReviewReminder extends Model {
 			  AND sending_at < DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
 	}
 
-	public function enqueueEligible($storeId, array $orderStatusIds, $delayDays, $maxAgeDays, $limit = 250) {
+	public function enqueueEligible($storeId, array $orderStatusIds, $minOrderDate, $delayDays, $maxAgeDays, $limit = 250) {
 		$storeId = (int)$storeId;
 		$orderStatusIds = $this->normaliseIds($orderStatusIds);
 
@@ -98,6 +99,7 @@ class ModelExtensionModuleAgmediaReviewReminder extends Model {
 
 		$delayDays = max(0, (int)$delayDays);
 		$maxAgeDays = max($delayDays, (int)$maxAgeDays);
+		$minOrderDate = $this->normaliseMinOrderDate($minOrderDate);
 		$limit = max(1, min(1000, (int)$limit));
 		$legacyGuards = $this->getLegacyDuplicateGuards();
 
@@ -108,6 +110,7 @@ class ModelExtensionModuleAgmediaReviewReminder extends Model {
 			WHERE o.store_id = '" . $storeId . "'
 			  AND d.delivery_id IS NULL
 			  AND o.order_status_id IN (" . implode(',', $orderStatusIds) . ")
+			  AND o.date_added >= '" . $this->db->escape($minOrderDate . ' 00:00:00') . "'
 			  AND o.date_added <= DATE_SUB(NOW(), INTERVAL " . $delayDays . " DAY)
 			  AND o.date_added >= DATE_SUB(NOW(), INTERVAL " . $maxAgeDays . " DAY)" .
 			  $legacyGuards . "
@@ -193,7 +196,7 @@ class ModelExtensionModuleAgmediaReviewReminder extends Model {
 		return $query->row;
 	}
 
-	public function getEligibleOrder($orderId, $storeId, array $orderStatusIds, $delayDays, $maxAgeDays) {
+	public function getEligibleOrder($orderId, $storeId, array $orderStatusIds, $minOrderDate, $delayDays, $maxAgeDays) {
 		$orderStatusIds = $this->normaliseIds($orderStatusIds);
 
 		if (!$orderStatusIds) {
@@ -202,12 +205,14 @@ class ModelExtensionModuleAgmediaReviewReminder extends Model {
 
 		$delayDays = max(0, (int)$delayDays);
 		$maxAgeDays = max($delayDays, (int)$maxAgeDays);
+		$minOrderDate = $this->normaliseMinOrderDate($minOrderDate);
 		$query = $this->db->query("SELECT o.order_id, o.store_id, o.store_name, o.store_url,
 				o.firstname, o.lastname, o.email, o.language_id, o.order_status_id, o.date_added
 			FROM `" . DB_PREFIX . "order` o
 			WHERE o.order_id = '" . (int)$orderId . "'
 			  AND o.store_id = '" . (int)$storeId . "'
 			  AND o.order_status_id IN (" . implode(',', $orderStatusIds) . ")
+			  AND o.date_added >= '" . $this->db->escape($minOrderDate . ' 00:00:00') . "'
 			  AND o.date_added <= DATE_SUB(NOW(), INTERVAL " . $delayDays . " DAY)
 			  AND o.date_added >= DATE_SUB(NOW(), INTERVAL " . $maxAgeDays . " DAY)
 			LIMIT 1");
@@ -338,6 +343,7 @@ class ModelExtensionModuleAgmediaReviewReminder extends Model {
 				INNER JOIN `" . DB_PREFIX . "order` o ON o.store_id = d.store_id AND o.order_id = d.order_id
 				SET d.status = 'sending', d.sending_at = NOW(), d.message_id = '" . $this->db->escape($messageId) . "', d.date_modified = NOW()
 				WHERE d.delivery_id = '" . (int)$deliveryId . "' AND d.status = 'processing'
+				  AND o.date_added >= '" . $this->db->escape(AgmediaReviewReminderPolicy::minOrderDateTime()) . "'
 				  AND LOWER(TRIM(o.email)) = LOWER(TRIM(d.email))");
 
 			if (!$this->db->countAffected()) {
@@ -517,6 +523,10 @@ class ModelExtensionModuleAgmediaReviewReminder extends Model {
 		}
 
 		return array_values($result);
+	}
+
+	private function normaliseMinOrderDate($value) {
+		return AgmediaReviewReminderPolicy::normaliseMinOrderDate($value);
 	}
 
 	private function getLegacyDuplicateGuards() {
