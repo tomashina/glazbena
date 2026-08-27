@@ -2,18 +2,6 @@
 namespace Vendor\iSenseLabs\OrderReviews\Mail;
 
 class Mail {
-    public $to;
-    public $from;
-    public $sender;
-    public $reply_to;
-    public $subject;
-    public $text;
-    public $html;
-    public $attachments = array();
-    public $bcc;
-    public $parameter;
-    public $before_data_terminator;
-
     public function send() {
         if (is_array($this->to)) {
             $to = implode(',', $this->to);
@@ -89,9 +77,9 @@ class Mail {
         ini_set('sendmail_from', $this->from);
 
         if ($this->parameter) {
-            return mail($to, '=?UTF-8?B?' . base64_encode($this->subject) . '?=', $message, $header, $this->parameter);
+            mail($to, '=?UTF-8?B?' . base64_encode($this->subject) . '?=', $message, $header, $this->parameter);
+        } else {
+            mail($to, '=?UTF-8?B?' . base64_encode($this->subject) . '?=', $message, $header);
         }
-
-        return mail($to, '=?UTF-8?B?' . base64_encode($this->subject) . '?=', $message, $header);
     }
 }

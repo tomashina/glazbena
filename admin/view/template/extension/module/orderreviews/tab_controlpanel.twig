@@ -1,5 +1,4 @@
 <div class="container-fluid">
-	<input type="hidden" id="orderreviews-next-reviewmail-id" name="{{ moduleName }}[NextReviewMailId]" value="{{ nextReviewMailId }}" />
 	<div class="row">
 		<div class="col-md-3">
 			<h5><strong><span class="required">* </span>Module status:</strong></h5>
@@ -90,52 +89,38 @@
 			</div>
 			<div class="col-md-3">
 				<button class="btn btn-primary cronModal"><i class="fa fa-question-circle"></i>&nbsp;&nbsp;{{text_how_to_setup}}</button>
-				<p class="help" style="margin-top:10px;">{{ text_safe_cron_notification }}</p>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" name="{{ moduleName }}[CronNotification]" value="yes" {{ moduleData.CronNotification ? 'checked="checked"' : '' }}/> {{text_notification_option}}
+					</label>
+				</div>
 			</div>
 		</div>
 		<br />
 		<div class="row">
 			<div class="col-md-3">
-				<h5><strong>{{ text_batch_size }}</strong></h5>
-				<span class="help"><i class="fa fa-info-circle"></i>&nbsp;{{ text_batch_size_help }}</span>
+				<h5><strong>{{text_bcc}}</strong></h5>
+				<span class="help"><i class="fa fa-info-circle"></i>&nbsp;{{text_bcc_help}}</span>
 			</div>
 			<div class="col-md-3">
-				<input type="number" min="1" max="3" name="{{ moduleName }}[BatchSize]" value="{{ moduleData.BatchSize is defined ? moduleData.BatchSize : 2 }}" class="form-control" />
+				<select name="{{ moduleName }}[BCC]" class="form-control">
+					<option value="yes" {{ moduleData.BCC  and  moduleData.BCC  == 'yes' ? 'selected=selected' : '' }}>{{text_enabled}}</option>
+					<option value="no" {{ moduleData.BCC is empty  or  moduleData.BCC == 'no' ? 'selected=selected' : '' }}>{{text_disabled}}</option>
+				</select>
 			</div>
 		</div>
 		<br />
 		<div class="row">
 			<div class="col-md-3">
-				<h5><strong>{{ text_hourly_limit }}</strong></h5>
-				<span class="help"><i class="fa fa-info-circle"></i>&nbsp;{{ text_hourly_limit_help }}</span>
+				<h5><strong>{{text_log}}</strong></h5>
+				<span class="help"><i class="fa fa-info-circle"></i>&nbsp;{{text_log_help}}</span>
 			</div>
 			<div class="col-md-3">
-				<input type="number" min="1" max="4" name="{{ moduleName }}[HourlyLimit]" value="{{ moduleData.HourlyLimit is defined ? moduleData.HourlyLimit : 2 }}" class="form-control" />
+				<select name="{{ moduleName }}[LOG]" class="form-control">
+					<option value="yes" {{ moduleData.LOG  and  moduleData.LOG  == 'yes' ? 'selected=selected' : '' }}>{{text_enabled}}</option>
+					<option value="no" {{ moduleData.LOG is empty  or  moduleData.LOG == 'no' ? 'selected=selected' : '' }}>{{text_disabled}}</option>
+				</select>
 			</div>
-		</div>
-		<br />
-		<div class="row">
-			<div class="col-md-3">
-				<h5><strong>{{ text_max_age_days }}</strong></h5>
-				<span class="help"><i class="fa fa-info-circle"></i>&nbsp;{{ text_max_age_days_help }}</span>
-			</div>
-			<div class="col-md-3">
-				<input type="number" min="1" max="365" name="{{ moduleName }}[MaxAgeDays]" value="{{ moduleData.MaxAgeDays is defined ? moduleData.MaxAgeDays : 45 }}" class="form-control" />
-			</div>
-		</div>
-		<br />
-		<div class="row">
-			<div class="col-md-3">
-				<h5><strong>{{ text_max_attempts }}</strong></h5>
-				<span class="help"><i class="fa fa-info-circle"></i>&nbsp;{{ text_max_attempts_help }}</span>
-			</div>
-			<div class="col-md-3">
-				<input type="number" min="1" max="5" name="{{ moduleName }}[MaxAttempts]" value="{{ moduleData.MaxAttempts is defined ? moduleData.MaxAttempts : 3 }}" class="form-control" />
-			</div>
-		</div>
-		<br />
-		<div class="alert alert-info">
-			<i class="fa fa-shield"></i>&nbsp;{{ text_safe_delivery_note }}
 		</div>
 	</div>
 	<br />
@@ -1133,8 +1118,7 @@
 <script type="text/javascript"><!--
 // Add Template
 function addNewReviewMail() {
-	var count = parseInt($('#orderreviews-next-reviewmail-id').val(), 10) || 1;
-	$('#orderreviews-next-reviewmail-id').val(count + 1);
+	count = $('.review-list li:last-child > a').data('reviewmail-id') + 1 || 1;
 	var ajax_data = {};
 	ajax_data.user_token = '{{ user_token }}';
 	ajax_data.store_id = '{{ store.store_id }}';

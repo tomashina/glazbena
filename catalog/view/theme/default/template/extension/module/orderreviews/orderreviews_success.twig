@@ -79,9 +79,12 @@
                   </script>
             {% else %}
                 <div class="buttons">
-	                    <div class="pull-right">
-	                        {% if errors %}
-								{% if history and duplicate == false %}
+                    <div class="pull-right">
+                        {% if errors %}
+							{% if duplicate %}{% else %}
+								<a href="{{ ReveiewMailLinkNotDec }}" class="btn btn-warning">{{button_send_again}}</a>&nbsp;&nbsp;
+							{% endif %}
+							{% if history and duplicate == false %}
 								<button type="button" id="back-btn" class="btn btn-warning">{{button_back}}</button>&nbsp;&nbsp;
 							{% endif %}
                         {% endif %}

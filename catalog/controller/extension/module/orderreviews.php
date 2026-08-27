@@ -36,49 +36,6 @@ class ControllerExtensionModuleOrderReviews extends Controller {
 	}
 
     public function sendEmails()  {
-		$this->response->addHeader('Content-Type: application/json; charset=utf-8');
-
-		if (!$this->isCronAuthorized()) {
-			$this->response->addHeader('HTTP/1.1 403 Forbidden');
-			$this->response->setOutput(json_encode(array(
-				'status' => 'forbidden',
-				'message' => 'Invalid or missing OrderReviews cron token.'
-			)));
-			return;
-		}
-
-		if ($this->config->get('config_mail_engine') !== 'smtp') {
-			$this->response->addHeader('HTTP/1.1 503 Service Unavailable');
-			$this->response->setOutput(json_encode(array(
-				'status' => 'blocked',
-				'message' => 'OrderReviews safe delivery requires the SMTP mail engine.'
-			)));
-			return;
-		}
-
-		if (!$this->moduleModel->acquireDeliveryLock()) {
-			$this->response->addHeader('HTTP/1.1 409 Conflict');
-			$this->response->setOutput(json_encode(array(
-				'status' => 'locked',
-				'message' => 'Another OrderReviews worker is already running.'
-			)));
-			return;
-		}
-
-		$this->moduleModel->ensureDeliverySchema();
-		$this->moduleModel->recoverStaleDeliveries();
-
-		$summary = array(
-			'status' => 'ok',
-			'attempted' => 0,
-			'sent' => 0,
-			'retry' => 0,
-			'failed' => 0,
-			'suppressed' => 0,
-			'skipped' => 0,
-			'message' => 'OrderReviews worker completed.'
-		);
-		$transportFailed = false;
 		$stores = array_merge(array(0 => $this->moduleModel->getStore(0)), $this->model_setting_store->getStores());
 		
 		foreach ($stores as $store) {
@@ -90,68 +47,22 @@ class ControllerExtensionModuleOrderReviews extends Controller {
 
 			$moduleData = isset($setting[$this->moduleName]) ? $setting[$this->moduleName] : array();
 
-			if (!empty($moduleData['Enabled']) && $moduleData['Enabled'] == 'yes' && !empty($moduleData['ReviewMail']) && is_array($moduleData['ReviewMail'])) {
+			if (!empty($moduleData['Enabled']) && $moduleData['Enabled'] == 'yes' && isset($moduleData['ReviewMail'])) {
+				$counter = 0;
 				$OrderProducts = array();
-				$batchLimit = $this->safeIntegerSetting($moduleData, 'BatchSize', 2, 1, 3);
-				$hourlyLimit = $this->safeIntegerSetting($moduleData, 'HourlyLimit', 2, 1, 4);
-				$maxAgeDays = $this->safeIntegerSetting($moduleData, 'MaxAgeDays', 45, 1, 365);
-				$maxAttempts = $this->safeIntegerSetting($moduleData, 'MaxAttempts', 3, 1, 5);
-				$recentAttempts = $this->moduleModel->getRecentDeliveryAttemptCount();
-				$remaining = min($batchLimit, max(0, $hourlyLimit - $recentAttempts));
-
-				if ($remaining < 1) {
-					$summary['message'] = 'Hourly delivery limit reached; no email was attempted.';
-					continue;
-				}
 				
-				foreach ($moduleData['ReviewMail'] as $reviewmailKey => $reviewmail) {
-					if (!is_array($reviewmail)) {
-						continue;
-					}
-
-					$reviewmailId = isset($reviewmail['id']) ? (int)$reviewmail['id'] : (int)$reviewmailKey;
-					$customerGroupId = isset($reviewmail['CustomerGroupID']) ? $reviewmail['CustomerGroupID'] : 'send_all';
-
-					if ($remaining > 0 && !$transportFailed && !empty($reviewmail['Enabled']) && $reviewmail['Enabled'] == 'yes') {
-						$this->moduleModel->finalizeIneligibleDeliveries($store['store_id'], $reviewmailId, $maxAttempts);
+				foreach ($moduleData['ReviewMail'] as $reviewmail) {
+					if ($reviewmail['Enabled']=='yes') {
 						
-						$orders = $this->moduleModel->getOrders(
-							$reviewmail['OrderStatusID'],
-							$reviewmail['Delay'],
-							$reviewmail['DateType'],
-							$store['store_id'],
-							$reviewmailId,
-							$remaining,
-							$maxAgeDays,
-							$maxAttempts,
-							$customerGroupId
-						);
+						$orders = $this->moduleModel->getOrders($reviewmail['OrderStatusID'], $reviewmail['Delay'], $reviewmail['DateType'],$store['store_id']);
 
 						foreach ($orders as $order) {
-							if ($remaining < 1 || $transportFailed) {
-								break;
-							}
-
 							if ($order['store_id'] != $store['store_id']) {
 								continue;
 							}
 
-							$isQueuedDelivery = !empty($order['orderreviews_delivery_id']);
-							$customerGroupMatches = ($customerGroupId == 'send_all') || ($customerGroupId != 'send_all' && $customerGroupId == $order['customer_group_id']);
-
-							if ($isQueuedDelivery && ((int)$order['order_status_id'] !== (int)$reviewmail['OrderStatusID'] || !$customerGroupMatches)) {
-								$this->moduleModel->cancelQueuedDelivery(
-									$store['store_id'],
-									$order['order_id'],
-									$reviewmailId,
-									'Order status or customer group changed before retry.'
-								);
-								$summary['skipped']++;
-								continue;
-							}
-
-							if (!$isQueuedDelivery && !$customerGroupMatches) {
-								continue;
+							if (!(($reviewmail['CustomerGroupID'] == 'send_all') || ($reviewmail['CustomerGroupID'] != 'send_all' && $reviewmail['CustomerGroupID']==$order['customer_group_id']))) {
+								break;	
 							}
 
 							if ($this->moduleModel->checkReviewLog($order['order_id'])) {
@@ -159,11 +70,10 @@ class ControllerExtensionModuleOrderReviews extends Controller {
 							}
 							
 							$OrderLanguage = $this->model_localisation_language->getLanguage($order['language_id']);
-							$languageCode = !empty($OrderLanguage['code']) ? $OrderLanguage['code'] : $this->config->get('config_language');
-							$LangVars = $this->moduleModel->loadLanguage($languageCode . '/extension/module', 'orderreviews');
+							$LangVars =  $this->moduleModel->loadLanguage($OrderLanguage['code'].'/extension/module','orderreviews');
 							$VarOrderProducts =  $this->moduleModel->getOrderProducts($order['order_id']);
 
-							$query_reviewed = $this->db->query("SELECT DISTINCT ol.review_product_id AS product_id FROM " . DB_PREFIX . "orderreviews_log ol LEFT JOIN `" . DB_PREFIX . "order` o ON ol.order_id = o.order_id WHERE o.email = '" . $this->db->escape($order['email']) . "' ORDER BY ol.review_product_id");
+							$query_reviewed = $this->db->query("SELECT DISTINCT product_id FROM " . DB_PREFIX . "orderreviews_log as ol LEFT JOIN `" . DB_PREFIX . "order` as o ON ol.order_id = o.order_id LEFT JOIN " . DB_PREFIX . "order_product as op ON ol.order_id = op.order_id WHERE o.email = '" . $order['email'] . "' ORDER BY product_id");
 
 							$reviewedProducts = array();
 
@@ -200,32 +110,30 @@ class ControllerExtensionModuleOrderReviews extends Controller {
 							}
 							$subject_original = array('{first_name}','{last_name}', '{order_id}');
 							$subject_replace = array($order['firstname'], $order['lastname'], $order['order_id']);
-							$Subject = str_replace($subject_original, $subject_replace, $this->localizedReviewValue(isset($reviewmail['Subject']) ? $reviewmail['Subject'] : array(), $order['language_id']));
-							$Message = html_entity_decode($this->localizedReviewValue(isset($reviewmail['Message']) ? $reviewmail['Message'] : array(), $order['language_id']), ENT_QUOTES, 'UTF-8');
+							$Subject = str_replace($subject_original, $subject_replace, $reviewmail['Subject'][$order['language_id']]);
+							$Message = html_entity_decode($reviewmail['Message'][$order['language_id']]);
 							$FirstName = $order['firstname'];
 							$LastName = $order['lastname'];
 							$Email = $order['email'];
 							$SubmitLink = $store['url'].'index.php?route='.$this->module_path;
-							$params = 'order_id='.$order['order_id'].'&reviewmail_id='.$reviewmailId.'&store_id='.$store['store_id'];
+							$params = 'order_id='.$order['order_id'].'&reviewmail_id='.$reviewmail['id'].'&store_id='.$store['store_id'];
 							$ReveiewMailLink = $store['url'].'index.php?route='.$this->module_path.'/sendReview&params='.base64_encode($params);
 							
 							$ProductFormData = $this->moduleModel->fetchForm('default/template/'.$this->module_path.'/orderreviews_product_form_include.twig');			
 							$ProductsViews = "";
 							
 							
-							$reviewType = isset($reviewmail['ReviewType']) ? $reviewmail['ReviewType'] : 'per_purchase';
-
-							if ($reviewType == 'per_purchase') {
+							if ($reviewmail['ReviewType'] == 'per_purchase') {
 								$tempVar = '';
 								$old = array("{number}","{pr_name}","{pr_id}","{image}");
 								$new = array('0','','0',NULL);
 								$tempVar = str_replace($old, $new, $ProductFormData);
 								$ProductsViews .= $tempVar;
-							} else if ($reviewType == 'per_product') {
+							} else if ($reviewmail['ReviewType'] == 'per_product') { 
 								if (sizeof($OrderProducts)>0) {
 									for ($i=0; $i<sizeof($OrderProducts); $i++) {
 										$tempVar = '';
-										if(!empty($reviewmail['DisplayImages']) && $reviewmail['DisplayImages'] == 'yes'){
+										if($reviewmail['DisplayImages'] == 'yes'){										
 											$this->load->model('catalog/product');
 											$product_info = $this->model_catalog_product->getProduct($OrderProducts[$i]['product_id']);
 											$this->load->model('tool/image');
@@ -253,12 +161,12 @@ class ControllerExtensionModuleOrderReviews extends Controller {
 								$MainFormData = $this->moduleModel->fetchForm('default/template/'.$this->module_path.'/orderreviews_review_email_form.twig');
 															
 								$form_pattern = array("{submit_link}","{first_name}", "{last_name}", "{customer_id}", "{text_submit}", "{text_review}", "{product_id}", "{order_id}", "{customer_name}", "{reviewmail_id}", "{email}","{product_info}","{reviewmail_link_href}","{link_button_text}","{store_url}","{star_1}","{star_2}","{star_3}","{star_4}","{star_5}");
-								$form_replacements = array($SubmitLink, $FirstName, $LastName, base64_encode($order['customer_id']), $LangVars['text_submit'], $LangVars['text_review'], $ProductIDs, base64_encode($order['order_id']), $FirstName.' '.$LastName, $reviewmailId, base64_encode($Email), $ProductsViews, $ReveiewMailLink,$LangVars['text_leave_review'],$store['url'],$LangVars['star_1'],$LangVars['star_2'],$LangVars['star_3'],$LangVars['star_4'],$LangVars['star_5']);
+								$form_replacements = array($SubmitLink, $FirstName, $LastName, base64_encode($order['customer_id']), $LangVars['text_submit'], $LangVars['text_review'], $ProductIDs, base64_encode($order['order_id']), $FirstName.' '.$LastName, $reviewmail['id'], base64_encode($Email), $ProductsViews, $ReveiewMailLink,$LangVars['text_leave_review'],$store['url'],$LangVars['star_1'],$LangVars['star_2'],$LangVars['star_3'],$LangVars['star_4'],$LangVars['star_5']);
 							}else{
-								$privacyCheckbox = $this->moduleModel->privacyCheckbox(isset($moduleData['PrivacyPolicy']) ? $moduleData['PrivacyPolicy'] : 0);
+								$privacyCheckbox = $this->moduleModel->privacyCheckbox($moduleData['PrivacyPolicy']);
 								$MainFormData = $this->moduleModel->fetchForm('default/template/'.$this->module_path.'/orderreviews_product_form_main.twig');
 								$form_pattern = array("{submit_link}","{first_name}", "{last_name}", "{customer_id}", "{text_submit}", "{text_review}", "{privacy_aggreement}", "{product_id}", "{order_id}", "{customer_name}", "{reviewmail_id}", "{email}","{product_info}");				
-								$form_replacements = array($SubmitLink, $FirstName, $LastName, base64_encode($order['customer_id']), $LangVars['text_submit'], $LangVars['text_review'], $privacyCheckbox, $ProductIDs, base64_encode($order['order_id']), $FirstName.' '.$LastName, $reviewmailId, base64_encode($Email), $ProductsViews);
+								$form_replacements = array($SubmitLink, $FirstName, $LastName, base64_encode($order['customer_id']), $LangVars['text_submit'], $LangVars['text_review'], $privacyCheckbox, $ProductIDs, base64_encode($order['order_id']), $FirstName.' '.$LastName, $reviewmail['id'], base64_encode($Email), $ProductsViews);	
 							}
 
 							$ReviewForm = str_replace($form_pattern, $form_replacements, $MainFormData);
@@ -277,7 +185,7 @@ class ControllerExtensionModuleOrderReviews extends Controller {
 								<html xmlns="http://www.w3.org/1999/xhtml">
 								<head>
 									<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-									<title>OrderReviews</title>
+									<title>Monthly Newsletter</title>
 								</head>
 								<body>'.$HTMLMail.'</body></html>';
 
@@ -288,151 +196,92 @@ class ControllerExtensionModuleOrderReviews extends Controller {
 								'store_name' => $store['name'],
 								'store_id' => $store['store_id']
 							);
-							if (sizeof($OrderProducts)>0) {
-								if (!$this->moduleModel->isValidDeliveryEmail($Email)) {
-									$deliveryId = $this->moduleModel->claimDelivery($store['store_id'], $order['order_id'], $reviewmailId, $Email, $maxAttempts);
+						if (sizeof($OrderProducts)>0) {
 
-									if ($deliveryId) {
-										$this->moduleModel->markDeliverySuppressed($deliveryId, $Email, 'Invalid email address format.', 'validation');
-										$summary['suppressed']++;
-										$summary['skipped']++;
-										$remaining--;
-									}
+    // BLOKIRAJ EMAIL ADRESE KOJE VRAĆAJU GREŠKU
+    $blockedEmails = array(
+        'anusicluka22@gmail.com'
+    );
 
-									continue;
-								}
+    if (in_array(strtolower($Email), $blockedEmails)) {
+        continue;
+    }
 
-								$deliveryId = $this->moduleModel->claimDelivery($store['store_id'], $order['order_id'], $reviewmailId, $Email, $maxAttempts);
+    try {
 
-								if (!$deliveryId) {
-									$summary['skipped']++;
-									continue;
-								}
+        $emailResult = $this->moduleModel->sendMail($MailData);
 
-								$summary['attempted']++;
-								$remaining--;
+        // Ako je slanje uspješno
+        if ($emailResult) {
 
-								$smtpAccepted = false;
-								$MailData['before_data_terminator'] = function() use ($deliveryId) {
-									$this->moduleModel->markDeliverySending($deliveryId);
-								};
+            $counter++;
 
-								try {
-									if (!$this->moduleModel->sendMail($MailData)) {
-										throw new Exception('SMTP transport did not accept the message.');
-									}
+            if (isset($moduleData['LOG']) && $moduleData['LOG'] == 'yes') {
 
-									$smtpAccepted = true;
-								} catch (Exception $e) {
-									if ($this->moduleModel->isUnknownDeliveryFailure($e)) {
-										$this->moduleModel->markDeliveryUnknown($deliveryId, $e);
-										$summary['failed']++;
-									} elseif ($this->moduleModel->isPermanentRecipientFailure($e)) {
-										$this->moduleModel->markDeliverySuppressed($deliveryId, $Email, $e->getMessage(), 'smtp');
-										$summary['suppressed']++;
-										$summary['failed']++;
-									} else {
-										$deliveryStatus = $this->moduleModel->markDeliveryFailed($deliveryId, $e, $maxAttempts);
-										$summary[$deliveryStatus]++;
-									}
+                $OrderDate = date('Y-m-d H:i:s', time());
 
-									$this->log->write('OrderReviews SMTP delivery failed for order ' . (int)$order['order_id'] . ': ' . $e->getMessage());
-									$summary['status'] = 'paused';
-									$summary['message'] = 'Delivery paused after the first SMTP error.';
-									$transportFailed = true;
-								}
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "orderreviews_mail_log` 
+                    SET 
+                        `date` = '".$this->db->escape($OrderDate)."', 
+                        `store_id` = '".$this->db->escape($store['store_id'])."', 
+                        `order_id` = '".$this->db->escape($order['order_id'])."'");
+            }
 
-								if ($smtpAccepted) {
-									try {
-										$this->moduleModel->markDeliverySent($deliveryId, $store['store_id'], $order['order_id']);
-										$summary['sent']++;
-									} catch (Exception $e) {
-										// SMTP already returned 250. Never place this message back in
-										// retry merely because the local delivery log could not be saved.
-										try {
-											$this->moduleModel->markDeliveryUnknown(
-												$deliveryId,
-												new Exception('SMTP accepted the message, but saving the delivery result failed.')
-											);
-										} catch (Exception $ignored) {
-											// A processing/sending row is recovered safely after 30 minutes.
-										}
+        } else {
 
-										$this->log->write('OrderReviews SMTP accepted order ' . (int)$order['order_id'] . ', but its delivery result could not be saved: ' . $e->getMessage());
-										$summary['failed']++;
-										$summary['status'] = 'paused';
-										$summary['message'] = 'SMTP accepted a message, but saving its delivery result failed. It will not be retried automatically.';
-										$transportFailed = true;
-									}
-								}
-							} else {
-								$deliveryId = $this->moduleModel->claimDelivery($store['store_id'], $order['order_id'], $reviewmailId, $Email, $maxAttempts);
+            // Ako sendMail vrati false -> zapiši da se više ne retrya
+            $OrderDate = date('Y-m-d H:i:s', time());
 
-								if ($deliveryId) {
-									$this->moduleModel->markDeliveryCancelled($deliveryId, 'No unreviewed products remain for this order.');
-									$remaining--;
-								}
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "orderreviews_mail_log` 
+                SET 
+                    `date` = '".$this->db->escape($OrderDate)."', 
+                    `store_id` = '".$this->db->escape($store['store_id'])."', 
+                    `order_id` = '".$this->db->escape($order['order_id'])."'");
 
-								$summary['skipped']++;
-							}
-							}
+        }
+
+    } catch (Exception $e) {
+
+        // Ako SMTP baci exception -> isto logiraj
+        $OrderDate = date('Y-m-d H:i:s', time());
+
+        $this->db->query("INSERT INTO `" . DB_PREFIX . "orderreviews_mail_log` 
+            SET 
+                `date` = '".$this->db->escape($OrderDate)."', 
+                `store_id` = '".$this->db->escape($store['store_id'])."', 
+                `order_id` = '".$this->db->escape($order['order_id'])."'");
+
+    }
+}
 						}
 					}
 				}
-			}
-
-		$this->moduleModel->releaseDeliveryLock();
-
-		if ($transportFailed) {
-			$this->response->addHeader('HTTP/1.1 503 Service Unavailable');
-		}
-
-		$this->response->setOutput(json_encode($summary));
-	    }
-
-	private function isCronAuthorized() {
-		if (PHP_SAPI === 'cli') {
-			return true;
-		}
-
-		$encryptionKey = (string)$this->config->get('config_encryption');
-		$providedToken = isset($this->request->get['token']) ? (string)$this->request->get['token'] : '';
-
-		if ($encryptionKey === '' || $providedToken === '') {
-			return false;
-		}
-
-		$expectedToken = hash_hmac('sha256', 'orderreviews-cron-v1', $encryptionKey);
-
-		return hash_equals($expectedToken, $providedToken);
-	}
-
-	private function safeIntegerSetting($settings, $key, $default, $minimum, $maximum) {
-		$value = isset($settings[$key]) ? (int)$settings[$key] : (int)$default;
-
-		return max((int)$minimum, min((int)$maximum, $value));
-	}
-
-	private function localizedReviewValue($values, $languageId) {
-		if (!is_array($values)) {
-			return (string)$values;
-		}
-
-		if (isset($values[$languageId])) {
-			return (string)$values[$languageId];
-		}
-
-		$firstValue = reset($values);
-
-		return $firstValue !== false ? (string)$firstValue : '';
-	}
+				
+				$result = "Cron was executed successfully! A total of <strong>".$counter."</strong> emails were sent to the customers.<br />";
 	
-	public function sendEmailAgain() {
-		$this->response->addHeader('HTTP/1.1 410 Gone');
-		$this->response->setOutput('Direct OrderReviews resend is disabled. The protected queue worker handles all deliveries.');
-	}
-
-	private function legacySendEmailAgain() {
+				if (isset($moduleData['CronNotification']) && $moduleData['CronNotification']=='yes' && sizeof($OrderProducts)>0) {
+					
+					$mailToUser = new Vendor\iSenseLabs\OrderReviews\Mail($this->config->get('config_mail_engine'));
+			        $mailToUser->parameter = $this->config->get('config_mail_parameter');
+			        $mailToUser->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+			        $mailToUser->smtp_username = $this->config->get('config_mail_smtp_username');
+			        $mailToUser->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+			        $mailToUser->smtp_port = $this->config->get('config_mail_smtp_port');
+			        $mailToUser->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+					$mailToUser->setTo($this->config->get('config_email'));
+					$mailToUser->setFrom($this->config->get('config_email'));
+					$mailToUser->setSender($this->config->get('config_name'));
+					$mailToUser->setSubject(html_entity_decode('OrderReviews Cron Task', ENT_QUOTES, 'UTF-8'));
+					$mailToUser->setHtml($result);
+					$mailToUser->send(); 
+				} else {
+					echo $result;	
+				}	
+			}
+		}
+    }
+	
+	public function sendEmailAgain()  {
 		$stores = array_merge(array(0 => $this->moduleModel->getStore(0)), $this->model_setting_store->getStores());
 
 		foreach ($stores as $store) {
@@ -1058,8 +907,10 @@ class ControllerExtensionModuleOrderReviews extends Controller {
 	 */
 	public function handleAddOrderHistory($route, &$data)
 	{
-		// Delay 0 is intentionally handled by the same protected cron queue.
-		// Sending inside the checkout event would bypass rate limiting and deduplication.
+		if (!empty($data)) {
+			list($order_id,$order_status_id) = $data;
+			$this->moduleModel->sendReviewMail($order_id, $order_status_id);
+		}
 	}
 
 	public function viewOrderHistoryAfter($route, &$data, &$output)

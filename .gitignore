@@ -25,7 +25,6 @@ image/tmp/
 
 # Database dumps and private import feeds
 *.sql
-!database/migrations/20260827_orderreviews_safe_delivery.sql
 SHOP_sync.xml
 
 # Temporary/backup files
