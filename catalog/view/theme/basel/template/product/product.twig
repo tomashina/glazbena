@@ -5,21 +5,22 @@
              <div class="modal in" id="help-modal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"></div>
                             <script>
                               $(document).on('click','.tmdhelptopic',function(e) {
+                                e.preventDefault();
                                 $('#help-modal .modal-content').html('<div class="loader-if centered"></div>');
-                                $('#help-modal').load($(this).attr('href'));
+                                $('#help-modal').load($(this).attr('data-popup-url'));
                               });
                             </script>
                             <style>.linkbox{padding-left:0px; padding-right:0px; margin-top:10px;}
                                 .paddbox{padding-left:0px; padding-right:0px;margin-bottom:10px;}
                                 .paddbox + .paddbox{padding-left:10px;}
                                 .paddbox:nth-child(3){padding-left:0px;}
+                                .gk-product-action{border:0;background:transparent;padding:0;color:inherit;font:inherit;}
                             </style>
 			
 
 {% if product_layout != "full-width" %}
     <style>
         .main-image:not(.slick-initialized) > div:not(:first-child) { display:none; }
-        .gk-product-action { border:0; background:transparent; padding:0; color:inherit; font:inherit; }
         @media (max-width:767px) {
             .image-additional:not(.slick-initialized) { display:flex; gap:6px; opacity:1; overflow-x:auto; }
             .image-additional:not(.slick-initialized) > div { flex:0 0 72px; }
@@ -269,7 +270,7 @@ max-height:600px;
 
                                     {% if formlink.form_id < 2  %}
 
-                                        <p class="info is_wishlist mb-10"> <a data-toggle="modal" href="{{ formlink.formlink }}" data-target="#help-modal" class=" tmdhelptopic "><i class="icon-tag"></i> {{ popuplinkname }} </a></p>
+                                        <p class="info is_wishlist mb-10"> <button type="button" data-toggle="modal" data-popup-url="{{ formlink.formlink }}" data-target="#help-modal" class="gk-product-action tmdhelptopic"><i class="icon-tag"></i> {{ popuplinkname }} </button></p>
                                     {% endif %}
                                 </div>
 
@@ -538,7 +539,7 @@ max-height:600px;
 
                                                 {% if formlink.form_id > 1  %}
 
-                                                    <a data-toggle="modal" href="{{ formlink.formlink }}" style="margin-bottom:0px;float:right" data-target="#help-modal" class="btn btn-primary col-xs-7 outofstock tmdhelptopic"> <span class="ikona"></span><img src="image/upit-black.svg" class="carticon" alt="" width="20" height="20"> {{ popuplinkname }} </a>
+                                                    <button type="button" data-toggle="modal" data-popup-url="{{ formlink.formlink }}" style="margin-bottom:0px;float:right" data-target="#help-modal" class="btn btn-primary col-xs-7 outofstock tmdhelptopic"> <span class="ikona"></span><img src="image/upit-black.svg" class="carticon" alt="" width="20" height="20"> {{ popuplinkname }} </button>
                                                     <div class="clearfix"></div>
                                                 {% endif %}
                                             {% endfor %}

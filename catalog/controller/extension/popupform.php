@@ -18,18 +18,28 @@ class ControllerExtensionPopupForm extends Controller {
 		$this->load->model('tool/image');	
 		$this->load->model('catalog/product');	
 		
-		
-		if (isset($this->request->get['product_id'])) {
-			$data['product_id'] = $this->request->get['product_id'];
-		} else {
-			$data['product_id'] = 0;
+		$product_id = isset($this->request->get['product_id']) ? (int)$this->request->get['product_id'] : 0;
+		$form_id = isset($this->request->get['form_id']) ? (int)$this->request->get['form_id'] : 0;
+		$data['product_id'] = $product_id;
+		$data['form_id'] = $form_id;
+
+		$product_info = $this->model_catalog_product->getProduct($product_id);
+
+		if (!$product_info) {
+			$this->request->get['route'] = 'error/not_found';
+			return $this->load->controller('error/not_found');
 		}
-		if (isset($this->request->get['form_id'])) {
-			$data['form_id'] = $this->request->get['form_id'];
-			$form_id = $this->request->get['form_id'];
-		} else {
-			$data['form_id'] = 0;
-			$form_id = 0;
+
+		$is_ajax = !empty($this->request->server['HTTP_X_REQUESTED_WITH'])
+			&& strtolower($this->request->server['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
+		// This route renders a modal fragment. Direct visits (including crawlers)
+		// belong on the canonical product page instead of a standalone form URL.
+		if (!$is_ajax) {
+			$this->response->redirect(
+				$this->url->link('product/product', 'product_id=' . $product_id, true),
+				301
+			);
 		}
 		
 		if (isset($this->error['warning'])) {
@@ -58,9 +68,16 @@ class ControllerExtensionPopupForm extends Controller {
 			
 		$tmdforms_info = $this->model_extension_form->getForm($form_id);
 
+		if (!$tmdforms_info) {
+			$this->request->get['route'] = 'error/not_found';
+			return $this->load->controller('error/not_found');
+		}
+
+		$this->response->addHeader('X-Robots-Tag: noindex, nofollow');
+
 		if($tmdforms_info['display_type']=='Only customer') { 
 			if (!$this->customer->isLogged()) {
-				$this->session->data['redirect'] = $this->url->link('extension/form', 'form_id='.$forms_id, true);
+					$this->session->data['redirect'] = $this->url->link('extension/form', 'form_id=' . $form_id, true);
 				$this->response->redirect($this->url->link('account/login', '', true));
 			}
 		}
@@ -68,7 +85,7 @@ class ControllerExtensionPopupForm extends Controller {
 		if($tmdforms_info['display_type']=='Only guest') {
 			if ($this->customer->isLogged()) {
 				//$this->response->redirect($this->url->link('common/home', '', true));
-				$this->session->data['redirect'] = $this->url->link('extension/form', 'form_id='.$forms_id, true);
+					$this->session->data['redirect'] = $this->url->link('extension/form', 'form_id=' . $form_id, true);
 			}
 		}
 		
@@ -152,8 +169,6 @@ class ControllerExtensionPopupForm extends Controller {
 		$data['producturl'] =str_replace('&amp;','&',$producturls);
 		
 		
-		
-		$product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);
 		
 		if ($product_info['image']) {
 			/* update code */

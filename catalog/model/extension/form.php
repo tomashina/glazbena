@@ -277,7 +277,7 @@ class ModelExtensionForm extends Model {
 		if(isset($query->rows)){
 			foreach($query->rows as $row)
 			{
-				$formdata[$row['form_id']]=array('form_id'=>$row['form_id'],'display_type'=>$row['display_type'],'popuplinkname'=>$row['popuplinkname'],'formlink' => $this->url->link('extension/popupform/popupformpage&form_id='.$row['form_id'].'&product_id=' . $product_id,'', true));
+				$formdata[$row['form_id']]=array('form_id'=>$row['form_id'],'display_type'=>$row['display_type'],'popuplinkname'=>$row['popuplinkname'],'formlink' => $this->url->link('extension/popupform/popupformpage', 'form_id=' . (int)$row['form_id'] . '&product_id=' . (int)$product_id, true));
 			}
 		
 		}
@@ -294,7 +294,7 @@ class ModelExtensionForm extends Model {
 					foreach($query1->rows as $row)
 					{
 						
-						$formdata[$row['form_id']]=array('form_id'=>$row['form_id'],'display_type'=>$row['display_type'],'popuplinkname'=>$row['popuplinkname'],'formlink' => $this->url->link('extension/popupform/popupformpage&form_id='.$row['form_id'].'&product_id=' . $product_id,'',true));
+						$formdata[$row['form_id']]=array('form_id'=>$row['form_id'],'display_type'=>$row['display_type'],'popuplinkname'=>$row['popuplinkname'],'formlink' => $this->url->link('extension/popupform/popupformpage', 'form_id=' . (int)$row['form_id'] . '&product_id=' . (int)$product_id, true));
 					}
 				}
 				
@@ -308,7 +308,7 @@ class ModelExtensionForm extends Model {
 					foreach($query1->rows as $row)
 					{
 				
-					$formdata[$row['form_id']]=array('form_id'=>$row['form_id'],'display_type'=>$row['display_type'],'popuplinkname'=>$row['popuplinkname'],'formlink' => $this->url->link('extension/popupform/popupformpage&form_id='.$row['form_id'].'&product_id=' . $product_id,'',true));
+					$formdata[$row['form_id']]=array('form_id'=>$row['form_id'],'display_type'=>$row['display_type'],'popuplinkname'=>$row['popuplinkname'],'formlink' => $this->url->link('extension/popupform/popupformpage', 'form_id=' . (int)$row['form_id'] . '&product_id=' . (int)$product_id, true));
 					}
 				}
 			}
@@ -320,7 +320,7 @@ class ModelExtensionForm extends Model {
 				if(isset($query1->rows)){
 					foreach($query1->rows as $row)
 					{
-						$formdata[$row['form_id']]=array('form_id'=>$row['form_id'],'display_type'=>$row['display_type'],'popuplinkname'=>$row['popuplinkname'],'formlink' => $this->url->link('extension/popupform/popupformpage&form_id='.$row['form_id'].'&product_id=' . $product_id,'',true));
+						$formdata[$row['form_id']]=array('form_id'=>$row['form_id'],'display_type'=>$row['display_type'],'popuplinkname'=>$row['popuplinkname'],'formlink' => $this->url->link('extension/popupform/popupformpage', 'form_id=' . (int)$row['form_id'] . '&product_id=' . (int)$product_id, true));
 					}
 			
 				}
