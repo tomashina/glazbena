@@ -16,6 +16,9 @@
             <a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" /></a>
             {% endif %}</td>
           <td class="name"><a href="{{ product.href }}">{{ product.name }}</a>
+            {% if product.price and product.anchor_price_text %}
+<span class="anchor-price anchor-price-cart hidden-md hidden-lg">{{ product.anchor_price_text|escape }}</span>
+{% endif %}
             <div>
               {% for option in product.option %} 
               <small>{{ option.name }}: {{ option.value }}</small><br />
@@ -40,7 +43,11 @@
 			{% else %}
 			x&nbsp;{{ product.quantity }} 
 			{% endif %}</td>
-		  <td class="price1 hidden-xs hidden-sm">{{ product.price }}</td>
+		  <td class="price1 hidden-xs hidden-sm">{{ product.price }}
+{% if product.price and product.anchor_price_text %}
+<span class="anchor-price anchor-price-cart">{{ product.anchor_price_text|escape }}</span>
+{% endif %}
+</td>
           <td class="total text-right">{{ product.total }}</td>
         </tr>
         {% endfor %}

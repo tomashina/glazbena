@@ -1,0 +1,13 @@
+/* Historical reference prices are separate from current and promotional prices. */
+.anchor-price {
+    display: block;
+    margin-top: 5px;
+    color: #595959;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.35;
+    white-space: normal;
+}
+.anchor-price-detail { margin-top: 7px; font-size: 13px; }
+.anchor-price-compare { margin-top: 6px; }
+.live-search .anchor-price, .live-searchlajv .anchor-price { margin-bottom: 4px; }

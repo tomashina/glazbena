@@ -159,6 +159,9 @@
             {% endif %}
           </ul>
           {% endif %}
+          {% if price and anchor_price_text %}
+<div class="anchor-price anchor-price-detail">{{ anchor_price_text|escape }}</div>
+{% endif %}
           <div id="product"> {% if options %}
             <hr>
             <h3>{{ text_option }}</h3>
@@ -318,6 +321,9 @@
                 {{ product.price }}
                 {% else %} <span class="price-new">{{ product.special }}</span> <span class="price-old">{{ product.price }}</span> {% endif %}
                 {% if product.tax %} <span class="price-tax">{{ text_tax }} {{ product.tax }}</span> {% endif %} </p>
+{% if product.price and product.anchor_price_text %}
+<div class="anchor-price anchor-price-card">{{ product.anchor_price_text|escape }}</div>
+{% endif %}
               {% endif %} </div>
             <div class="button-group">
               <button type="button" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}');"><span class="hidden-xs hidden-sm hidden-md">{{ button_cart }}</span> <i class="fa fa-shopping-cart"></i></button>

@@ -63,6 +63,10 @@ $(document).ready(function() {
                                     }
                                 }
 
+                                if (product.price && product.anchor_price_text) {
+                                    html += '<div class="anchor-price">' + $('<div>').text(product.anchor_price_text).html() + '</div>';
+                                }
+
                                 html += product.quantity ;
 
                                 html += '</td>';
@@ -163,6 +167,10 @@ $(document).ready(function() {
                                     } else {
                                         html += '<div class="price"><span class="price">' + product.price + '</span></div>';
                                     }
+                                }
+
+                                if (product.price && product.anchor_price_text) {
+                                    html += '<div class="anchor-price">' + $('<div>').text(product.anchor_price_text).html() + '</div>';
                                 }
 
                                 html += product.quantity ;
@@ -271,6 +279,10 @@ $(document).ready(function() {
                                     } else {
                                         html += '<div class="price"><span class="price">' + product.price + '</span></div>';
                                     }
+                                }
+
+                                if (product.price && product.anchor_price_text) {
+                                    html += '<div class="anchor-price">' + $('<div>').text(product.anchor_price_text).html() + '</div>';
                                 }
 
                                 html += product.quantity ;

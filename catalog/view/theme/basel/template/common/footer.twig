@@ -9,7 +9,10 @@
 {% endif %}
 <div class="row links-holder">
 
-      <div class="smdWrapperTag" data-consent-service="certified-shop"></div>
+  <div class="footer-assurances col-xs-12">
+    <div class="smdWrapperTag" data-consent-service="certified-shop"></div>
+    {% include 'default/template/common/legal_guarantee_bar.twig' %}
+  </div>
 
   <div class="footer-column col-xs-12 col-sm-4">
 <div class="footer-custom-wrapper">
@@ -42,6 +45,8 @@
           <li><a href="{{ information.href }}">{{ information.title }}</a></li>
           {% endfor %}
    <li><a href="https://www.glazbena-kutija.hr/cesta-pitanja">{{ text_faq }}</a></li>
+          {% if price_list %}<li><a href="{{ price_list }}">{{ text_price_list }}</a></li>{% endif %}
+          <li><a href="{{ contract_withdrawal }}">{{ text_contract_withdrawal }}</a></li>
 
 
 
@@ -53,7 +58,6 @@
       <div class="footer-column col-xs-12 col-sm-4 eq_height">
         <h2 class="footer-heading">{{ text_service }}</h2>
         <ul class="list-unstyled" style="margin-bottom:20px">
-          <li><a href="{{ contract_withdrawal }}">{{ text_contract_withdrawal }}</a></li>
           <li><a href="#cookie-settings" data-cookie-consent-trigger>{{ text_cookie_settings }}</a></li>
           {% for information in informations [6:]%}
           <li><a href="{{ information.href }}">{{ information.title }}</a></li>
@@ -82,7 +86,7 @@
 {% if is_home %}<script src="catalog/view/theme/basel/js/masterslider.min.js?v=3.26"></script>{% endif %}
 {% for script in scripts %}<script src="{{ script }}"></script>{% endfor %}
 <script src="catalog/view/theme/basel/js/countdown.min.js?v=3.26"></script>
-<script src="catalog/view/theme/basel/js/live_search.min.js?v=3.26"></script>
+<script src="catalog/view/theme/basel/js/live_search.min.js?v=3.27"></script>
 <script src="catalog/view/theme/basel/js/featherlight.min.js?v=3.26"></script>
 {% if view_popup %}
 <!-- Popup -->
@@ -138,6 +142,7 @@ $('#column-left, #column-right').theiaStickySidebar({containerSelector:$(this).c
 {% endif %}
 <button type="button" class="scroll-to-top primary-bg-color" onclick="$('html, body').animate({scrollTop:0});" aria-label="Povratak na vrh"><i class="icon-arrow-right" aria-hidden="true"></i></button>
 <button type="button" class="gk-cookie-fab" data-cookie-consent-trigger aria-label="{{ text_cookie_settings }}" title="{{ text_cookie_settings }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5Z"/><path d="M8.5 8.5h.01M16 15.5h.01M12 12h.01M11 17h.01M7 14h.01"/></svg></button>
+{% include 'default/template/common/legal_guarantee_modal.twig' %}
 <div id="featherlight-holder"></div>
 
 

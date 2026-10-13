@@ -112,6 +112,12 @@ class ControllerExtensionBaselLiveSearch extends Controller {
         // 4) Render JSON iz filtriranih rezultata
         $json['total'] = count($kept);
 
+        $anchor_prices = array();
+        if ($this->config->get('module_anchor_price_status')) {
+            $this->load->model('extension/module/anchor_price');
+            $anchor_prices = $this->model_extension_module_anchor_price->getByProductIds(array_column($kept, 'product_id'));
+        }
+
         foreach ($kept as $result) {
             $image = !empty($result['image'])
                 ? $this->model_tool_image->resize($result['image'], $image_width, $image_height)
@@ -144,13 +150,20 @@ class ControllerExtensionBaselLiveSearch extends Controller {
                 ? '<span class="outofstock" style="text-transform:uppercase;color:' . $color . '">' . $ss . '</span>'
                 : '<span class="instock" style="text-transform:uppercase">' . $this->language->get('basel_text_in_stock') . '</span>';
 
+            $anchor_price_text = '';
+            if ($price && isset($anchor_prices[$result['product_id']])) {
+                $anchor_display = $this->model_extension_module_anchor_price->getDisplayData($anchor_prices[$result['product_id']]);
+                $anchor_price_text = isset($anchor_display['anchor_price_text']) ? $anchor_display['anchor_price_text'] : '';
+            }
+
             $json['products'][] = array(
                 'product_id' => (int)$result['product_id'],
                 'quantity'   => $stock_html,
                 'image'      => $image,
                 'name'       => $name,
                 'price'      => $price,
-                'special'    => $special,
+                'special'    => $price ? $special : false,
+                'anchor_price_text' => $anchor_price_text,
                 'url'        => $this->url->link('product/product', 'product_id=' . (int)$result['product_id'])
             );
         }

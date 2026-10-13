@@ -29,6 +29,10 @@ class ControllerCommonFooter extends Controller {
 		$data['order'] = $this->url->link('account/order', '', true);
 		$data['wishlist'] = $this->url->link('account/wishlist', '', true);
 		$data['newsletter'] = $this->url->link('account/newsletter', '', true);
+		$data['price_list'] = $this->config->get('module_anchor_price_status') ? $this->url->link('information/price_list') : '';
+		$data['legal_guarantee_url'] = 'https://europa.eu/youreurope/jamstva_hr';
+		$data['legal_guarantee_notice_svg'] = 'catalog/view/theme/basel/image/legal-guarantee/legal-guarantee-notice-hr.svg';
+		$this->document->addStyle('catalog/view/theme/basel/stylesheet/legal-guarantee.css?v=1.0.2', 'stylesheet', 'screen', 'footer');
 		$data['is_error_page'] = isset($this->request->get['route']) && strpos($this->request->get['route'], 'error/') === 0;
 		$seo_entity = $this->registry->get('seo_entity');
 		$data['is_home'] = is_array($seo_entity) && isset($seo_entity['type']) && $seo_entity['type'] === 'home';

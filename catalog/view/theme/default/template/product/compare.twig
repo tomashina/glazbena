@@ -46,7 +46,11 @@
               {{ product.price }}
               {% else %} <strike>{{ product.price }}</strike> {{ product.special }}
               {% endif %}
-              {% endif %}</td>
+              {% endif %}
+{% if product.price and product.anchor_price_text %}
+<span class="anchor-price anchor-price-compare">{{ product.anchor_price_text|escape }}</span>
+{% endif %}
+</td>
             {% endfor %} </tr>
           <tr>
             <td>{{ text_model }}</td>

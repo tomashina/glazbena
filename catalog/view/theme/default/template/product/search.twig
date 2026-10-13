@@ -129,6 +129,9 @@
                   <span class="price-tax">{{ text_tax }} {{ product.tax }}</span>
                   {% endif %}
                 </p>
+{% if product.price and product.anchor_price_text %}
+<div class="anchor-price anchor-price-card">{{ product.anchor_price_text|escape }}</div>
+{% endif %}
                 {% endif %}
                 {% if product.rating %}
                 <div class="rating">

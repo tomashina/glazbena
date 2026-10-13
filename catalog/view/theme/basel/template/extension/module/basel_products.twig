@@ -88,6 +88,9 @@
                 <span class="price-tax">{{ text_tax }} {{ product.tax }}</span>
                 {% endif %}
             </div><!-- .price -->
+            {% if product.price and product.anchor_price_text %}
+<div class="anchor-price anchor-price-card">{{ product.anchor_price_text|escape }}</div>
+{% endif %}
             {% endif %}
 
                 {% if ((product.quantity < 1) and (stock_badge_status)) %}

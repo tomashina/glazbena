@@ -19,6 +19,14 @@ class ControllerCommonColumnLeft extends Controller {
 			// Catalog
 			$catalog = array();
 
+			if ($this->user->hasPermission('access', 'extension/module/anchor_price')) {
+				$catalog[] = array(
+					'name' => 'Sidrene cijene',
+					'href' => $this->url->link('extension/module/anchor_price', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
 			if ($this->user->hasPermission('access', 'catalog/category')) {
 				$catalog[] = array(
 					'name'	   => $this->language->get('text_category'),

@@ -45,7 +45,11 @@
               <div class="price"> {% if not product.special %}
                 {{ product.price }}
                 {% else %} <b>{{ product.special }}</b> <s>{{ product.price }}</s> {% endif %} </div>
-              {% endif %}</td>
+              {% endif %}
+{% if product.price and product.anchor_price_text %}
+<span class="anchor-price anchor-price-wishlist">{{ product.anchor_price_text|escape }}</span>
+{% endif %}
+</td>
             <td class="text-right"><button type="button" onclick="cart.add('{{ product.product_id }}');" data-toggle="tooltip" title="{{ button_cart }}" class="btn btn-primary"><i class="fa fa-shopping-cart"></i></button>
               <a href="{{ product.remove }}" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa fa-times"></i></a></td>
           </tr>

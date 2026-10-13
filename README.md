@@ -47,6 +47,13 @@ PAYPAL_SANDBOX_CLIENT_SECRET
 
 Produkcijske tajne ne smiju se spremati u Git.
 
+## Sidrene cijene i digitalni cjenik
+
+Instalacija, CSV uvoz, dnevna objava CSV/XML cjenika i provjere opisani su u
+`docs/anchor-prices.md`. Početno stanje koristi trenutačne cijene s datumom
+10. 9. 2026., prema dogovoru. Obavijest o zakonskom jamstvu u footeru opisana je u
+`docs/eu-legal-guarantee-notice.md`.
+
 ## AI discovery i product feed
 
 Implementacija za AI search, strukturirane podatke, OpenAI product feed, IndexNow i monitoring dokumentirana je u:

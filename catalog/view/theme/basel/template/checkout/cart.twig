@@ -98,6 +98,9 @@
                   {% endif %}
                   <small class="hidden-md hidden-lg"><br />{{ column_model }}: {{ product.model }}</small>
                   <small class="hidden-md hidden-lg"><br />{{ column_price }}: {{ product.price }}</small><br />
+                  {% if product.price and product.anchor_price_text %}
+<span class="anchor-price anchor-price-cart hidden-md hidden-lg">{{ product.anchor_price_text|escape }}</span>
+{% endif %}
 				  <a class="btn btn-default btn-tiny hidden-md hidden-lg" style="margin-top:5px;" onclick="cart.remove('{{ product.cart_id }}');">{{ button_remove }}</a>
                   </td>
                 <td class="hidden-xs hidden-sm">{{ product.model }}</td>
@@ -114,7 +117,11 @@
 
 
                                 </script>
-                <td class="text-right price-cell hidden-xs hidden-sm">{{ product.price }}</td>
+                <td class="text-right price-cell hidden-xs hidden-sm">{{ product.price }}
+{% if product.price and product.anchor_price_text %}
+<span class="anchor-price anchor-price-cart">{{ product.anchor_price_text|escape }}</span>
+{% endif %}
+</td>
                 <td class="text-right total-cell">{{ product.total }}</td>
               </tr>
               {% endfor %}

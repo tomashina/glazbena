@@ -1,0 +1,128 @@
+.legal-guarantee-bar {
+  clear: both;
+  margin: 18px 0 30px;
+  text-align: center;
+}
+
+.footer-assurances {
+  text-align: center;
+}
+
+.footer-assurances .smdWrapperTag {
+  margin-bottom: 0;
+}
+
+.legal-guarantee-bar .legal-guarantee-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: normal;
+  text-decoration: none;
+}
+
+#footer .legal-guarantee-trigger {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+}
+
+.legal-guarantee-bar .legal-guarantee-trigger:hover {
+  opacity: 0.86;
+  text-decoration: none;
+}
+
+.legal-guarantee-bar .legal-guarantee-trigger:focus,
+.legal-guarantee-notice-frame:focus,
+.legal-guarantee-modal a:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.legal-guarantee-bar .fa-shield {
+  margin-right: 8px;
+  color: inherit;
+  font-size: 18px;
+}
+
+.legal-guarantee-bar .fa-angle-right {
+  margin-left: 8px;
+}
+
+.legal-guarantee-modal .modal-dialog {
+  width: calc(100% - 30px);
+  max-width: 900px;
+}
+
+.legal-guarantee-modal .modal-header {
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.legal-guarantee-modal .modal-content {
+  background: #fff;
+  color: #161616;
+}
+
+.legal-guarantee-modal .modal-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.legal-guarantee-modal .modal-body {
+  padding: 15px;
+}
+
+.legal-guarantee-notice-frame {
+  max-height: calc(100vh - 190px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  text-align: center;
+}
+
+.legal-guarantee-notice-frame img {
+  display: block;
+  width: 720px;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.legal-guarantee-more {
+  margin: 14px 0 0 !important;
+  text-align: center;
+}
+
+.legal-guarantee-more a {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .legal-guarantee-bar .legal-guarantee-trigger {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .legal-guarantee-modal .modal-dialog {
+    width: auto;
+    margin: 10px;
+  }
+
+  .legal-guarantee-modal .modal-body {
+    padding: 10px;
+  }
+
+  .legal-guarantee-notice-frame {
+    max-height: calc(100vh - 170px);
+    text-align: left;
+  }
+
+  .legal-guarantee-notice-frame img {
+    width: 640px;
+    max-width: none;
+    margin: 0;
+  }
+}

@@ -1,5 +1,6 @@
 <footer>
   <div class="container">
+    {% include 'default/template/common/legal_guarantee_bar.twig' %}
     <div class="row">
       {% if informations %}
       <div class="col-sm-3">
@@ -8,6 +9,8 @@
          {% for information in informations %}
           <li><a href="{{ information.href }}">{{ information.title }}</a></li>
           {% endfor %}
+          {% if price_list %}<li><a href="{{ price_list }}">{{ text_price_list }}</a></li>{% endif %}
+          <li><a href="{{ contract_withdrawal }}">{{ text_contract_withdrawal }}</a></li>
         </ul>
       </div>
       {% endif %}
@@ -42,6 +45,7 @@
     <p>{{ powered }}</p>
   </div>
 </footer>
+{% include 'default/template/common/legal_guarantee_modal.twig' %}
 {% for style in styles %}
 <link href="{{ style.href }}" type="text/css" rel="{{ style.rel }}" media="{{ style.media }}" />
 {% endfor %}
