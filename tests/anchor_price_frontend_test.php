@@ -146,7 +146,7 @@ foreach ($renderTemplates as $template) {
     $html = $twig->render($template, $context);
     anchorFrontendAssert(strpos($html, '&lt;script&gt;unsafe&lt;/script&gt;') !== false && strpos($html, '<script>unsafe</script>') === false, $template . ': reference must render as escaped text.');
     $context['price'] = false; $context['product']['price'] = false; $context['products'][0]['price'] = false; $context['tabs'][0]['products'][0]['price'] = false;
-    anchorFrontendAssert(strpos($twig->render($template, $context), 'Cijena na 13.') === false, $template . ': reference must be hidden when prices are hidden.');
+    anchorFrontendAssert(strpos($twig->render($template, $context), 'Cijena na ') === false, $template . ': reference must be hidden when prices are hidden.');
     unset($context['product']['anchor_price_text'], $context['products'][0]['anchor_price_text'], $context['tabs'][0]['products'][0]['anchor_price_text'], $context['anchor_price_text']);
     $context['price'] = $product['price']; $context['product']['price'] = $product['price']; $context['products'][0]['price'] = $product['price']; $context['tabs'][0]['products'][0]['price'] = $product['price'];
     anchorFrontendAssert(strpos($twig->render($template, $context), 'anchor-price-') === false, $template . ': absent or pending references must not render an empty label.');
