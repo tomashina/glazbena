@@ -1409,15 +1409,12 @@ class ModelExtensionShippingUltimateShipping extends Model {
             
 			
             \Agmedia\Helpers\Log::stockPile($quote_data, 'ultimate');
-            \Agmedia\Helpers\Log::stockPile($this->session->data['shipping_method'], 'ultimate');
+            \Agmedia\Helpers\Log::stockPile(isset($this->session->data['shipping_method']) ? $this->session->data['shipping_method'] : array(), 'ultimate');
             \Agmedia\Helpers\Log::stockPile($cost, 'ultimate');
             \Agmedia\Helpers\Log::stockPile($heading, 'ultimate');
             
             
-            if (isset($quote_data[$this->name . '_0']['cost'])) {
-                $this->session->data['shipping_method']['cost'] = $quote_data[$this->name . '_0']['cost'];
-                $this->session->data['shipping_method']['title'] = $quote_data[$this->name . '_0']['title'];
-            }
+            $this->updateSelectedQuote($quote_data);
 			
 			return array(
 				'code'			=> $this->name,
@@ -1434,6 +1431,28 @@ class ModelExtensionShippingUltimateShipping extends Model {
 	//------------------------------------------------------------------------------
 	// Private functions
 	//------------------------------------------------------------------------------
+	private function updateSelectedQuote(array $quotes) {
+		$selected_code = isset($this->session->data['shipping_method']['code']) ? (string)$this->session->data['shipping_method']['code'] : '';
+		$quote_key = $this->name . '_0';
+
+		if ($selected_code !== '') {
+			$prefix = $this->name . '.';
+			if (strpos($selected_code, $prefix) !== 0) {
+				return;
+			}
+			$quote_key = substr($selected_code, strlen($prefix));
+		}
+
+		if (isset($quotes[$quote_key]['cost'])) {
+			$quote = $quotes[$quote_key];
+			// Keep cost and tax metadata from the same quote; another provider's
+			// selected method must not be changed while these rates are generated.
+			$this->session->data['shipping_method']['cost'] = $quote['cost'];
+			$this->session->data['shipping_method']['title'] = $quote['title'];
+			$this->session->data['shipping_method']['tax_class_id'] = isset($quote['tax_class_id']) ? (int)$quote['tax_class_id'] : 0;
+		}
+	}
+
 	private function getSettings() {
 		$code = (version_compare(VERSION, '3.0', '<') ? '' : $this->type . '_') . $this->name;
 		
