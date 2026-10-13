@@ -12,7 +12,7 @@ JAN je HOT oznaka, ISBN uvezena cijena, a UPC interna oznaka ove trgovine. **Bar
 
 ## Instalacija i objava
 
-Prije produkcijske instalacije napraviti backup baze i aplikacijskih datoteka. Prenijeti ovaj Git commit, pa iz korijena projekta pokrenuti s istim PHP-om i konfiguracijom baze kao webshop:
+Prije produkcijske instalacije napraviti backup baze i aplikacijskih datoteka. Sigurnosne kopije čuvati izvan javnog korijena, s direktorijem `0700` i datotekama `0600`. Prije Git deploya postaviti `umask 022`: javne datoteke moraju biti čitljive web poslužitelju (`0644`, direktoriji `0755`), uključujući novi CSS i SVG. Iz korijena projekta pokrenuti s istim PHP-om i konfiguracijom baze kao webshop:
 
 ```sh
 php scripts/anchor_price.php install
@@ -22,6 +22,8 @@ php scripts/anchor_price.php publish
 ```
 
 Instalacija je ponovljiva: čuva već unesene cijene, reviziju i publikacije. Instalira tablice, postavke, administracijske dozvole i OpenCart evente. Osvježavanje ponovno generira OpenCart modifikacije i briše predmemoriju predložaka. Dnevna objava provjerava sve aktivne proizvode; nepotpuni podaci zaustavljaju cijelu objavu.
+
+Produkcijska instalacija 13. 10. 2026. obuhvatila je 4.305 aktivnih artikala: 4.278 s referentnim datumom 10. 9. 2026. i 27 naknadno unesenih artikala sa stvarnim datumom unosa, prema izričitoj uputi trgovca. Potvrde imaju revizijski trag. Produkcijski korijen je `/home/newzuzi/glazbena`, a CLI PHP `/opt/cpanel/ea-php81/root/usr/bin/php`. Repozitorij je povezan s GitHubom zasebnim ključem samo za čitanje; produkcijske konfiguracije ostaju lokalne.
 
 ## CSV uvoz
 
