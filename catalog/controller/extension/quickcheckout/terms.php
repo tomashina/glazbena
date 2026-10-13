@@ -27,6 +27,8 @@ class ControllerExtensionQuickCheckoutTerms extends Controller {
 			$data['button_continue'] = $proceed_button_text[$this->config->get('config_language_id')];
 		}
 		
+		$data['legal_guarantee'] = $this->load->controller('common/legal_guarantee');
+
 		return $this->load->view('extension/quickcheckout/terms', $data);
 	}
 	

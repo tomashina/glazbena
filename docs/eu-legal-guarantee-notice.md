@@ -12,6 +12,8 @@ Do not edit, recolor, crop, re-typeset, or change the proportions of the officia
 
 The Basel footer displays “Zakonsko jamstvo – najmanje 2 godine” (localized for English) directly below the Certified Shop badge, inside the footer. The default fallback displays the same control inside its footer. Selecting the link opens the complete Croatian notice in the existing Bootstrap modal, with keyboard scrolling, a full-size notice link, and a link to the official information page. Without JavaScript, the footer link opens the official information page directly.
 
+Product pages also show the notice immediately below their purchase controls. Checkout shows it before the order-review button and again before payment controls after QuickCheckout replaces the page with its confirmation fragment. Standard checkout retains the notice above its final confirmation panel. All placements reuse one footer modal and the same unmodified official notice, with Croatian and English control labels.
+
 This is the statutory guarantee notice from the reference implementation; it does not create a separate commercial warranty or promise two extra years.
 
 After uploading the changed source files, refresh OpenCart modifications and the theme/template cache so generated copies of `catalog/controller/common/footer.php` use the new footer data and stylesheet. The digital price list footer link is displayed only while the anchor-price module is enabled.

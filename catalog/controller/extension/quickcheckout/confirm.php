@@ -471,6 +471,8 @@ class ControllerExtensionQuickCheckoutConfirm extends Controller {
 		$data['payment_target'] = html_entity_decode($this->config->get('quickcheckout_payment_target'), ENT_QUOTES);
 		$data['back'] = $this->url->link('extension/quickcheckout/checkout', '', true);
 		
+		$data['legal_guarantee'] = $this->load->controller('common/legal_guarantee');
+
 		$this->response->setOutput($this->load->view('extension/quickcheckout/confirm', $data));
   	}
 }

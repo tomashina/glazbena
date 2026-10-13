@@ -12,6 +12,48 @@
   margin-bottom: 0;
 }
 
+.legal-guarantee-inline {
+  clear: both;
+  margin: 16px 0;
+  text-align: left;
+}
+
+.legal-guarantee-inline-link {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid #d8d8d8;
+  border-radius: 3px;
+  background: #f7f7f7;
+  color: #161616;
+  font-size: 14px;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.legal-guarantee-inline-link:hover {
+  border-color: #161616;
+  color: #161616;
+  text-decoration: none;
+}
+
+.legal-guarantee-inline-link:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.legal-guarantee-inline-link > .fa-shield {
+  font-size: 18px;
+}
+
+.legal-guarantee-inline-action {
+  margin-left: auto;
+  font-size: 13px;
+  text-decoration: underline;
+}
+
 .legal-guarantee-bar .legal-guarantee-trigger {
   display: inline-flex;
   align-items: center;
