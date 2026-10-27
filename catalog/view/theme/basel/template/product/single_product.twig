@@ -78,7 +78,7 @@
     {% endif %}
 </div><!-- .price -->
 {% if product.price and product.anchor_price_text %}
-<div class="anchor-price anchor-price-card">{{ product.anchor_price_text|escape }}</div>
+<div class="anchor-price anchor-price-card">{% if product.anchor_price_label and product.anchor_price_value %}<span class="anchor-price-label">{{ product.anchor_price_label|escape }}</span> <span class="anchor-price-value">{{ product.anchor_price_value|escape }}</span>{% else %}{{ product.anchor_price_text|escape }}{% endif %}</div>
 {% endif %}
 {% endif %}
 

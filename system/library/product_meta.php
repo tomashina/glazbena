@@ -23,7 +23,9 @@ class ProductMeta {
 			$tags = self::generateTags($name, $html, $limit);
 			$tag_list = implode(', ', $tags);
 
-			$description['meta_title'] = $name;
+			if (!isset($description['meta_title']) || trim((string)$description['meta_title']) === '') {
+				$description['meta_title'] = $name;
+			}
 			$description['meta_keyword'] = $tag_list;
 
 			if (!isset($description['tag']) || trim((string)$description['tag']) === '') {

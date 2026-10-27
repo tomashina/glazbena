@@ -94,11 +94,13 @@ $controller = new ControllerExtensionModuleAnchorPrice($registry);
 
 $display = $model->getDisplayData($record);
 anchorFrontendAssert($display['anchor_price_text'] === 'Cijena na 10. 9. 2026.: 199,00 EUR', 'Reference price must carry its configured reference date.');
+anchorFrontendAssert($display['anchor_price_label'] === 'Cijena na 10. 9. 2026.:', 'Croatian reference label must be available separately from its amount.');
 $session->data['currency'] = 'USD';
 anchorFrontendAssert($model->getDisplayData($record)['anchor_price_value'] === '398,00 USD', 'A stored snapshot must convert its original currency exactly once.');
 $session->data['currency'] = 'EUR';
 $session->data['language'] = 'en-gb';
 anchorFrontendAssert($model->getDisplayData($record)['anchor_price_text'] === 'Price on 10 Sep 2026: 199,00 EUR', 'Selected English must override the Croatian store default.');
+anchorFrontendAssert($model->getDisplayData($record)['anchor_price_label'] === 'Price on 10 Sep 2026:', 'English reference label must be available separately from its amount.');
 $config->set('config_language', 'en-gb');
 $session->data['language'] = 'hr-hr';
 anchorFrontendAssert($model->getDisplayData($record)['anchor_price_text'] === 'Cijena na 10. 9. 2026.: 199,00 EUR', 'Switching back to Croatian must override the store default.');
@@ -150,6 +152,26 @@ foreach ($renderTemplates as $template) {
     unset($context['product']['anchor_price_text'], $context['products'][0]['anchor_price_text'], $context['tabs'][0]['products'][0]['anchor_price_text'], $context['anchor_price_text']);
     $context['price'] = $product['price']; $context['product']['price'] = $product['price']; $context['products'][0]['price'] = $product['price']; $context['tabs'][0]['products'][0]['price'] = $product['price'];
     anchorFrontendAssert(strpos($twig->render($template, $context), 'anchor-price-') === false, $template . ': absent or pending references must not render an empty label.');
+}
+
+$splitProduct = array_merge($product, $display, array(
+    'anchor_price_label' => $display['anchor_price_label'] . '<script>label</script>',
+    'anchor_price_value' => $display['anchor_price_value'] . '<script>value</script>'
+));
+$splitTemplates = array(
+    'basel/template/product/category.twig', 'basel/template/product/manufacturer_info.twig',
+    'basel/template/extension/module/basel_products.twig', 'default/template/extension/module/featured.twig',
+    'default/template/extension/module/latest.twig', 'default/template/extension/module/bestseller.twig',
+    'default/template/extension/module/special.twig'
+);
+foreach ($splitTemplates as $template) {
+    $context = array('products' => array($splitProduct), 'tabs' => array(array('products' => array($splitProduct))), 'stock_badge_status' => false);
+    $html = $twig->render($template, $context);
+    anchorFrontendAssert(strpos($html, '<span class="anchor-price-label">Cijena na 10. 9. 2026.:&lt;script&gt;label&lt;/script&gt;</span> <span class="anchor-price-value">199,00 EUR&lt;script&gt;value&lt;/script&gt;</span>') !== false, $template . ': label and amount must render in separate escaped spans.');
+    anchorFrontendAssert(strpos($html, '<script>label</script>') === false && strpos($html, '<script>value</script>') === false, $template . ': split reference fields must never render executable markup.');
+    $context['products'][0]['price'] = false;
+    $context['tabs'][0]['products'][0]['price'] = false;
+    anchorFrontendAssert(strpos($twig->render($template, $context), 'anchor-price-card') === false, $template . ': split reference must remain hidden when prices are hidden.');
 }
 
 // Live search returns JSON rather than a Twig view, so it needs its own check.

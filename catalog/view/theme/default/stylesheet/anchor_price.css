@@ -11,3 +11,11 @@
 .anchor-price-detail { margin-top: 7px; font-size: 13px; }
 .anchor-price-compare { margin-top: 6px; }
 .live-search .anchor-price, .live-searchlajv .anchor-price { margin-bottom: 4px; }
+
+@media (max-width: 767px) {
+    .anchor-price-card .anchor-price-label,
+    .anchor-price-card .anchor-price-value {
+        display: block;
+        white-space: nowrap;
+    }
+}

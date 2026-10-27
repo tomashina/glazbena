@@ -68,17 +68,18 @@ class ModelExtensionModuleAnchorPrice extends Model {
 
 		if (strpos($language_code, 'hr') === 0 || strpos($language_code, 'croatia') === 0) {
 			$date = date('j. n. Y.', $timestamp);
-			$text = 'Cijena na ' . $date . ': ' . $price;
+			$label = 'Cijena na ' . $date . ':';
 		} else {
 			$date = date('j M Y', $timestamp);
-			$text = 'Price on ' . $date . ': ' . $price;
+			$label = 'Price on ' . $date . ':';
 		}
 
 		return array(
 			'anchor_price'       => $price,
 			'anchor_price_value' => $price,
 			'anchor_price_date'  => $date,
-			'anchor_price_text'  => $text,
+			'anchor_price_label' => $label,
+			'anchor_price_text'  => $label . ' ' . $price,
 			'anchor_price_rule'  => $record['rule_code'],
 			'anchor_price_status'=> $record['verification_status']
 		);
