@@ -52,6 +52,33 @@ class Cache {
 	public function set($key, $value) {
 		return $this->adaptor->set($key, $value);
 	}
+
+	/**
+	 * Read an explicitly timed entry without changing ordinary cache payloads.
+	 */
+	public function getTimed($key) {
+		$entry = $this->get($key);
+
+		if (!is_array($entry) || !isset($entry['expires_at']) || !is_numeric($entry['expires_at']) || !array_key_exists('value', $entry) || (int)$entry['expires_at'] <= $this->timedCacheNow()) {
+			return false;
+		}
+
+		return $entry['value'];
+	}
+
+	/**
+	 * Store a deadline with the value so every adaptor enforces the same TTL.
+	 */
+	public function setTimed($key, $value, $ttl = 300) {
+		return $this->set($key, array(
+			'expires_at' => $this->timedCacheNow() + max(0, (int)$ttl),
+			'value'      => $value
+		));
+	}
+
+	protected function timedCacheNow() {
+		return time();
+	}
    
     /**
      * 

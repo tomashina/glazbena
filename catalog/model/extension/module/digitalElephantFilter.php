@@ -10,7 +10,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
     public function getMinMaxPrice($category_id)
     {
 		$cache_key = $this->filterCacheKey('price', array('category_id' => (int)$category_id));
-		$cached_price = $this->cache->get($cache_key);
+		$cached_price = $this->cache->getTimed($cache_key);
 
 		if ($cached_price !== false) {
 			return $cached_price;
@@ -107,7 +107,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
         $sql .= ") AS t GROUP BY t.tax_class_id) AS tr2 ON (tr2.tax_class_id = p.tax_class_id) WHERE p2s.store_id = '" . $this->config->get('config_store_id') . "' AND p.status = '1' AND p.date_available <= NOW() GROUP BY p.product_id) as min_max";
 
 		$query = $this->db->query($sql);
-		$this->cache->set($cache_key, $query->row);
+		$this->cache->setTimed($cache_key, $query->row, 300);
 
 		return $query->row;
     }
@@ -118,7 +118,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			'settings' => isset($DEF_settings['advance']['attributes']) ? $DEF_settings['advance']['attributes'] : array(),
 			'data'     => $data
 		));
-		$cached_attributes = $this->cache->get($cache_key);
+		$cached_attributes = $this->cache->getTimed($cache_key);
 
 		if ($cached_attributes !== false) {
 			return $cached_attributes;
@@ -128,7 +128,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			$data['product_ids'] = array_values(array_unique(array_filter(array_map('intval', (array)$data['product_ids']))));
 
 			if (!$data['product_ids']) {
-				$this->cache->set($cache_key, array());
+				$this->cache->setTimed($cache_key, array(), 300);
 				return array();
 			}
 		}
@@ -232,7 +232,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
                 sort($attributes[$attribute_group_id]['attribute_values'][$attribute_id]['values']);
             }
         }
-		$this->cache->set($cache_key, $attributes);
+		$this->cache->setTimed($cache_key, $attributes, 300);
 
 		return $attributes;
     }
@@ -249,7 +249,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			'settings' => isset($DEF_settings['advance']['manufacturers']) ? $DEF_settings['advance']['manufacturers'] : array(),
 			'data'     => $data
 		));
-		$cached_manufacturers = $this->cache->get($cache_key);
+		$cached_manufacturers = $this->cache->getTimed($cache_key);
 
 		if ($cached_manufacturers !== false) {
 			return $cached_manufacturers;
@@ -289,7 +289,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
         }
 
 		$query = $this->db->query($sql);
-		$this->cache->set($cache_key, $query->rows);
+		$this->cache->setTimed($cache_key, $query->rows, 300);
 
 		return $query->rows;
     }
@@ -301,7 +301,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			'category_id' => (int)$category_id,
 			'settings'    => isset($data['advance']['categories']) ? $data['advance']['categories'] : array()
 		));
-		$cached_categories = $this->cache->get($cache_key);
+		$cached_categories = $this->cache->getTimed($cache_key);
 
 		if ($cached_categories !== false) {
 			return $cached_categories;
@@ -330,7 +330,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
         }
 
 		$query = $this->db->query($sql);
-		$this->cache->set($cache_key, $query->rows);
+		$this->cache->setTimed($cache_key, $query->rows, 300);
 
 		return $query->rows;
     }
@@ -341,7 +341,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			'settings' => isset($DEF_settings['advance']['options']) ? $DEF_settings['advance']['options'] : array(),
 			'data'     => $data
 		));
-		$cached_options = $this->cache->get($cache_key);
+		$cached_options = $this->cache->getTimed($cache_key);
 
 		if ($cached_options !== false) {
 			return $cached_options;
@@ -400,7 +400,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
             $options[$row['option_id']]['option_values'][] = array('option_value_id' => $row['option_value_id'], 'name' => $row['name'], 'image' => $row['image']);
         }
-		$this->cache->set($cache_key, $options);
+		$this->cache->setTimed($cache_key, $options, 300);
 
 		return $options;
     }
@@ -409,7 +409,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
     public function getTotalProducts($data)
     {
 		$cache_key = $this->filterCacheKey('total', $data);
-		$cached_total = $this->cache->get($cache_key);
+		$cached_total = $this->cache->getTimed($cache_key);
 
 		if ($cached_total !== false) {
 			return (int)$cached_total;
@@ -425,7 +425,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
         $total = count($query->rows);
 
-		$this->cache->set($cache_key, $total);
+		$this->cache->setTimed($cache_key, $total, 300);
 
 		return $total;
     }
@@ -440,11 +440,10 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			'shipping_zone_id'    => isset($this->session->data['shipping_zone_id']) ? (int)$this->session->data['shipping_zone_id'] : 0,
 			'payment_country_id'  => isset($this->session->data['payment_country_id']) ? (int)$this->session->data['payment_country_id'] : 0,
 			'payment_zone_id'     => isset($this->session->data['payment_zone_id']) ? (int)$this->session->data['payment_zone_id'] : 0,
-			'time_bucket'         => (int)floor(time() / 300),
 			'data'                => $this->normalizeFilterCacheData($data)
 		);
 
-		return 'product.filter.v2.' . $type . '.' . hash('sha256', serialize($context));
+		return 'product.filter.v3.' . $type . '.' . hash('sha256', serialize($context));
 	}
 
 	private function normalizeFilterCacheData($value) {
@@ -483,7 +482,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
     public function getProducts($data = array())
     {
 		$cache_key = $this->filterCacheKey('products', $data);
-		$cached_products = $this->cache->get($cache_key);
+		$cached_products = $this->cache->getTimed($cache_key);
 
 		if ($cached_products !== false) {
 			return $cached_products;
@@ -501,9 +500,10 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
 		$product_id_data = $data;
 		unset($product_id_data['start'], $product_id_data['limit']);
-		$this->cache->set(
+		$this->cache->setTimed(
 			$this->filterCacheKey('product_ids', $product_id_data),
-			array_values(array_unique(array_map('intval', array_column($query->rows, 'product_id'))))
+			array_values(array_unique(array_map('intval', array_column($query->rows, 'product_id')))),
+			300
 		);
 
         //load model catalog_product
@@ -539,7 +539,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			}
 		}
 
-		$this->cache->set($cache_key, $product_data);
+		$this->cache->setTimed($cache_key, $product_data, 300);
 
 		return $product_data;
     }
@@ -549,7 +549,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 		unset($data['start'], $data['limit']);
 
 		$cache_key = $this->filterCacheKey('product_ids', $data);
-		$cached_product_ids = $this->cache->get($cache_key);
+		$cached_product_ids = $this->cache->getTimed($cache_key);
 
 		if ($cached_product_ids !== false) {
 			return array_values(array_map('intval', $cached_product_ids));
@@ -562,7 +562,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 		}
 
 		$product_ids = array_values(array_unique(array_map('intval', array_column($query->rows, 'product_id'))));
-		$this->cache->set($cache_key, $product_ids);
+		$this->cache->setTimed($cache_key, $product_ids, 300);
 
 		return $product_ids;
 	}

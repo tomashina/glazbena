@@ -237,11 +237,10 @@ class ModelCatalogProduct extends Model {
 			'store_id'          => (int)$this->config->get('config_store_id'),
 			'language_id'       => (int)$this->config->get('config_language_id'),
 			'customer_group_id' => (int)$this->config->get('config_customer_group_id'),
-			'time_bucket'       => (int)floor(time() / 300),
 			'data'              => $this->normalizeProductQueryCacheData($data)
 		);
 
-		return 'product.query.v3.' . $type . '.' . hash('sha256', serialize($context));
+		return 'product.query.v4.' . $type . '.' . hash('sha256', serialize($context));
 	}
 
 	private function normalizeProductQueryCacheData($value) {
@@ -269,7 +268,7 @@ class ModelCatalogProduct extends Model {
    // ======================= getProducts() =======================
 public function getProducts($data = array()) {
 	$cache_key = $this->productQueryCacheKey('list', $data);
-	$cached_products = $this->cache->get($cache_key);
+	$cached_products = $this->cache->getTimed($cache_key);
 
 	if ($cached_products !== false) {
 		return $cached_products;
@@ -534,7 +533,7 @@ public function getProducts($data = array()) {
         $product_data[$result['product_id']] = $result;
     }
 
-	$this->cache->set($cache_key, $product_data);
+	$this->cache->setTimed($cache_key, $product_data, 300);
 
 	return $product_data;
 }
@@ -960,7 +959,7 @@ public function getProducts($data = array()) {
    // ======================= getTotalProducts() =======================
 public function getTotalProducts($data = array()) {
 	$cache_key = $this->productQueryCacheKey('total', $data);
-	$cached_total = $this->cache->get($cache_key);
+	$cached_total = $this->cache->getTimed($cache_key);
 
 	if ($cached_total !== false) {
 		return (int)$cached_total;
@@ -1086,7 +1085,7 @@ public function getTotalProducts($data = array()) {
 
 	$query = $this->db->query($sql);
 	$total = (int)$query->row['total'];
-	$this->cache->set($cache_key, $total);
+	$this->cache->setTimed($cache_key, $total, 300);
 
 	return $total;
 }
