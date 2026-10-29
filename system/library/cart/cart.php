@@ -17,6 +17,13 @@ class Cart {
 		$this->tax = $registry->get('tax');
 		$this->weight = $registry->get('weight');
 
+		// Anonymous catalogue requests deliberately do not start a session.
+		// They cannot own a cart, so do not run cart maintenance for crawlers
+		// and other visitors who have not started shopping.
+		if (!$this->session->getId() && !$this->customer->getId()) {
+			return;
+		}
+
 		// Remove all the expired carts with no customer ID
 		$this->db->query("DELETE FROM " . DB_PREFIX . "cart WHERE (api_id > '0' OR customer_id = '0') AND date_added < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
 
@@ -37,6 +44,12 @@ class Cart {
 	}
 
 	public function getProducts() {
+		// Check the current ID each time: a controller can start a session
+		// after this cart object has been constructed.
+		if (!$this->session->getId() && !$this->customer->getId()) {
+			return array();
+		}
+
 		$product_data = array();
 
 		$cart_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "cart WHERE api_id = '" . (isset($this->session->data['api_id']) ? (int)$this->session->data['api_id'] : 0) . "' AND customer_id = '" . (int)$this->customer->getId() . "' AND session_id = '" . $this->db->escape($this->session->getId()) . "'");
