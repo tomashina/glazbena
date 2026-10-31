@@ -38,6 +38,21 @@ if (!isset($_GET['route']) && !isset($_GET['_route_']) && isset($_SERVER['REQUES
 	}
 }
 
+// Reject excessive catalogue variants before database, sessions and templates.
+require_once(DIR_SYSTEM . 'library/catalog_request_guard.php');
+$catalog_request_guard = new CatalogRequestGuard(DIR_CACHE . 'catalog-request-guard/');
+$catalog_retry_after = $catalog_request_guard->evaluate($_GET, $_SERVER);
+if ($catalog_retry_after > 0) {
+	http_response_code(429);
+	header('Retry-After: ' . $catalog_retry_after);
+	header('Content-Type: text/plain; charset=utf-8');
+	header('Cache-Control: no-store, private');
+	if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'HEAD') {
+		echo "Previše zahtjeva za pregled kataloga. Pokušajte ponovno za nekoliko sekundi.\n";
+	}
+	exit;
+}
+
 // Startup
 require_once(DIR_SYSTEM . 'startup.php');
 require_once(modification(DIR_SYSTEM . 'minify/classes/minify_minifier.php'));

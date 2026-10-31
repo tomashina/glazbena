@@ -4,7 +4,6 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 {
 	const DISCONTINUED_STOCK_STATUS_ID = 9;
 //    private $DEF_settings;
-    private $storageSort = null;
     private $storageAttribute = null;
 
     public function getMinMaxPrice($category_id)
@@ -415,15 +414,10 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			return (int)$cached_total;
 		}
 
-        $sql = $this->generalizeProducts($data);
-
-        $query = $this->db->query($sql);
-
-        if ($generalizeAttribute = $this->generalizeAttribute($data, $query)) {
-            $query = $generalizeAttribute;
-        }
-
-        $total = count($query->rows);
+        // Counts share the same filters as the ordered ID query, but do not
+        // need every matching row or the per-product sort/price calculations.
+        $query = $this->db->query($this->generalizeProducts($data, true));
+        $total = (int)$query->row['total'];
 
 		$this->cache->setTimed($cache_key, $total, 300);
 
@@ -431,6 +425,10 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
     }
 
 	private function filterCacheKey($type, array $data) {
+		if ($type === 'total') {
+			unset($data['sort'], $data['order'], $data['start'], $data['limit']);
+		}
+
 		$context = array(
 			'store_id'            => (int)$this->config->get('config_store_id'),
 			'language_id'         => (int)$this->config->get('config_language_id'),
@@ -443,7 +441,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			'data'                => $this->normalizeFilterCacheData($data)
 		);
 
-		return 'product.filter.v3.' . $type . '.' . hash('sha256', serialize($context));
+		return 'product.filter.v4.' . $type . '.' . hash('sha256', serialize($context));
 	}
 
 	private function normalizeFilterCacheData($value) {
@@ -488,42 +486,17 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 			return $cached_products;
 		}
 
-        $sql = $this->generalizeProducts($data);
-
         $product_data = array();
-
-        $query = $this->db->query($sql);
-
-        if ($generalizeAttribute = $this->generalizeAttribute($data, $query)) {
-            $query = $generalizeAttribute;
-        }
-
-		$product_id_data = $data;
-		unset($product_id_data['start'], $product_id_data['limit']);
-		$this->cache->setTimed(
-			$this->filterCacheKey('product_ids', $product_id_data),
-			array_values(array_unique(array_map('intval', array_column($query->rows, 'product_id')))),
-			300
-		);
+		$product_ids = $this->getProductIds($data);
 
         //load model catalog_product
         $this->load->model('catalog/product');
 
-        $products = $query->rows;
-
         if (isset($data['start']) || isset($data['limit'])) {
-            if ($data['start'] < 0) {
-                $data['start'] = 0;
-            }
-
-            if ($data['limit'] < 1) {
-                $data['limit'] = 20;
-            }
-
-            $products = array_splice($products, $data['start'], $data['limit']);
+            $start = isset($data['start']) ? max(0, (int)$data['start']) : 0;
+            $limit = isset($data['limit']) && (int)$data['limit'] > 0 ? (int)$data['limit'] : 20;
+            $product_ids = array_slice($product_ids, $start, $limit);
         }
-
-		$product_ids = array_column($products, 'product_id');
 
 		if ($this->config->get('module_boost_special_manager_include') == '1') {
 			foreach ($product_ids as $product_id) {
@@ -563,6 +536,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
 		$product_ids = array_values(array_unique(array_map('intval', array_column($query->rows, 'product_id'))));
 		$this->cache->setTimed($cache_key, $product_ids, 300);
+		$this->cache->setTimed($this->filterCacheKey('total', $data), count($product_ids), 300);
 
 		return $product_ids;
 	}
@@ -666,11 +640,14 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
         return $this->storageAttribute;
     }
 
-    private function generalizeProducts($data)
+    private function generalizeProducts($data, $count_only = false)
     {
     $this->db->query("SET SQL_BIG_SELECTS=1");
 
-        $sql = "SELECT "
+        if ($count_only) {
+            $sql = "SELECT COUNT(DISTINCT p.product_id) AS total";
+        } else {
+            $sql = "SELECT "
             . "p.product_id, "
             . "(SELECT AVG(rating) AS total FROM " . DB_PREFIX . "review "
             . "r1 WHERE r1.product_id = p.product_id "
@@ -691,6 +668,7 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
             . "OR ps.date_start < NOW()) "
             . "AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW())) "
             . "ORDER BY ps.priority ASC, ps.price ASC LIMIT 1) AS special";
+        }
 
         if (!empty($data['filter_category_id'])) {
 
@@ -917,50 +895,84 @@ class ModelExtensionModuleDigitalElephantFilter extends Model
 
         //PRICE WHERE END
 
-        $sql .= $this->generalizeSort($data);
+        if ($count_only) {
+            $sql .= $this->attributeCountConditions($data);
+        } else {
+            $sql .= $this->generalizeSort($data);
+        }
 
         return $sql;
     }
 
-    private function generalizeSort($data)
+    private function attributeCountConditions($data)
     {
-        if ($this->storageSort == null) {
-            $sql = '';
-
-            $sql .= " GROUP BY p.product_id";
-
-            $sort_data = array(
-                'pd.name',
-                'p.model',
-                'p.quantity',
-                'p.price',
-                'rating',
-                'p.sort_order',
-                'p.date_added'
-            );
-
-            if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-                if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
-                    $sql .= " ORDER BY LCASE(" . $data['sort'] . ")";
-                } elseif ($data['sort'] == 'p.price') {
-                    $sql .= " ORDER BY (CASE WHEN special IS NOT NULL THEN special WHEN discount IS NOT NULL THEN discount ELSE p.price END)";
-                } else {
-                    $sql .= " ORDER BY " . $data['sort'];
-                }
-            } else {
-                $sql .= " ORDER BY p.sort_order";
-            }
-
-            if (isset($data['order']) && ($data['order'] == 'DESC')) {
-                $sql .= " DESC, LCASE(pd.name) DESC";
-            } else {
-                $sql .= " ASC, LCASE(pd.name) ASC";
-            }
-
-            $this->storageSort = $sql;
+        if (empty($data['attributes'])) {
+            return '';
         }
 
-        return $this->storageSort;
+        $sql = '';
+        foreach ($data['attributes'] as $key => $attribute_values) {
+            $attribute_id = (int)$key;
+            if ($attribute_id < 1 || !is_array($attribute_values)) {
+                continue;
+            }
+
+            $values = array();
+            foreach ($attribute_values as $value) {
+                if ($value !== '') {
+                    $values[] = "'" . $this->db->escape((string)$value) . "'";
+                }
+            }
+
+            if ($values) {
+                $sql .= " AND EXISTS (SELECT 1 FROM " . DB_PREFIX . "product_attribute pa_count"
+                    . " WHERE pa_count.product_id = p.product_id"
+                    . " AND pa_count.attribute_id = '" . $attribute_id . "'"
+                    . " AND pa_count.language_id = '" . (int)$this->config->get('config_language_id') . "'"
+                    . " AND pa_count.text IN (" . implode(',', $values) . "))";
+            }
+        }
+
+        // The legacy attribute query starts from product_attribute even when
+        // a nonempty selection contains no usable attribute values.
+        return $sql !== '' ? $sql : " AND EXISTS (SELECT 1 FROM " . DB_PREFIX . "product_attribute pa_count WHERE pa_count.product_id = p.product_id)";
+    }
+
+    private function generalizeSort($data)
+    {
+        $sql = '';
+
+        $sql .= " GROUP BY p.product_id";
+
+        $sort_data = array(
+            'pd.name',
+            'p.model',
+            'p.quantity',
+            'p.price',
+            'rating',
+            'p.sort_order',
+            'p.date_added'
+        );
+
+        if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+            if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
+                $sql .= " ORDER BY LCASE(" . $data['sort'] . ")";
+            } elseif ($data['sort'] == 'p.price') {
+                $sql .= " ORDER BY (CASE WHEN special IS NOT NULL THEN special WHEN discount IS NOT NULL THEN discount ELSE p.price END)";
+            } else {
+                $sql .= " ORDER BY " . $data['sort'];
+            }
+        } else {
+            $sql .= " ORDER BY p.sort_order";
+        }
+
+        if (isset($data['order']) && ($data['order'] == 'DESC')) {
+            $sql .= " DESC, LCASE(pd.name) DESC";
+        } else {
+            $sql .= " ASC, LCASE(pd.name) ASC";
+        }
+
+        return $sql;
     }
 
     public function getAllCategoryIds() {

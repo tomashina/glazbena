@@ -233,6 +233,11 @@ class ModelCatalogProduct extends Model {
 	}
 
 	private function productQueryCacheKey($type, array $data) {
+		// Presentation changes do not change the number of matching products.
+		if ($type === 'total') {
+			unset($data['sort'], $data['order'], $data['start'], $data['limit']);
+		}
+
 		$context = array(
 			'store_id'          => (int)$this->config->get('config_store_id'),
 			'language_id'       => (int)$this->config->get('config_language_id'),

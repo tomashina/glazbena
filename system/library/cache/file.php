@@ -1,13 +1,13 @@
 <?php
 namespace Cache;
 class File {
+	private const FORMAT = 'glazbena-file-cache-v1';
 	private $expire;
 	private $files = array();
 
 	public function __construct($expire = 3600) {
 		$this->expire = $expire;
 
-		$files = glob(DIR_CACHE . 'cache.*');
 		$now = time();
 		$gc_handle = @fopen(DIR_CACHE . '.cache-gc', 'c+');
 		$run_gc = false;
@@ -26,20 +26,32 @@ class File {
 			}
 		}
 
-		if ($files) {
-			foreach ($files as $file) {
-				$separator = strrpos($file, '.');
-				$time = substr($file, $separator + 1);
+		// Enumerate the full directory only for the elected cleanup request.
+		// Building every key's index on every request becomes costly as bots
+		// generate thousands of distinct catalogue query cache entries.
+		if ($run_gc) {
+			$files = glob(DIR_CACHE . 'cache.*');
 
-				if ($time < $now) {
-					if ($run_gc) {
+			if ($files) {
+				// Remove legacy copies before expired stable entries, so an old
+				// value cannot reappear after its replacement has expired.
+				foreach ($files as $file) {
+					$expiry = substr(strrchr($file, '.'), 1);
+
+					if (ctype_digit($expiry) && ((int)$expiry < $now || is_file(substr($file, 0, strrpos($file, '.')) . '.data'))) {
 						@unlink($file);
 					}
-					continue;
 				}
 
-				$key = substr($file, strlen(DIR_CACHE . 'cache.'), $separator - strlen(DIR_CACHE . 'cache.'));
-				$this->files[$key][] = $file;
+				foreach ($files as $file) {
+					if (substr($file, -5) === '.data') {
+						$entry = json_decode($this->read($file), true);
+
+						if (!$this->isEntry($entry) || (int)$entry['expires_at'] < $now) {
+							@unlink($file);
+						}
+					}
+				}
 			}
 		}
 
@@ -51,36 +63,52 @@ class File {
 
 	public function get($key) {
 		$key = preg_replace('/[^A-Z0-9\._-]/i', '', $key);
-		$files = isset($this->files[$key]) ? $this->files[$key] : array();
+		$data = $this->read(DIR_CACHE . 'cache.' . $key . '.data');
+
+		if ($data !== false) {
+			$entry = json_decode($data, true);
+
+			// An expired replacement must never fall back to an older file.
+			if (!$this->isEntry($entry) || (int)$entry['expires_at'] < time()) {
+				return false;
+			}
+
+			return $entry['value'];
+		}
+
+		// Legacy entries remain readable during the gradual cache warmup.
+		// New entries use a deterministic path and never need glob().
+		if (!isset($this->files[$key])) {
+			$this->files[$key] = array();
+			$files = glob(DIR_CACHE . 'cache.' . $key . '.*');
+
+			if ($files) {
+				$prefix = DIR_CACHE . 'cache.' . $key . '.';
+
+				foreach ($files as $file) {
+					// A parent key must not read a dotted descendant's payload.
+					// Only the numeric expiry may follow the exact requested key.
+					if (ctype_digit(substr($file, strlen($prefix)))) {
+						$this->files[$key][] = $file;
+					}
+				}
+			}
+		}
+
+		$files = $this->files[$key];
 
 		foreach ($files as $file) {
 			if ((int)substr(strrchr($file, '.'), 1) < time()) {
 				continue;
 			}
 
-			// Open the indexed path on every read: another request may have
-			// invalidated it since this request built its directory index.
-			$handle = @fopen($file, 'r');
+			$data = $this->read($file);
 
-			if (!$handle) {
+			if ($data === false) {
 				continue;
 			}
 
-			if (!flock($handle, LOCK_SH)) {
-				fclose($handle);
-				return false;
-			}
-
-			// Read from the already opened stream. The cache file can be
-			// unlinked by another request after glob(), so asking the path
-			// for its size here causes a warning even though the handle is
-			// still valid.
-			$data = stream_get_contents($handle);
-
-			flock($handle, LOCK_UN);
-			fclose($handle);
-
-			if ($data === false || $data === '') {
+			if ($data === '') {
 				return false;
 			}
 
@@ -91,24 +119,65 @@ class File {
 	}
 
 	public function set($key, $value) {
-		$this->delete($key);
-
-		$file = DIR_CACHE . 'cache.' . preg_replace('/[^A-Z0-9\._-]/i', '', $key) . '.' . (time() + $this->expire);
-
-		$handle = fopen($file, 'w');
-
-		flock($handle, LOCK_EX);
-
-		fwrite($handle, json_encode($value));
-
-		fflush($handle);
-
-		flock($handle, LOCK_UN);
-
-		fclose($handle);
-
 		$key = preg_replace('/[^A-Z0-9\._-]/i', '', $key);
-		$this->files[$key] = array($file);
+		$data = json_encode(array('marker' => self::FORMAT, 'expires_at' => time() + $this->expire, 'value' => $value));
+
+		if ($data === false) {
+			return false;
+		}
+
+		$temporary = tempnam(DIR_CACHE, '.cache-write-');
+
+		if ($temporary === false) {
+			return false;
+		}
+
+		$written = file_put_contents($temporary, $data, LOCK_EX);
+		$gc_handle = @fopen(DIR_CACHE . '.cache-gc', 'c+');
+		$published = false;
+
+		// Coordinate publication with cleanup so it cannot unlink a fresh
+		// replacement using an expiry read from the previous file.
+		if ($written === strlen($data) && $gc_handle && flock($gc_handle, LOCK_SH)) {
+			$published = rename($temporary, DIR_CACHE . 'cache.' . $key . '.data');
+			flock($gc_handle, LOCK_UN);
+		}
+
+		if ($gc_handle) {
+			fclose($gc_handle);
+		}
+
+		if (!$published) {
+			@unlink($temporary);
+			return false;
+		}
+
+		$this->files[$key] = array();
+		return true;
+	}
+
+	private function isEntry($entry) {
+		return is_array($entry) && isset($entry['marker'], $entry['expires_at']) && $entry['marker'] === self::FORMAT && is_numeric($entry['expires_at']) && array_key_exists('value', $entry);
+	}
+
+	private function read($file) {
+		$handle = @fopen($file, 'r');
+
+		if (!$handle) {
+			return false;
+		}
+
+		if (!flock($handle, LOCK_SH)) {
+			fclose($handle);
+			return false;
+		}
+
+		// Read the stream rather than statting a path another request may
+		// unlink or atomically replace while this handle remains valid.
+		$data = stream_get_contents($handle);
+		flock($handle, LOCK_UN);
+		fclose($handle);
+		return $data;
 	}
 
 	public function delete($key) {
@@ -118,7 +187,7 @@ class File {
 		} else {
 			$key = preg_replace('/[^A-Z0-9\._-]/i', '', $key);
 			// Mutations need a fresh listing, including entries written by other
-			// requests after our index was built. Keep prefix invalidation intact.
+			// requests after our first lookup. Keep prefix invalidation intact.
 			$files = glob(DIR_CACHE . 'cache.' . $key . '.*');
 
 			foreach (array_keys($this->files) as $indexed_key) {

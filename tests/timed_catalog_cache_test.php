@@ -135,6 +135,16 @@ namespace {
     $filter = new TimedModelFixture\ModelExtensionModuleDigitalElephantFilter($registry);
     $params = array('filter_category_id' => 12, 'start' => 0, 'limit' => 20, 'nested' => array('b' => 2, 'a' => 1));
 
+    foreach (array(array($product, 'productQueryCacheKey'), array($filter, 'filterCacheKey')) as $fixture) {
+        list($model, $method) = $fixture;
+        $total_key = timedModelKey($model, $method, 'total', $params);
+        $cache->setTimed($total_key, 42, 300);
+        $other_page = array_replace($params, array('start' => 100, 'limit' => 100, 'sort' => 'p.price', 'order' => 'DESC'));
+        timedCacheAssert(timedModelKey($model, $method, 'total', $other_page) === $total_key, 'Totals must share cache across pagination and sorting.');
+        timedCacheAssert($model->getTotalProducts($other_page) === 42, 'An unchanged filtered total must not query the database for a different page.');
+        timedCacheAssert(timedModelKey($model, $method, 'total', array_replace($params, array('filter_category_id' => 13))) !== $total_key, 'Totals must keep different category filters separate.');
+    }
+
     $timed_cache_test_now = 299;
     $product_key = timedModelKey($product, 'productQueryCacheKey', 'list', $params);
     $filter_key = timedModelKey($filter, 'filterCacheKey', 'products', $params);
